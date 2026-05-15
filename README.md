@@ -1,45 +1,45 @@
-# Flask React Project
+# Shmedium
 
-This is the starter for the Flask React project.
+A Medium clone built as an App Academy capstone (May–Jun 2023). Flask + Postgres backend, React 17 + Redux frontend, AWS S3 for story images.
 
-## Getting started
-1. Clone this repository (only this branch)
+## Local development (Node 18+, Python 3.11)
 
-2. Install dependencies
-
-      ```bash
-      pipenv install -r requirements.txt
-      ```
-
-3. Create a **.env** file based on the example with proper settings for your
-   development environment
-
-4. Make sure the SQLite3 database connection URL is in the **.env** file
-
-5. This starter organizes all tables inside the `flask_schema` schema, defined
-   by the `SCHEMA` environment variable.  Replace the value for
-   `SCHEMA` with a unique name, **making sure you use the snake_case
-   convention**.
-
-6. Get into your pipenv, migrate your database, seed your database, and run your Flask app
+1. Clone and install backend deps:
 
    ```bash
+   pipenv install -r requirements.txt
    pipenv shell
    ```
 
+2. Copy `.env.example` to `.env` and fill in values. Minimum to boot the backend against SQLite:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   The `SCHEMA` var is only needed in production (Postgres). For SQLite dev, leave it commented.
+
+3. Run migrations and seed:
+
    ```bash
    flask db upgrade
-   ```
-
-   ```bash
    flask seed all
-   ```
-
-   ```bash
    flask run
    ```
 
-7. To run the React App in development, checkout the [README](./react-app/README.md) inside the `react-app` directory.
+4. In a second terminal, start the React app:
+
+   ```bash
+   cd react-app
+   npm install
+   npm start
+   ```
+
+   The npm scripts already set `NODE_OPTIONS=--openssl-legacy-provider`, which webpack 4 (react-scripts 4) needs on Node 17+.
+
+5. For production Postgres, this project organizes all tables inside the `flask_schema` schema, defined by the `SCHEMA` environment variable. Replace the value with a unique name in **snake_case**.
+
+See [`react-app/README.md`](./react-app/README.md) for more frontend-specific notes.
 
 
 ## Deployment through Render.com
@@ -119,6 +119,10 @@ Add the following keys and values in the Render GUI form:
 - SCHEMA (your unique schema name, in snake_case)
 - REACT_APP_BASE_URL (use render.com url, located at top of page, similar to
   https://this-application-name.onrender.com)
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_BUCKET_NAME (the S3 bucket name for story image uploads)
+- AWS_REGION (e.g. `us-east-1` — must match the bucket's actual region)
 
 In a new tab, navigate to your dashboard and click on your Postgres database
 instance.

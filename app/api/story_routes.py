@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 import os
 import json
 
-from ..aws3 import s3, bucket
+from ..aws3 import s3, bucket, region
 import boto3
 
 
@@ -131,11 +131,11 @@ def create_story_image(id):
             filename = secure_filename(file.filename)
             file.save(filename)
             s3.upload_file(
-                Bucket='well-done-proj',
+                Bucket=bucket,
                 Filename=filename,
                 Key=filename
             )
-            url = f"https://{bucket}.s3.us-east-2.amazonaws.com/{filename}"
+            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
     if 'file' in request.files:
             file = request.files['file']
@@ -146,12 +146,12 @@ def create_story_image(id):
             file.save(filename)
 
             s3.upload_file(
-                Bucket='well-done-proj',
+                Bucket=bucket,
                 Filename=filename,
                 Key=filename
             )
 
-            url = f"https://{bucket}.s3.us-east-2.amazonaws.com/{filename}"
+            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
     form = StoryImageForm()
     form['csrf_token'].data = request.cookies['csrf_token']
@@ -249,8 +249,8 @@ def update_story(id):
 
             filename = secure_filename(file.filename)
             file.save(filename)
-            s3.upload_file(Bucket='well-done-proj', Filename=filename, Key=filename)
-            url = f"https://{bucket}.s3.us-east-2.amazonaws.com/{filename}"
+            s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
+            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
             new_story_image = StoryImage(
                 story_id=story.id,
@@ -313,11 +313,11 @@ def create_story_with_images():
             filename = secure_filename(file.filename)
             file.save(filename)
             s3.upload_file(
-                Bucket='well-done-proj',
+                Bucket=bucket,
                 Filename=filename,
                 Key=filename
             )
-            url = f"https://{bucket}.s3.us-east-2.amazonaws.com/{filename}"
+            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
             alt_tag = request.form.get(f'altTag{i}')
             position = request.form.get(f'position{i}')
