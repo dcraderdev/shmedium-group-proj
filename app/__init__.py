@@ -5,14 +5,18 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_login import LoginManager
 from .models import db, User, Story, Follower, Clap, Comment, StoryImage, Tag, StoryTag
+from .models.notification import Notification
 from .api.user_routes import user_routes
 from .api.auth_routes import auth_routes
 from .api.story_routes import story_routes
 from .api.comment_routes import comment_routes
 from .api.follow_routes import follow_routes
+from .api.notification_routes import notification_routes
 from .seeds import seed_commands
+from .email_digest import digest_commands
 from .config import Config
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload, selectinload
 
 app = Flask(__name__, static_folder='../react-app/build', static_url_path='/')
 
@@ -28,6 +32,7 @@ def load_user(id):
 
 # Tell flask about our seed commands
 app.cli.add_command(seed_commands)
+app.cli.add_command(digest_commands)
 
 app.config.from_object(Config)
 app.register_blueprint(user_routes, url_prefix='/api/users')
@@ -35,6 +40,7 @@ app.register_blueprint(auth_routes, url_prefix='/api/auth')
 app.register_blueprint(story_routes, url_prefix='/api/story')
 app.register_blueprint(comment_routes, url_prefix='/api/comment')
 app.register_blueprint(follow_routes, url_prefix='/api/follow')
+app.register_blueprint(notification_routes, url_prefix='/api/notifications')
 
 db.init_app(app)
 Migrate(app, db)
@@ -85,13 +91,23 @@ def api_help():
 @app.route("/api/init")
 def initial_load():
     """
-    Eager Load data upon initialization 
+    Eager Load data upon initialization
     """
-    stories = Story.query.all()
-    # tags = Tag.query.all()
+    stories = Story.query.options(
+        selectinload(Story.author).options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ),
+        selectinload(Story.tags).joinedload(StoryTag.tag),
+        selectinload(Story.images),
+        selectinload(Story.comments).options(
+            joinedload(Comment.user),
+            selectinload(Comment.claps),
+        ),
+        selectinload(Story.claps),
+    ).all()
     return {
         'stories': [story.to_dict() for story in stories],
-        # 'tags': [tag.to_dict() for tag in tags],
     }
 
 # from .models import db, User, Story, Follower, Clap, Comment, StoryImage, Tag, StoryTag
@@ -116,9 +132,25 @@ def search():
 
         # last_names = [Story.author.lastName.ilike(f'%{term}%') for term in search_terms]
 
-        stories = Story.query.filter(or_(*conditions)).all()
-        authors = User.query.filter(or_(*author_conditions)).all()
+        _eager = [
+            selectinload(Story.author).options(
+                selectinload(User.followers),
+                selectinload(User.following),
+            ),
+            selectinload(Story.tags).joinedload(StoryTag.tag),
+            selectinload(Story.images),
+            selectinload(Story.comments).options(
+                joinedload(Comment.user),
+                selectinload(Comment.claps),
+            ),
+            selectinload(Story.claps),
+        ]
 
+        stories = Story.query.options(*_eager).filter(or_(*conditions)).all()
+        authors = User.query.options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ).filter(or_(*author_conditions)).all()
 
         matching_tags = Tag.query.filter(or_(*tag_conditions)).all()
         matching_tag_ids = [tag.id for tag in matching_tags]
@@ -126,7 +158,7 @@ def search():
         matching_story_tags = StoryTag.query.filter(StoryTag.tag_id.in_(matching_tag_ids)).all()
 
         matching_story_ids = set(story_tag.story_id for story_tag in matching_story_tags)
-        tagged_stories = Story.query.filter(Story.id.in_(matching_story_ids)).all()
+        tagged_stories = Story.query.options(*_eager).filter(Story.id.in_(matching_story_ids)).all()
 
         # author1 = Story.query.filter(or_(*first_names)).all()
         # author2 = Story.query.filter(or_(*last_names)).all()

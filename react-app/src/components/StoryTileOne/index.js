@@ -72,6 +72,8 @@ const StoryTileOne = ({ story, index }) => {
                   src={story?.authorInfo.profileImage}
                   onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
                   alt="author profile icon"
+                  loading="lazy"
+                  decoding="async"
                 ></img>
                 )}
               </div>
@@ -115,6 +117,8 @@ const StoryTileOne = ({ story, index }) => {
                   src={story?.authorInfo.profileImage}
                   alt="author profile icon"
                   onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
+                  loading="lazy"
+                  decoding="async"
                 ></img>
               )}
               </div>

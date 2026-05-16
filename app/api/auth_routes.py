@@ -1,9 +1,25 @@
 from flask import Blueprint, jsonify, session, request
-from app.models import User, db, Follower, Story
+from app.models import User, db, Follower, Story, StoryTag, Comment
 from app.forms import LoginForm
 from app.forms import SignUpForm
 from flask_login import current_user, login_user, logout_user, login_required
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
+
+
+def _story_full_query():
+    return Story.query.options(
+        selectinload(Story.author).options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ),
+        selectinload(Story.tags).joinedload(StoryTag.tag),
+        selectinload(Story.images),
+        selectinload(Story.comments).options(
+            joinedload(Comment.user),
+            selectinload(Comment.claps),
+        ),
+        selectinload(Story.claps),
+    )
 
 
 auth_routes = Blueprint('auth', __name__)
@@ -28,8 +44,8 @@ def authenticate():
     if current_user.is_authenticated:
         followings = Follower.query.filter_by(follower_id=current_user.id).all()
         followed_authors_ids = [following.author_id for following in followings]
-        subscribed_stories = Story.query.options(joinedload(Story.author)).filter(Story.author_id.in_(followed_authors_ids)).all()
-        user_stories = Story.query.filter_by(author_id=current_user.id).all()
+        subscribed_stories = _story_full_query().filter(Story.author_id.in_(followed_authors_ids)).all() if followed_authors_ids else []
+        user_stories = _story_full_query().filter(Story.author_id == current_user.id).all()
 
         # followed_authors = User.query.filter(User.author_id.in_(followed_authors_ids)).all()
 
@@ -61,8 +77,8 @@ def login():
 
         followings = Follower.query.filter_by(follower_id=current_user.id).all()
         followed_authors_ids = [following.author_id for following in followings]
-        subscribed_stories = Story.query.options(joinedload(Story.author)).filter(Story.author_id.in_(followed_authors_ids)).all()
-        user_stories = Story.query.filter_by(author_id=current_user.id).all()
+        subscribed_stories = _story_full_query().filter(Story.author_id.in_(followed_authors_ids)).all() if followed_authors_ids else []
+        user_stories = _story_full_query().filter(Story.author_id == current_user.id).all()
         
         return {
             'user': user.to_dict(),

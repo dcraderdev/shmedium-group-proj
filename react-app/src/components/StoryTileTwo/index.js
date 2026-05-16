@@ -82,6 +82,8 @@ const StoryTileTwo = ({story}) => {
                 <img
                   src={story?.authorInfo.profileImage}
                   alt="author profile picture"
+                  loading="lazy"
+                  decoding="async"
                   onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
                 ></img>
               )}
@@ -121,6 +123,8 @@ const StoryTileTwo = ({story}) => {
         <img
           src={thumbnail}
           alt={'profile image'}
+          loading="lazy"
+          decoding="async"
           onClick={() => history.push(`/story/${story.id}`)}
         ></img>
       </div>

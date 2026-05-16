@@ -113,7 +113,7 @@ const Comments = ({ userId, storyId, authorInfo, setShowComments }) => {
             <div className='comment-tile' key={comment?.id}>
                 <div>
                   <div className='comment-panel-author-info'>
-                    <img src={comment?.author?.profileImage} alt='comment-author-icon' className='comment-author-image'/>
+                    <img src={comment?.author?.profileImage} alt='comment-author-icon' className='comment-author-image' loading="lazy" decoding="async"/>
                     <div className='author-name-created'>
                       <p>{comment?.author?.firstName} {comment?.author?.lastName}</p>
                       <p className='time comment-panel-time'>{comment?.createdAt.slice(0, 16)}</p>

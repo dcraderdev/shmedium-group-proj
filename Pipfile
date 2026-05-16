@@ -26,8 +26,9 @@ sqlalchemy = "==1.4.46"
 werkzeug = "==2.2.2"
 wtforms = "==3.0.1"
 boto3 = "*"
+sendgrid = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"

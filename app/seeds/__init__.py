@@ -8,6 +8,7 @@ from .claps import seed_claps, undo_claps
 from .story_images import seed_story_images, undo_story_images
 from .story_tags import seed_story_tags, undo_story_tags
 from .comment_claps import seed_comment_claps, undo_comment_claps
+from .realistic_articles import seed_realistic_articles, undo_realistic_articles
 
 from app.models.db import db, environment, SCHEMA
 
@@ -33,6 +34,7 @@ def seed():
         undo_story_images()
         undo_story_tags()
         undo_comment_claps()
+        undo_realistic_articles()
 
     seed_users()
     seed_tags()
@@ -43,6 +45,7 @@ def seed():
     seed_comment_claps()
     seed_story_images()
     seed_story_tags()
+    seed_realistic_articles()
 
     # Add other seed functions here
 
@@ -59,6 +62,7 @@ def undo():
     undo_story_images()
     undo_story_tags()
     undo_comment_claps()
+    undo_realistic_articles()
 
     
     

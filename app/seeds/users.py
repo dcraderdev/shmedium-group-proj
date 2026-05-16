@@ -5,11 +5,11 @@ def seed_users():
     User.query.delete() 
     demo = User(
         username='Demo',
-        email='demo@aa.io',
-        password='password',
+        email='demo@dcrader.dev',
+        password='demouser',
         profile_image='https://i.redd.it/ivaymc8wobo71.png',
-        first_name='John',
-        last_name='Doe'
+        first_name='Demo',
+        last_name='User'
     )
 
     marnie = User(
