@@ -40,7 +40,8 @@ const profileImages = {
 /** Highlight query terms in a plain string — returns HTML string. */
 function hlText(text, q) {
   if (!text || !q) return text || '';
-  const terms = [...new Set(q.trim().split(/\s+/).filter(Boolean))];
+  const terms = [...new Set(q.trim().split(/\s+/).filter(Boolean))]
+    .sort((a, b) => b.length - a.length); // longest first prevents "py" splitting inside "python"
   if (!terms.length) return text;
   const pattern = new RegExp(
     '(' + terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
