@@ -100,6 +100,7 @@ const StoryPage = () => {
     loadStory();
   }, [id, dispatch]);
 
+  // --- Format date ---
   useEffect(() => {
     if (story?.createdAt) {
       const d = new Date(story.createdAt);
@@ -107,13 +108,17 @@ const StoryPage = () => {
     }
   }, [story]);
 
-  // --- Sort content segments (text + images) ---
+  // --- Sort content segments (text + images with optional variants) ---
   useEffect(() => {
     if (!story) return;
     const segments = [];
     let last = 0;
     story.images.forEach((image) => {
-      segments.push({ text: story.content.slice(last, image.position), image: image.url, altTag: image.altTag });
+      segments.push({
+        text: story.content.slice(last, image.position),
+        imageData: { url: image.url, variants: image.variants || null },
+        altTag: image.altTag,
+      });
       last = image.position;
     });
     if (last < story.content.length) {
@@ -125,7 +130,6 @@ const StoryPage = () => {
   // --- Extract ToC from rendered headings ---
   useEffect(() => {
     if (!story || isLoading) return;
-    // Small delay so DOM has rendered
     const timer = setTimeout(() => {
       if (!contentRef.current) return;
       const nodes = contentRef.current.querySelectorAll('h2, h3');
@@ -197,6 +201,8 @@ const StoryPage = () => {
                   src={story.authorInfo?.profileImage}
                   alt="author profile icon"
                   className="author-image"
+                  loading="lazy"
+                  decoding="async"
                   onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}
                 />
                 <div className="author-information memo-text">
@@ -267,8 +273,33 @@ const StoryPage = () => {
                         {parse(item.text, parseOpts)}
                       </div>
                     )}
-                    {item.image && (
-                      <img src={item.image} alt={item.altTag} className="story-image" />
+                    {item.imageData && (
+                      item.imageData.variants ? (
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet={`${item.imageData.variants.card.webp} 800w, ${item.imageData.variants.full.webp} 1600w`}
+                            sizes="(max-width: 900px) 800px, 1600px"
+                          />
+                          <img
+                            src={item.imageData.variants.full.jpeg}
+                            srcSet={`${item.imageData.variants.card.jpeg} 800w, ${item.imageData.variants.full.jpeg} 1600w`}
+                            sizes="(max-width: 900px) 800px, 1600px"
+                            alt={item.altTag}
+                            className="story-image"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </picture>
+                      ) : (
+                        <img
+                          src={item.imageData.url}
+                          alt={item.altTag}
+                          className="story-image"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )
                     )}
                   </div>
                 ))}
@@ -320,6 +351,8 @@ const StoryPage = () => {
                   src={story.authorInfo?.profileImage}
                   alt="author profile icon"
                   className="author-image"
+                  loading="lazy"
+                  decoding="async"
                   onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}
                 />
                 <div className="author-information memo-text">

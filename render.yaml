@@ -36,3 +36,59 @@ services:
         value: shmedium-prod-images-dcrader
       - key: AWS_REGION
         value: us-west-1
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: DIGEST_FROM_EMAIL
+        value: digest@shmedium.app
+      - key: APP_BASE_URL
+        value: https://shmedium.onrender.com
+
+  - type: cron
+    name: shmedium-digest-daily
+    env: python
+    region: oregon
+    schedule: "0 8 * * *"
+    buildCommand: pip install -r requirements.txt && pip install psycopg2-binary
+    startCommand: flask digest send-daily
+    envVars:
+      - key: FLASK_APP
+        value: app
+      - key: FLASK_ENV
+        value: production
+      - key: SCHEMA
+        value: shmedium_schema
+      - key: DATABASE_URL
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: DIGEST_FROM_EMAIL
+        value: digest@shmedium.app
+      - key: APP_BASE_URL
+        value: https://shmedium.onrender.com
+      - key: SECRET_KEY
+        sync: false
+
+  - type: cron
+    name: shmedium-digest-weekly
+    env: python
+    region: oregon
+    schedule: "0 9 * * 1"
+    buildCommand: pip install -r requirements.txt && pip install psycopg2-binary
+    startCommand: flask digest send-weekly
+    envVars:
+      - key: FLASK_APP
+        value: app
+      - key: FLASK_ENV
+        value: production
+      - key: SCHEMA
+        value: shmedium_schema
+      - key: DATABASE_URL
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: DIGEST_FROM_EMAIL
+        value: digest@shmedium.app
+      - key: APP_BASE_URL
+        value: https://shmedium.onrender.com
+      - key: SECRET_KEY
+        sync: false

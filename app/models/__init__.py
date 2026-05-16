@@ -10,3 +10,4 @@ from .clap import Clap
 from .story_tag import StoryTag
 from .bookmark import Bookmark
 from .story_highlight import StoryHighlight
+from .notification import Notification

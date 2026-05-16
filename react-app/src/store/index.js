@@ -4,12 +4,14 @@ import session from './session';
 import story from './story';
 import bookmark from './bookmark';
 import highlight from './highlight';
+import notifications from './notifications';
 
 const rootReducer = combineReducers({
   session,
   story,
   bookmark,
   highlight,
+  notifications,
 });
 
 
