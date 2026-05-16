@@ -14,17 +14,19 @@
 
 
 .style3-content{
-  height: 70px;
+  height: fit-content;
   margin-left: 20px;
-
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .style3-author-container{
   display: flex;
   align-items: center;
-  width: 240px;
+  width: 100%;
+  max-width: 240px;
   height: 30px;
   margin-bottom: 4px;
 }

@@ -17,9 +17,10 @@
 }
 
 .story-page {
-  max-width: 800px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 70px;
+  box-sizing: border-box;
 }
 
 .triple-dots-icon {
@@ -171,16 +172,11 @@
 .story-image {
   display: flex;
   margin: 20px auto;
-  max-width: 70%;
-  /* min-height: 70px; */
+  max-width: 100%;
   height: auto;
-  /* margin-top: 10px;
-  margin-bottom: 10px; */
-  width: 70%;
-  /* border-radius: 20px; */
+  width: 100%;
   border: 1px solid black;
-  /* box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1); */
-
+  box-sizing: border-box;
 }
 
 
@@ -207,21 +203,20 @@
 
 .unclap-button,
 .clap-button {
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: none;
   border: none;
   font-size: 1em;
   cursor: pointer;
-  margin: 0 5px; 
+  margin: 0 5px;
   position: relative;
   transition: color 0.3s ease;
   border: rgb(255, 255, 255) solid 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 
 
@@ -268,5 +263,58 @@
 
 .blur{
   filter: blur(10px);
-  
+}
+
+/* ===== STORY PAGE MOBILE RESPONSIVE ===== */
+
+@media screen and (max-width: 640px) {
+  .story-page {
+    padding: 72px 20px 40px;
+  }
+
+  .story-title {
+    font-size: 24px;
+  }
+
+  .story-content {
+    font-size: 18px;
+    line-height: 30px;
+  }
+
+  .options-bar {
+    padding: 8px 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .comment-button {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .alt-options button {
+    min-height: 44px;
+    margin-right: 8px;
+  }
+
+  .author-section {
+    margin-top: 20px;
+  }
+
+  .follow-unfollow-button {
+    min-height: 44px;
+    padding: 4px 8px;
+  }
+}
+
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+  .story-page {
+    padding: 80px 40px 60px;
+  }
+}
+
+@media screen and (min-width: 1025px) {
+  .story-page {
+    padding: 80px 0;
+  }
 }

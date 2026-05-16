@@ -141,6 +141,65 @@
   }
 }
 
+@media screen and (max-width: 640px) {
+  .writepage-container1-header2 {
+    font-size: 40px;
+  }
+
+  .writepage-container1-header3 {
+    font-size: 17px;
+    width: 95%;
+  }
+
+  .writepage-started-button {
+    font-size: 18px;
+    width: 100%;
+    max-width: 280px;
+    min-height: 44px;
+  }
+
+  .writepage-container2-header {
+    font-size: 14vw;
+  }
+
+  .writepage-container4-header {
+    font-size: 16vw;
+  }
+
+  .writepage-container4-header2 {
+    font-size: 17px;
+    width: 90%;
+  }
+
+  .writepage-container5-header {
+    font-size: 16vw;
+    width: 95%;
+  }
+
+  .writepage-container5-header2 {
+    font-size: 17px;
+    width: 95%;
+  }
+
+  .writepage-container6-header {
+    font-size: 10vw;
+  }
+
+  .writepage-container6-header2 {
+    font-size: 16px;
+    width: 95%;
+  }
+
+  .writepage-container5-container,
+  .writepage-container6-container,
+  .writepage-container4-container,
+  .writepage-container2-container,
+  .writepage-container1-container {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
 .writepage-creator-tile{
   width: 90%;
   height: 70px;

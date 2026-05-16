@@ -1,6 +1,7 @@
 .storyfeed-container{
   width: 100%;
   position: relative;
+  box-sizing: border-box;
 }
 
 .hidden{
@@ -132,11 +133,28 @@
   justify-content: space-between;
   top: 0px;
   left: 0px;
-  width: 110%;
-  border-bottom: rgba(73, 73, 73, 0.2) solid 1px ;
-  box-shadow: 2px 0  0 2px rgba(73, 73, 73, 1) solid 1px ;
+  width: 100%;
+  border-bottom: rgba(73, 73, 73, 0.2) solid 1px;
+  box-shadow: 2px 0 0 2px rgba(73, 73, 73, 1) solid 1px;
   height: 55px;
+}
 
+/* ===== STORY FEED MOBILE ===== */
 
-} 
+@media screen and (max-width: 640px) {
+  .feed-nav {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .feed-select {
+    font-size: 13px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .header-title {
+    font-size: 28px;
+  }
+}
 
