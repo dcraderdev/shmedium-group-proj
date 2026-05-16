@@ -29,3 +29,4 @@ werkzeug==2.2.2
 wtforms==3.0.1
 boto3
 Pillow==10.3.0
+sendgrid
