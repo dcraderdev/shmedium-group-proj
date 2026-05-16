@@ -35,7 +35,7 @@ class StoryImage(db.Model):
         )
 
     def to_dict(self):
-        if self.url.startswith('https://well-done'):
+        if self.file_name:
             final_url = self._presigned(self.file_name)
         else:
             final_url = self.url

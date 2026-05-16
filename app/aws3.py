@@ -35,12 +35,21 @@ def generate_image_variants(file_bytes, base_filename):
 
     All objects get a 1-year immutable cache header so CDN / browsers can
     cache aggressively once the app switches to public URLs or a CDN.
+
+    Returns True on success, False if the format is skipped (e.g. GIF).
     """
-    from PIL import Image  # deferred so startup isn't slowed when Pillow absent
+    from PIL import Image, ImageOps  # deferred so startup isn't slowed when Pillow absent
+
+    ext = base_filename.rsplit('.', 1)[-1].lower() if '.' in base_filename else ''
+    if ext == 'gif':
+        return False  # animated GIFs would lose animation — skip
 
     stem = base_filename.rsplit('.', 1)[0]
 
     img = Image.open(io.BytesIO(file_bytes))
+
+    # Respect EXIF orientation so portraits don't display rotated
+    img = ImageOps.exif_transpose(img)
 
     # Flatten alpha channels so JPEG encoding never fails
     if img.mode in ('RGBA', 'LA', 'P'):

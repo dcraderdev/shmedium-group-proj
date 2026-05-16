@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, session, render_template, request, redirec
 from flask_login import login_required, current_user
 from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower
 from app.forms import StoryForm
-from app.forms import StoryImageForm
 from app.forms import CommentForm
 from sqlalchemy.orm import joinedload, selectinload
 from werkzeug.utils import secure_filename
@@ -140,71 +139,66 @@ def delete_story(id):
 
 
 @story_routes.route('/<int:id>/image', methods=['POST'])
+@login_required
 def create_story_image(id):
     """
-    Creates a new story image
+    Creates a new story image attached to an existing story.
+    Expects a file under the 'images' or 'file' key plus form fields:
+    position (int) and alt_tag (str).
     """
+    story = Story.query.get(id)
+    if story is None:
+        return {"error": "Story not found"}, 404
+    if current_user.id != story.author_id:
+        return {"error": "You do not have permission to edit this story"}, 403
 
+    # Determine the uploaded file
+    file = None
     if 'images' in request.files:
         files = request.files.getlist('images')
-        for file in files:
-            if file.filename == '':
-                return {"error": "No file selected"}, 400
-            filename = secure_filename(file.filename)
-            file.save(filename)
-            s3.upload_file(
-                Bucket=bucket,
-                Filename=filename,
-                Key=filename
-            )
-            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+        if files:
+            file = files[0]
+    if file is None and 'file' in request.files:
+        file = request.files['file']
 
-    if 'file' in request.files:
-            file = request.files['file']
-            if file.filename == '':
-                return {"error": "No file selected"}, 400
+    if file is None or file.filename == '':
+        return {"error": "No file selected"}, 400
 
-            filename = secure_filename(file.filename)
-            file.save(filename)
+    filename = secure_filename(file.filename)
+    file.save(filename)
+    s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
+    url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
-            s3.upload_file(
-                Bucket=bucket,
-                Filename=filename,
-                Key=filename
-            )
+    has_variants = False
+    try:
+        with open(filename, 'rb') as fh:
+            result = generate_image_variants(fh.read(), filename)
+        has_variants = result is True
+    except Exception as e:
+        print(f"Warning: variant generation failed for {filename}: {e}")
+    finally:
+        try:
+            os.remove(filename)
+        except Exception:
+            pass
 
-            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+    position = request.form.get('position')
+    alt_tag = request.form.get('alt_tag', '')
 
-    form = StoryImageForm()
-    form['csrf_token'].data = request.cookies['csrf_token']
-    if not form.validate_on_submit(): 
+    if not position:
+        return {"error": "position is required"}, 400
 
-      print(form.errors)
-
-
-    if form.validate_on_submit():
-      data = form.data
-      story = Story.query.get(id)
-
-      if story is None:
-          return {"error": "Story not found"}, 404
-      if current_user.id != story.author_id:
-          return {"error": "You do not have permission to edit this story"}, 403
-
-
-      new_story_image = StoryImage(
-          story_id=story.id,
-          url=data['url'],
-          position=data['position'],
-          alt_tag=data['alt_tag']
-      )
-      db.session.add(new_story_image)
-      db.session.commit()
-      # return new_story_image.to_dict()
-      return jsonify({**new_story_image.to_dict(), 'message': 'Story image successfully created'}), 201
-
-    if form.errors:
-      return {'error': "Bad Data"}
+    new_story_image = StoryImage(
+        story_id=story.id,
+        url=url,
+        file_name=filename,
+        has_variants=has_variants,
+        position=int(position),
+        alt_tag=alt_tag,
+    )
+    db.session.add(new_story_image)
+    db.session.commit()
+    return jsonify({**new_story_image.to_dict(), 'message': 'Story image successfully created'}), 201
 
 
 @story_routes.route('/', methods=['POST'])
