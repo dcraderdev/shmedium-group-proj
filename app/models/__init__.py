@@ -9,4 +9,6 @@ from .follower import Follower
 from .clap import Clap
 from .story_tag import StoryTag
 from .search_query import SearchQuery
+from .bookmark import Bookmark
+from .story_highlight import StoryHighlight
 from .notification import Notification
