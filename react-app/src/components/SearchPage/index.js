@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import './SearchPage.css';
 import StoryTileTwo from '../StoryTileTwo';
@@ -55,24 +55,19 @@ const SearchPage = () => {
       .then((d) => setPopular(d.queries || []));
   }, [query]);
 
-  const fetchResults = useCallback(async () => {
-    if (!query) { setResults(null); return; }
-    setLoading(true);
-    try {
-      const url =
-        `/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      setResults(data);
-    } finally {
-      setLoading(false);
-    }
-  }, [query, type, page]);
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    fetchResults();
-  }, [fetchResults]);
+    if (!query) { setResults(null); setLoading(false); return; }
+    const controller = new AbortController();
+    setLoading(true);
+    const url = `/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`;
+    fetch(url, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => setResults(data))
+      .catch((err) => { if (err.name !== 'AbortError') console.error(err); })
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, [query, type, page]);
 
   // Keyboard navigation in the result list
   useEffect(() => {

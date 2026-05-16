@@ -105,6 +105,17 @@ function Navigation() {
 
   }, [scrollPosition]);
 
+  // Keep nav input in sync with the /search page URL
+  useEffect(() => {
+    if (location.pathname === '/search') {
+      const params = new URLSearchParams(location.search);
+      setSearch(params.get('q') || '');
+    } else {
+      setSearch('');
+    }
+    setShowSuggestions(false);
+  }, [location.pathname, location.search]);
+
   useEffect(() => {
     setIsLoaded(false);
     setIsLandingPage(false);
