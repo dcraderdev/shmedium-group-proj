@@ -7,6 +7,7 @@ const NEW_SEARCH = "session/NEW_SEARCH";
 const REMOVE_SEARCH = "session/REMOVE_SEARCH";
 const SET_FEED = "session/SET_FEED";
 const SET_SUB_FEED = "session/SET_SUB_FEED";
+const SET_SUGGESTIONS = "session/SET_SUGGESTIONS";
 
 
 export const setUser = (user) => ({
@@ -41,9 +42,14 @@ const setSubFeedAction = (subFeed) => ({
 	payload: subFeed,
 });
 
+const setSuggestionsAction = (data) => ({
+	type: SET_SUGGESTIONS,
+	payload: data,
+});
 
 
-const initialState = { user: null, search: {}, currentFeed: 'for you', subFeed: null, subscribedStories: [], followedAuthorIds: [] };
+
+const initialState = { user: null, search: {}, currentFeed: 'for you', subFeed: null, subscribedStories: [], followedAuthorIds: [], suggestions: { stories: [], authors: [], tags: [] } };
 
 export const authenticate = () => async (dispatch) => {
 	const response = await fetch("/api/auth/", {
@@ -127,6 +133,18 @@ export const setSubFeed = (subFeed) => async (dispatch) => {
 	dispatch(setSubFeedAction(subFeed));
 };
 
+export const fetchSuggestions = (q) => async (dispatch) => {
+	if (!q || q.length < 2) {
+		dispatch(setSuggestionsAction({ stories: [], authors: [], tags: [] }));
+		return;
+	}
+	const res = await fetch(`/api/search/suggest?q=${encodeURIComponent(q)}`);
+	if (res.ok) {
+		const data = await res.json();
+		dispatch(setSuggestionsAction(data));
+	}
+};
+
 export const signUp = (credentials) => async (dispatch) => {
 	const {email, password, firstName, lastName, profileImage, username} = credentials
 
@@ -189,8 +207,10 @@ export default function reducer(state = initialState, action) {
 			return {...newState, currentFeed: action.payload };		
 		}
 		case SET_SUB_FEED:{
-			return {...newState, subFeed: action.payload };		
+			return {...newState, subFeed: action.payload };
 		}
+		case SET_SUGGESTIONS:
+			return {...newState, suggestions: action.payload};
 		case SUBSCRIBED_STORIES:
 			return {...newState, subscribedStories: action.payload};		
 		
