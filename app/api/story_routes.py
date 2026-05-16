@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 import os
 import json
 
-from ..aws3 import s3, bucket, region
+from ..aws3 import s3, bucket, region, generate_image_variants
 import boto3
 
 
@@ -274,10 +274,19 @@ def update_story(id):
             s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
             url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
+            has_variants = False
+            try:
+                with open(filename, 'rb') as fh:
+                    generate_image_variants(fh.read(), filename)
+                has_variants = True
+            except Exception as e:
+                print(f"Warning: variant generation failed for {filename}: {e}")
+
             new_story_image = StoryImage(
                 story_id=story.id,
                 url=url,
                 file_name=filename,
+                has_variants=has_variants,
                 position=request.form.get(f'position{i}'),
                 alt_tag=request.form.get(f'altTag{i}')
             )
@@ -341,6 +350,14 @@ def create_story_with_images():
             )
             url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
+            has_variants = False
+            try:
+                with open(filename, 'rb') as fh:
+                    generate_image_variants(fh.read(), filename)
+                has_variants = True
+            except Exception as e:
+                print(f"Warning: variant generation failed for {filename}: {e}")
+
             alt_tag = request.form.get(f'altTag{i}')
             position = request.form.get(f'position{i}')
 
@@ -348,6 +365,7 @@ def create_story_with_images():
                 story_id=new_story.id,
                 url=url,
                 file_name=filename,
+                has_variants=has_variants,
                 position=position,
                 alt_tag=alt_tag
             )
