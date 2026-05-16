@@ -5,6 +5,52 @@ Web Service. Postgres lives on Supabase. Images live on AWS S3.
 
 > Architecture decision: see the README. Single URL, single deploy.
 
+## Fastest path — Render Blueprint (one click)
+
+`render.yaml` at the repo root declares the entire service. Donovan just:
+
+1. Open this URL (logged into Render): https://render.com/deploy?repo=https://github.com/dcraderdev/shmedium-group-proj
+2. Pick the `portfolio-deploy` branch when prompted.
+3. Render parses `render.yaml` and shows the service spec for review.
+4. Fill in the 3 secret env vars Render asks for:
+   - `DATABASE_URL` → the Supabase pooled URI (port 6543)
+   - `AWS_ACCESS_KEY_ID` → from IAM (when ready)
+   - `AWS_SECRET_ACCESS_KEY` → from IAM (when ready)
+5. Click **Apply**. Render provisions, builds, runs migrations + seed, goes live.
+
+That's it. Everything else (build command, start command, region, plan,
+non-secret env vars) is baked into `render.yaml`. The first build takes
+10-15 min (the 2,189-package CRA install is the bottleneck).
+
+If IAM keys aren't ready yet, paste placeholder values like `PLACEHOLDER`.
+The app boots fine; only image uploads will 500 until real keys are set.
+Update the env vars in the Render dashboard later, no redeploy needed.
+
+> **Use the pooled URL** — `db.<project>.supabase.co:6543/postgres` — not the
+> direct `:5432` URL. Free-tier Supabase has a small direct-connection cap that
+> Render's worker can exhaust on cold start.
+
+## Demo user
+
+Seeded user for portfolio visitors. The signin modal exposes a prominent
+**"Try the Demo →"** button that auto-fills these creds.
+
+| Field | Value |
+|---|---|
+| Email | `demo@dcrader.dev` |
+| Password | `demouser` |
+| Display name | Demo User |
+
+The user is seeded with 5 stories + follows 10 other authors, so the
+feed has 41+ subscribed stories on landing.
+
+---
+
+## Manual setup (fallback if Blueprint UI fails)
+
+Everything below describes the same service `render.yaml` declares, in case
+Donovan needs to fill in the New Web Service form by hand.
+
 ## Prereqs (Donovan to gather before starting)
 
 You'll need values for these. Hand the whole bundle off in one go.

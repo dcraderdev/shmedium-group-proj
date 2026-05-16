@@ -97,7 +97,7 @@ function SigninModal() {
   const demoUser = async (e) => {
     e.preventDefault();
     const response = await dispatch(
-      sessionActions.signin({ email:'demo@aa.io', password:'password' })
+      sessionActions.signin({ email:'demo@dcrader.dev', password:'demouser' })
     );
     if (response.status===200) {
       setUpdateObj(null)
@@ -129,6 +129,18 @@ function SigninModal() {
       <div className="signin-close-button" onClick={closeModal}>
       <i className="fa-solid fa-x"></i>
       </div>
+
+      <button
+        type="button"
+        onClick={demoUser}
+        className="signin-demo-button"
+      >
+        Try the Demo →
+      </button>
+      <div className="signin-demo-hint">
+        One click, no signup. Logs you in as <b>Demo User</b>.
+      </div>
+      <div className="signin-divider"><span>or sign in</span></div>
 
       <form onSubmit={handleSubmit} className="signin-div">
         <label className="user">
@@ -185,11 +197,6 @@ function SigninModal() {
     
 
 
-
-
-        <div className='signin-demo-container memo-text demo-user-singin link' onClick={demoUser}> 
-          Demo User
-        </div>
 
 
       </div>

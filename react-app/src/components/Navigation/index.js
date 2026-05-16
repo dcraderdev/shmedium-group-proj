@@ -194,7 +194,7 @@ function Navigation() {
   const demoUser = async (e) => {
     e.preventDefault();
     const response = await dispatch(
-      sessionActions.signin({ email: 'demo@aa.io', password: 'password' })
+      sessionActions.signin({ email: 'demo@dcrader.dev', password: 'demouser' })
     );
     if (response.status === 200) {
       setUpdateObj(null);
