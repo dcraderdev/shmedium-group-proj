@@ -13,6 +13,7 @@ from .api.follow_routes import follow_routes
 from .seeds import seed_commands
 from .config import Config
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload, selectinload
 
 app = Flask(__name__, static_folder='../react-app/build', static_url_path='/')
 
@@ -85,13 +86,23 @@ def api_help():
 @app.route("/api/init")
 def initial_load():
     """
-    Eager Load data upon initialization 
+    Eager Load data upon initialization
     """
-    stories = Story.query.all()
-    # tags = Tag.query.all()
+    stories = Story.query.options(
+        selectinload(Story.author).options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ),
+        selectinload(Story.tags).joinedload(StoryTag.tag),
+        selectinload(Story.images),
+        selectinload(Story.comments).options(
+            joinedload(Comment.user),
+            selectinload(Comment.claps),
+        ),
+        selectinload(Story.claps),
+    ).all()
     return {
         'stories': [story.to_dict() for story in stories],
-        # 'tags': [tag.to_dict() for tag in tags],
     }
 
 # from .models import db, User, Story, Follower, Clap, Comment, StoryImage, Tag, StoryTag
@@ -116,9 +127,25 @@ def search():
 
         # last_names = [Story.author.lastName.ilike(f'%{term}%') for term in search_terms]
 
-        stories = Story.query.filter(or_(*conditions)).all()
-        authors = User.query.filter(or_(*author_conditions)).all()
+        _eager = [
+            selectinload(Story.author).options(
+                selectinload(User.followers),
+                selectinload(User.following),
+            ),
+            selectinload(Story.tags).joinedload(StoryTag.tag),
+            selectinload(Story.images),
+            selectinload(Story.comments).options(
+                joinedload(Comment.user),
+                selectinload(Comment.claps),
+            ),
+            selectinload(Story.claps),
+        ]
 
+        stories = Story.query.options(*_eager).filter(or_(*conditions)).all()
+        authors = User.query.options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ).filter(or_(*author_conditions)).all()
 
         matching_tags = Tag.query.filter(or_(*tag_conditions)).all()
         matching_tag_ids = [tag.id for tag in matching_tags]
@@ -126,7 +153,7 @@ def search():
         matching_story_tags = StoryTag.query.filter(StoryTag.tag_id.in_(matching_tag_ids)).all()
 
         matching_story_ids = set(story_tag.story_id for story_tag in matching_story_tags)
-        tagged_stories = Story.query.filter(Story.id.in_(matching_story_ids)).all()
+        tagged_stories = Story.query.options(*_eager).filter(Story.id.in_(matching_story_ids)).all()
 
         # author1 = Story.query.filter(or_(*first_names)).all()
         # author2 = Story.query.filter(or_(*last_names)).all()

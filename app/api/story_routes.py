@@ -4,7 +4,7 @@ from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap
 from app.forms import StoryForm
 from app.forms import StoryImageForm
 from app.forms import CommentForm
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from werkzeug.utils import secure_filename
 import os
 import json
@@ -16,12 +16,34 @@ import boto3
 story_routes = Blueprint('stories', __name__)
 
 
+def _story_with_relations():
+    """Base Story query with every relation that to_dict() touches eager-loaded.
+
+    Collapses the N+1 chain (author + author.followers/following, tags->tag,
+    images, comments->user+claps, claps) into a small constant number of
+    SELECTs regardless of story count.
+    """
+    return Story.query.options(
+        selectinload(Story.author).options(
+            selectinload(User.followers),
+            selectinload(User.following),
+        ),
+        selectinload(Story.tags).joinedload(StoryTag.tag),
+        selectinload(Story.images),
+        selectinload(Story.comments).options(
+            joinedload(Comment.user),
+            selectinload(Comment.claps),
+        ),
+        selectinload(Story.claps),
+    )
+
+
 @story_routes.route('/')
 def stories():
     """
     Query for all stories and returns them in a list of story dictionaries
     """
-    stories = Story.query.all()
+    stories = _story_with_relations().all()
     return {'stories': [story.to_dict() for story in stories]}
 
 
@@ -29,10 +51,10 @@ def stories():
 @story_routes.route('/initialize')
 def initial_load():
     """
-    Eager Load data upon initialization 
+    Eager Load data upon initialization
     """
 
-    stories = Story.query.all()
+    stories = _story_with_relations().all()
     tags = Tag.query.all()
 
     return {
@@ -49,7 +71,7 @@ def curr_user_stories():
     """
     Query for current user's stories and returns them in a list of story dictionaries
     """
-    stories = Story.query.filter_by(author_id=current_user.id).all()
+    stories = _story_with_relations().filter(Story.author_id == current_user.id).all()
     if stories is None:
         return {"error": "No stories found"}, 404
     return {'stories': [story.to_dict() for story in stories]}
@@ -66,8 +88,8 @@ def subscribed_stories():
 
     followings = Follower.query.filter_by(follower_id=current_user.id).all()
     followed_authors_ids = [following.author_id for following in followings]
-    subscribed_stories = Story.query.options(joinedload(Story.author)).filter(Story.author_id.in_(followed_authors_ids)).all()
-    
+    subscribed_stories = _story_with_relations().filter(Story.author_id.in_(followed_authors_ids)).all()
+
 
     if subscribed_stories is None:
         return {"error": "No stories found"}, 404
@@ -83,7 +105,7 @@ def story(id):
     """
     Query for a story by id and returns that story in a dictionary
     """
-    story = Story.query.get(id)
+    story = _story_with_relations().filter(Story.id == id).first()
 
     if story is None:
         return {"error": "Story not found"}, 404
