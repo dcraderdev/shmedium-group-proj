@@ -107,13 +107,15 @@ function Navigation() {
 
   // Keep nav input in sync with the /search page URL
   useEffect(() => {
+    clearTimeout(suggestTimer.current);
+    setSuggestions({ stories: [], authors: [], tags: [] });
+    setShowSuggestions(false);
     if (location.pathname === '/search') {
       const params = new URLSearchParams(location.search);
       setSearch(params.get('q') || '');
     } else {
       setSearch('');
     }
-    setShowSuggestions(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -279,8 +281,8 @@ function Navigation() {
   const commitSearch = (q) => {
     if (!q || !q.trim()) return;
     setShowSuggestions(false);
-    setSearch('');
     clearTimeout(suggestTimer.current);
+    // URL sync effect handles updating the input value on /search
     history.push(`/search?q=${encodeURIComponent(q.trim())}&type=stories`);
   };
 
@@ -580,6 +582,9 @@ function Navigation() {
                         value={search}
                         onChange={handleSearchChange}
                         onKeyDown={handleSuggestKeyDown}
+                        onFocus={() => search.length >= 2 && setShowSuggestions(
+                          suggestions.stories.length > 0 || suggestions.authors.length > 0 || suggestions.tags.length > 0
+                        )}
                         placeholder={'Search Medium'}
                         autoComplete="off"
                       />
