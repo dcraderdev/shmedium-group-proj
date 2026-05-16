@@ -13,6 +13,7 @@ import SignupModal from './components/SignupModal';
 import ProfileButtonModal from './components/ProfileButtonModal';
 import StoryOptionsModal from './components/StoryOptionsModal';
 import CreateStoryPage from './components/CreateStoryPage';
+import AuthorProfilePage from './components/AuthorProfilePage';
 
 import * as storyActions from './store/story';
 import { ModalContext } from './context/ModalContext';
@@ -83,7 +84,7 @@ function App() {
           </Route>
 
           <Route path="/author/:id" exact>
-            <StoryPage />
+            <AuthorProfilePage />
           </Route>
 
 

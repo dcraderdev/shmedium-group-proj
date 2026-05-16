@@ -32,6 +32,7 @@ class Story(db.Model):
 
 
     def to_dict(self):
+        top_level = [c for c in self.comments if c.parent_id is None]
         return {
             'id': self.id,
             'authorId': self.author_id,
@@ -42,11 +43,11 @@ class Story(db.Model):
             'updatedAt': self.updated_at,
             'tags': [tag.tag.to_dict() for tag in self.tags],
             'images': [image.to_dict() for image in self.images],
-            
-            'comments': [comment.to_dict() for comment in self.comments],
+            'comments': [comment.to_dict() for comment in top_level],
+            'commentCount': len(self.comments),
             'claps': len(self.claps),
             'timeToRead': self.time_to_read,
-            'slicedIntro': self.sliced_intro
+            'slicedIntro': self.sliced_intro,
         }
 
         

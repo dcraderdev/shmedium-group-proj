@@ -1,0 +1,555 @@
+/* ── AuthorProfilePage ───────────────────────────────────────── */
+
+.apc-root {
+  min-height: 100vh;
+  background: #faf9f7;
+  font-family: 'Georgia', serif;
+}
+
+/* ─── Hero ───────────────────────────────────────────────────── */
+
+.apc-hero {
+  position: relative;
+  height: 320px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+
+.apc-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%);
+}
+
+.apc-hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 0 40px 32px;
+  color: #fff;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.apc-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  margin-bottom: 4px;
+}
+
+.apc-name {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.apc-bio-hero {
+  font-size: 1rem;
+  opacity: 0.88;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.apc-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  opacity: 0.82;
+}
+
+.apc-dot {
+  opacity: 0.5;
+}
+
+.apc-hero-actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+}
+
+.apc-btn-follow,
+.apc-btn-edit {
+  padding: 8px 22px;
+  border-radius: 20px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.apc-btn-follow:hover,
+.apc-btn-edit:hover {
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.apc-btn-follow.following {
+  background: #fff;
+  color: #1a1a1a;
+}
+
+/* ─── Stats bar ──────────────────────────────────────────────── */
+
+.apc-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding: 28px 40px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.apc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.apc-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.apc-stat-label {
+  font-size: 0.78rem;
+  color: #757575;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────── */
+
+.apc-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fff;
+  padding: 0 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.apc-tab {
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  font-size: 0.92rem;
+  color: #757575;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+
+.apc-tab.active {
+  color: #1a1a1a;
+  border-bottom-color: #1a1a1a;
+  font-weight: 600;
+}
+
+.apc-tab:hover:not(.active) {
+  color: #1a1a1a;
+}
+
+/* ─── Tab content wrapper ────────────────────────────────────── */
+
+.apc-tab-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+/* ─── Sort bar ───────────────────────────────────────────────── */
+
+.apc-sort-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.apc-sort-btn {
+  padding: 6px 16px;
+  border-radius: 14px;
+  border: 1px solid #d9d9d9;
+  background: transparent;
+  font-size: 0.85rem;
+  color: #757575;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.apc-sort-btn.active {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fff;
+}
+
+.apc-sort-btn:hover:not(.active) {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+/* ─── Story grid ─────────────────────────────────────────────── */
+
+.apc-story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.apc-story-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+  display: flex;
+  flex-direction: column;
+}
+
+.apc-story-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+}
+
+.apc-story-card-img {
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.apc-story-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.apc-story-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.apc-story-card-intro {
+  font-size: 0.84rem;
+  color: #757575;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.apc-story-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #9e9e9e;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.apc-comment-badge {
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 0.75rem;
+  color: #555;
+}
+
+/* ─── Infinite scroll sentinel ───────────────────────────────── */
+
+.apc-sentinel {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.apc-loading-spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: apc-spin 0.7s linear infinite;
+}
+
+@keyframes apc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.apc-end-message,
+.apc-empty {
+  text-align: center;
+  color: #9e9e9e;
+  font-size: 0.9rem;
+  margin-top: 32px;
+}
+
+/* ─── Loading skeleton ───────────────────────────────────────── */
+
+.apc-loading {
+  min-height: 100vh;
+  background: #faf9f7;
+}
+
+.apc-skeleton-hero {
+  height: 320px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: apc-shimmer 1.4s infinite;
+}
+
+.apc-skeleton-body {
+  max-width: 900px;
+  margin: 40px auto;
+  height: 200px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: apc-shimmer 1.4s infinite;
+}
+
+@keyframes apc-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── About tab ──────────────────────────────────────────────── */
+
+.apc-about {
+  max-width: 640px;
+}
+
+.apc-about-bio {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #292929;
+  margin-bottom: 28px;
+}
+
+.apc-about-bio p { margin: 0 0 12px; }
+.apc-about-bio code {
+  background: #f4f4f4;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.88em;
+}
+
+.apc-social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apc-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: #1a1a1a;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.apc-social-link:hover {
+  border-bottom-color: #1a1a1a;
+}
+
+/* ─── Followers / Following tab ──────────────────────────────── */
+
+.apc-people-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 480px;
+}
+
+.apc-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.apc-user-pill:hover {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.apc-user-pill-icon {
+  font-size: 1.4rem;
+}
+
+.apc-user-pill-name {
+  flex: 1;
+  font-size: 0.92rem;
+  color: #292929;
+  font-weight: 500;
+}
+
+.apc-user-pill-arrow {
+  color: #9e9e9e;
+  font-size: 0.9rem;
+}
+
+/* ─── Edit profile modal ─────────────────────────────────────── */
+
+.apc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.apc-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.apc-modal-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 24px;
+}
+
+.apc-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.apc-form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #757575;
+  margin-bottom: -6px;
+}
+
+.apc-cover-preview {
+  height: 120px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 10px;
+  border: 1px solid #eee;
+}
+
+.apc-cover-upload-btn {
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.apc-textarea {
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.apc-textarea:focus { border-color: #1a1a1a; }
+
+.apc-input {
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.apc-input:focus { border-color: #1a1a1a; }
+
+.apc-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.apc-btn-cancel {
+  padding: 9px 20px;
+  border-radius: 20px;
+  border: 1px solid #d9d9d9;
+  background: transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.apc-btn-save {
+  padding: 9px 22px;
+  border-radius: 20px;
+  border: none;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.apc-btn-save:hover { background: #333; }
+.apc-btn-save:disabled { opacity: 0.55; cursor: not-allowed; }

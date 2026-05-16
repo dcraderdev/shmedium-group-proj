@@ -189,3 +189,14 @@
 }
 
 
+
+.style2-comment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: #757575;
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 2px 7px;
+}

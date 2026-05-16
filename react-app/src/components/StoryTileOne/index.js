@@ -97,9 +97,11 @@ const StoryTileOne = ({ story, index }) => {
               <div className="style1-date-content">{date}</div>
               <i className="style1 fa-solid fa-circle"></i>
               <div className="style1-date-read-time-content">
-                {/* {story?.readTime} min read */}
                 {story?.timeToRead} min read
               </div>
+              {story?.commentCount > 0 && (
+                <div className="style1-comment-badge">💬 {story.commentCount}</div>
+              )}
             </div>
           </div>
         </div>
@@ -144,6 +146,9 @@ const StoryTileOne = ({ story, index }) => {
               <div className="style1-date-read-time-content">
                 {story?.timeToRead} min read
               </div>
+              {story?.commentCount > 0 && (
+                <div className="style1-comment-badge">💬 {story.commentCount}</div>
+              )}
             </div>
           </div>
         </div>
