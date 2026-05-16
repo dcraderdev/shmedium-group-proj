@@ -3,6 +3,7 @@
 import {SUBSCRIBED_STORIES, FOLLOW_AUTHOR, UNFOLLOW_AUTHOR} from './story'
 const SET_USER = "session/SET_USER";
 const REMOVE_USER = "session/REMOVE_USER";
+const PATCH_USER = "session/PATCH_USER";
 const NEW_SEARCH = "session/NEW_SEARCH";
 const REMOVE_SEARCH = "session/REMOVE_SEARCH";
 const SET_FEED = "session/SET_FEED";
@@ -13,6 +14,11 @@ const SET_SUGGESTIONS = "session/SET_SUGGESTIONS";
 export const setUser = (user) => ({
 	type: SET_USER,
 	payload: user,
+});
+
+export const patchUser = (fields) => ({
+	type: PATCH_USER,
+	payload: fields,
 });
 
 
@@ -190,7 +196,9 @@ export default function reducer(state = initialState, action) {
 			return {...newState, followedAuthorIds:action.payload.followedAuthorIds};		
 			
 		
-			case REMOVE_USER:
+			case PATCH_USER:
+			return { ...newState, user: newState.user ? { ...newState.user, ...action.payload } : newState.user };
+		case REMOVE_USER:
 			return initialState;
 		case NEW_SEARCH:
 			const newSearch = {...newState.search}

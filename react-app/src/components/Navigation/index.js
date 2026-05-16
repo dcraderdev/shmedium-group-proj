@@ -7,6 +7,7 @@ import './Navigation.css';
 import { WindowContext } from '../../context/WindowContext';
 import { ModalContext } from '../../context/ModalContext';
 import * as sessionActions from '../../store/session';
+import NotificationBell from './NotificationBell';
 import mediumLogoSmall from '../../public/medium-logo-circles-white.svg';
 import mediumLogoLarge from '../../public/medium-logo-with-cirlces.svg';
 
@@ -16,8 +17,6 @@ import userOutline from '../../public/user-outline.png';
 import fountainPen from '../../public/fountain-pen.png';
 
 import writeIcon from '../../public/write-icon.svg';
-import bellIcon from '../../public/bell-icon.svg';
-// import blackBellIcon from '../../public/black-bell.svg';
 import magnifyGlass from '../../public/magnify-glass.svg';
 import magnifyGlassBlack from '../../public/magnify-glass-black.svg';
 
@@ -74,10 +73,7 @@ function Navigation() {
   const suggestTimer = useRef(null);
   const searchContainerRef = useRef(null);
 
-  // const state = useSelector((state) => state);
   const user = useSelector((state) => state.session.user);
-  // const searchResults = useSelector((state) => state.session.search);
-
 
   const { scrollPosition, windowSize, searchInputRef } =
     useContext(WindowContext);
@@ -88,7 +84,6 @@ function Navigation() {
   const [navColor, setNavColor] = useState(colorScheme[0]);
   const [buttonStyle, setButtonStyle] = useState(colorScheme[2]);
   const [profileImageSrc, setProfileImageSrc] = useState('');
-  // const [isTagUrl, setIsTagUrl] = useState(false);
   const [isLandingPage, setIsLandingPage] = useState(false);
   const [isWritePage, setIsWritePage] = useState(false);
   const [isHomePage, setIsHomePage] = useState(false);
@@ -108,10 +103,6 @@ function Navigation() {
         setButtonStyle(colors[3]);
       }
     }
-
-
-
-
   }, [scrollPosition]);
 
   // Keep nav input in sync with the /search page URL
@@ -133,7 +124,6 @@ function Navigation() {
     setIsWritePage(false);
     setIsHomePage(false);
 
-
     if (location.pathname === '/') {
       setIsLandingPage(true);
     }
@@ -144,18 +134,12 @@ function Navigation() {
       setIsHomePage(true);
     }
 
-  console.log(navColor);
-
-
-    // Initialize with the default color scheme
     let newColorScheme =
       colorSchemes[location.pathname] || colorSchemes.default;
 
     if (colorSchemes[location.pathname]) {
       newColorScheme = colorSchemes[location.pathname];
     }
-
-    // console.log(newColorScheme);
 
     colorScheme.current = newColorScheme;
     setNavColor(newColorScheme[0]);
@@ -447,7 +431,7 @@ function Navigation() {
 
             {isWritePage ? (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
+                <div className={`nav-bell`}></div>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
                     isWritePage ? 'black' : ''
@@ -455,10 +439,9 @@ function Navigation() {
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}></div>
-
                   <div className=" memo-text "></div>
                 </div>
-                <div className="bell-icon-container"></div>
+                <NotificationBell showBell={showWriteButton} />
 
                 <div
                   className={`nav-user-profile-div`}
@@ -469,13 +452,11 @@ function Navigation() {
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
-
                   {user && !user.profileImage && (
                     <div className={`profile-div`} onClick={handleProfileClick}>
                       <img src={quill} alt="user profile icon" />
                     </div>
                   )}
-
                   {!user && (
                     <div className={`profile-div`} onClick={userOutline}>
                       <img src={profileImageSrc} alt="user profile icon" />
@@ -485,7 +466,7 @@ function Navigation() {
               </div>
             ) : (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
+                <div className={`nav-bell`}></div>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
                     isWritePage ? 'black' : ''
@@ -499,14 +480,9 @@ function Navigation() {
                       alt="write symbol"
                     ></img>
                   </div>
-
                   <div className=" memo-text ">Write</div>
                 </div>
-                <div className="bell-icon-container">
-                  {showWriteButton && (
-                    <img src={bellIcon} alt="write symbol"></img>
-                  )}
-                </div>
+                <NotificationBell showBell={showWriteButton} />
 
                 <div
                   className={`nav-user-profile-div`}
@@ -517,13 +493,11 @@ function Navigation() {
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
-
                   {user && !user.profileImage && (
                     <div className={`profile-div`} onClick={handleProfileClick}>
                       <img src={quill} alt="user profile icon" />
                     </div>
                   )}
-
                   {!user && (
                     <div className={`profile-div`} onClick={userOutline}>
                       <img src={profileImageSrc} alt="user profile icon" />
@@ -540,8 +514,6 @@ function Navigation() {
 
 
 
-
-      
 
       {/* // For no user and on any page other than landing */}
 
@@ -660,7 +632,7 @@ function Navigation() {
             </div>
             {isWritePage ? (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
+                <div className={`nav-bell`}></div>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
                     isWritePage ? 'black' : ''
@@ -668,7 +640,6 @@ function Navigation() {
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}></div>
-
                   <div className=" memo-text "></div>
                 </div>
                 <div className="bell-icon-container"></div>
@@ -684,7 +655,7 @@ function Navigation() {
               </div>
             ) : (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
+                <div className={`nav-bell`}></div>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
                     isWritePage ? 'black' : ''
@@ -698,14 +669,9 @@ function Navigation() {
                       alt="write symbol"
                     ></img>
                   </div>
-
                   <div className=" memo-text ">Write</div>
                 </div>
-                <div className="bell-icon-container">
-                  {showWriteButton && (
-                    <img src={bellIcon} alt="write symbol"></img>
-                  )}
-                </div>
+                <div className="bell-icon-container"></div>
 
                 <div
                   className={`nav-user-profile-div`}

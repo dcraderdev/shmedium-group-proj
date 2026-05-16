@@ -5,13 +5,16 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_login import LoginManager
 from .models import db, User, Story, Follower, Clap, Comment, StoryImage, Tag, StoryTag, SearchQuery
+from .models.notification import Notification
 from .api.user_routes import user_routes
 from .api.auth_routes import auth_routes
 from .api.story_routes import story_routes
 from .api.comment_routes import comment_routes
 from .api.follow_routes import follow_routes
 from .api.search_routes import search_routes
+from .api.notification_routes import notification_routes
 from .seeds import seed_commands
+from .email_digest import digest_commands
 from .config import Config
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -29,6 +32,7 @@ def load_user(id):
 
 # Tell flask about our seed commands
 app.cli.add_command(seed_commands)
+app.cli.add_command(digest_commands)
 
 app.config.from_object(Config)
 app.register_blueprint(user_routes, url_prefix='/api/users')
@@ -37,6 +41,7 @@ app.register_blueprint(story_routes, url_prefix='/api/story')
 app.register_blueprint(comment_routes, url_prefix='/api/comment')
 app.register_blueprint(follow_routes, url_prefix='/api/follow')
 app.register_blueprint(search_routes, url_prefix='/api/search')
+app.register_blueprint(notification_routes, url_prefix='/api/notifications')
 
 db.init_app(app)
 Migrate(app, db)

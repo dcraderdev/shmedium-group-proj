@@ -31,6 +31,8 @@ const CreatorTile = ({ creator }) => {
                 <img
                   src={creator.imageUrl}
                   alt="author profile picture"
+                  loading="lazy"
+                  decoding="async"
                 ></img>
              
           </div>

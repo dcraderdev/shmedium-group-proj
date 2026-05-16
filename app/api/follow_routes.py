@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from app.models import User, Follower, Story, db
 from flask_login import current_user, login_required
+from .notification_helpers import create_notification
 
 follow_routes = Blueprint('follows', __name__)
 
@@ -19,6 +20,8 @@ def follow(id):
     if user and curr_user:
         new_follower = Follower(follower_id=curr_user, author_id=user.id)
         db.session.add(new_follower)
+        db.session.commit()
+        create_notification(user.id, 'follow', curr_user, 'user', curr_user)
         db.session.commit()
 
         # getting all author ids for the current user's following list

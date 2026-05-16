@@ -13,6 +13,7 @@ import SignupModal from './components/SignupModal';
 import ProfileButtonModal from './components/ProfileButtonModal';
 import StoryOptionsModal from './components/StoryOptionsModal';
 import CreateStoryPage from './components/CreateStoryPage';
+import NotificationsPage from './components/NotificationsPage';
 
 import * as storyActions from './store/story';
 import { ModalContext } from './context/ModalContext';
@@ -98,6 +99,10 @@ function App() {
 
           <Route path="/search" exact>
             <SearchPage />
+          </Route>
+
+          <Route path="/notifications" exact>
+            <NotificationsPage />
           </Route>
 
           <Route path="/" exact>

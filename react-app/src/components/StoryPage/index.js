@@ -91,11 +91,9 @@ const StoryPage = () => {
 
       story.images.forEach((image, i) => {
         let text = story.content.slice(lastPosition, image.position);
-
-        let img = image.url;
-
+        let imageData = { url: image.url, variants: image.variants || null };
         let altTag = image.altTag;
-        tempArr.push({ text, image: img, altTag });
+        tempArr.push({ text, imageData, altTag });
         lastPosition = image.position;
       });
       // Check if there's remaining content
@@ -178,6 +176,8 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
+                loading="lazy"
+                decoding="async"
                 onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
               />
               <div className="author-information memo-text">
@@ -262,13 +262,33 @@ const StoryPage = () => {
                       // <div className={`memo-text ${!user && index > 0 ? 'blur' : '' }`}>{parse(item.text)}</div>
                       <div className={`memo-text`}>{parse(item.text)}</div>
                     )}
-                    {item.image && (
-                      <img
-                        src={item.image}
-                        alt={item?.altTag}
-                        // className={`story-image ${!user ? 'blur' : '' }`}
-                        className={`story-image`}
-                      />
+                    {item.imageData && (
+                      item.imageData.variants ? (
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet={`${item.imageData.variants.card.webp} 800w, ${item.imageData.variants.full.webp} 1600w`}
+                            sizes="(max-width: 900px) 800px, 1600px"
+                          />
+                          <img
+                            src={item.imageData.variants.full.jpeg}
+                            srcSet={`${item.imageData.variants.card.jpeg} 800w, ${item.imageData.variants.full.jpeg} 1600w`}
+                            sizes="(max-width: 900px) 800px, 1600px"
+                            alt={item?.altTag}
+                            className="story-image"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </picture>
+                      ) : (
+                        <img
+                          src={item.imageData.url}
+                          alt={item?.altTag}
+                          className="story-image"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )
                     )}
                   </div>
                 ))}
@@ -318,6 +338,8 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
+                loading="lazy"
+                decoding="async"
                 onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
               />
               <div className="author-information memo-text">
