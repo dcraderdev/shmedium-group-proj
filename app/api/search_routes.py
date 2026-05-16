@@ -1,4 +1,5 @@
 import re
+import html as _html
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from sqlalchemy import or_, func, distinct
@@ -57,39 +58,52 @@ def _log_search(query):
         db.session.rollback()
 
 
+_TAG_RE = re.compile(r'<[^>]+>')
+
+
+def _strip_html(text):
+    """Replace HTML tags with spaces and collapse whitespace."""
+    return ' '.join(_TAG_RE.sub(' ', text).split())
+
+
 def _highlight(text_content, query):
-    """Wrap query terms in <mark> tags — single-pass, case-insensitive."""
-    if not text_content or not query:
-        return text_content or ''
+    """HTML-escape text, then wrap query terms in <mark> tags."""
+    if not text_content:
+        return ''
+    escaped = _html.escape(text_content)
+    if not query:
+        return escaped
     terms = sorted({t for t in query.split() if t}, key=len, reverse=True)
     if not terms:
-        return text_content
+        return escaped
+    # Escape query terms before building the regex so they match the escaped text
     pattern = re.compile(
-        r'(' + '|'.join(re.escape(t) for t in terms) + r')',
+        r'(' + '|'.join(re.escape(_html.escape(t)) for t in terms) + r')',
         re.IGNORECASE,
     )
-    return pattern.sub(r'<mark>\1</mark>', text_content)
+    return pattern.sub(r'<mark>\1</mark>', escaped)
 
 
 def _get_snippet(content, query, max_len=220):
-    """Extract a snippet centred on the first matching term."""
+    """Extract a plain-text snippet centred on the first matching term."""
     if not content:
         return ''
+    text = _strip_html(content)
     if not query:
-        return content[:max_len] + ('…' if len(content) > max_len else '')
-    lower = content.lower()
+        return text[:max_len] + ('…' if len(text) > max_len else '')
+    lower = text.lower()
     for term in query.split():
         idx = lower.find(term.lower())
         if idx >= 0:
             start = max(0, idx - 80)
-            end = min(len(content), idx + 140)
-            snippet = content[start:end]
+            end = min(len(text), idx + 140)
+            snippet = text[start:end]
             if start > 0:
                 snippet = '…' + snippet
-            if end < len(content):
+            if end < len(text):
                 snippet += '…'
             return snippet
-    return content[:max_len] + ('…' if len(content) > max_len else '')
+    return text[:max_len] + ('…' if len(text) > max_len else '')
 
 
 def _story_to_search_dict(story, query):

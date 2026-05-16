@@ -37,17 +37,25 @@ const profileImages = {
   'fountain-pen': fountainPen,
 };
 
-/** Highlight query terms in a plain string — returns HTML string. */
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+/** Highlight query terms in a plain-text string — returns safe HTML. */
 function hlText(text, q) {
-  if (!text || !q) return text || '';
+  if (!text) return '';
+  const escaped = escHtml(text);
+  if (!q) return escaped;
   const terms = [...new Set(q.trim().split(/\s+/).filter(Boolean))]
-    .sort((a, b) => b.length - a.length); // longest first prevents "py" splitting inside "python"
-  if (!terms.length) return text;
+    .sort((a, b) => b.length - a.length); // longest first prevents "py" inside "python"
+  if (!terms.length) return escaped;
+  // Escape query terms too so they match against the HTML-escaped text
   const pattern = new RegExp(
-    '(' + terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+    '(' + terms.map((t) => escHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
     'gi'
   );
-  return text.replace(pattern, '<mark>$1</mark>');
+  return escaped.replace(pattern, '<mark>$1</mark>');
 }
 
 function Navigation() {
