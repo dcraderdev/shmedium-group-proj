@@ -30,7 +30,8 @@
 }
 
 .signed-out{
-    width: 250px;
+    width: 100%;
+    max-width: 250px;
 }
 
 .comment-panel-author-info {
@@ -67,16 +68,17 @@
 .edit-comment-button,
 .delete-comment-button,
 .submit-comment {
-    /* display: flex; */
-    /* align-items: center; */
     background: none;
     background-color: #f2f2f2;
     border: none;
     cursor: pointer;
     margin-right: 10px;
     border-radius: 15px;
-    padding: 5px 10px;
+    padding: 10px 14px;
     font-size: 14px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .comment-content {

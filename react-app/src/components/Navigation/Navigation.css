@@ -707,19 +707,23 @@ color: #878787;
     display: flex;
   }
 
+  /* Hide desktop search bar on mobile */
   .nav-search {
     display: none !important;
   }
 
+  /* Hide landing page link buttons — replaced by drawer */
   .nav-link-buttons {
     display: none !important;
   }
 
+  /* Make user-button row auto-width so it doesn't overflow */
   .nav-user-buttons {
     width: auto;
     gap: 8px;
   }
 
+  /* Write button: icon only (hide "Write" label) */
   .nav-write .memo-text {
     display: none;
   }
@@ -729,10 +733,12 @@ color: #878787;
     margin-right: 0;
   }
 
+  /* Ensure buttons can't be tapped accidentally when hidden behind nav */
   .nav-bar {
     overflow: visible;
   }
 
+  /* Expand nav-buttons to near full width on mobile */
   .nav-buttons {
     width: calc(100% - 24px);
   }
