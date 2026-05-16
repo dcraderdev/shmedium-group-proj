@@ -103,8 +103,9 @@ const StoryPage = () => {
   }, [id, dispatch]);
 
   useEffect(() => {
-    if (story) {
-      setDate(story.createdAt.slice(0, 16));
+    if (story?.createdAt) {
+      const d = new Date(story.createdAt);
+      setDate(d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
     }
   }, [story]);
 
@@ -353,7 +354,7 @@ const StoryPage = () => {
           storyId={story.id}
           contentRef={contentRef}
           user={user}
-          contentVersion={sortedContent.length}
+          contentVersion={story.id}
         />
       )}
 

@@ -31,6 +31,7 @@ const RelatedStories = ({ storyId, authorName }) => {
 
   useEffect(() => {
     if (!storyId) return;
+    setRelated(null);
     const controller = new AbortController();
     fetch(`/api/story/${storyId}/related`, { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))

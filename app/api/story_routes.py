@@ -23,7 +23,7 @@ def _story_with_relations():
     images, comments->user+claps, claps) into a small constant number of
     SELECTs regardless of story count.
     """
-    from app.models import Bookmark, StoryHighlight
+    from app.models import StoryHighlight
     return Story.query.options(
         selectinload(Story.author).options(
             selectinload(User.followers),
@@ -488,7 +488,7 @@ def create_clap(id):
 @story_routes.route('/<int:id>/related')
 def related_stories(id):
     """Return up to 3 stories by same author and up to 3 stories sharing a tag."""
-    story = Story.query.get(id)
+    story = _story_with_relations().filter(Story.id == id).first()
     if not story:
         return {"error": "Story not found"}, 404
 
