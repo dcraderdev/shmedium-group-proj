@@ -80,6 +80,8 @@ const navToWrite = () => {
               src={spinningSphere}
               alt="Spinning sphere of words"
               className="ourstorypage-spinning-cube"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
@@ -132,6 +134,8 @@ const navToWrite = () => {
               src={mediumLogoCircles}
               alt="Medium circle logo"
               className="ourstorypage-medium-logo-circle"
+              loading="lazy"
+              decoding="async"
             />
 
 
@@ -196,6 +200,8 @@ const navToWrite = () => {
               src={supportWriters}
               alt="mobile view example"
               className="ourstorypage-take-medium-image"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="ourstorypage-read-reward-memo memo-text">
@@ -211,6 +217,8 @@ const navToWrite = () => {
               src={readUnlimited}
               alt="mobile view example"
               className="ourstorypage-take-medium-image"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="ourstorypage-read-reward-memo memo-text">
@@ -238,6 +246,8 @@ const navToWrite = () => {
                 src={appleStoreBtn}
                 alt="mobile view example"
                 className="ourstorypage-take-medium-image"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div className="ourstorypage-play-store-button">
@@ -246,6 +256,8 @@ const navToWrite = () => {
                 src={playStoreBtn}
                 alt="mobile view example"
                 className="ourstorypage-take-medium-image"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>
@@ -256,6 +268,8 @@ const navToWrite = () => {
             src={mobileViewPhoto}
             alt="mobile view example"
             className="ourstorypage-take-medium-image"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>
@@ -315,6 +329,8 @@ const navToWrite = () => {
               src={spinningCube}
               alt="Spinning cube of words"
               className="ourstorypage-spinning-cube"
+              loading="lazy"
+              decoding="async"
             />
 
 

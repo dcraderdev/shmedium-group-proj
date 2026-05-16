@@ -1,13 +1,12 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, lazy, Suspense } from 'react';
 // import { useHistory, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import './FeedPage.css' 
-import StoryFeed from '../StoryFeed';
-import SidePanel from '../SidePanel';
-
 import { WindowContext } from '../../context/WindowContext';
-import { authenticate } from '../../store/session';
-import * as storyActions from '../../store/story';
+import { initialLoad } from '../../store/story';
+import './FeedPage.css'
+import StoryFeed from '../StoryFeed';
+
+const SidePanel = lazy(() => import(/* webpackChunkName: "sidepanel" */ '../SidePanel'));
 
 
 
@@ -21,10 +20,7 @@ const FeedPage = () => {
 
 
   useEffect(() => {
-    dispatch(authenticate())
-      .then(() => {
-        dispatch(storyActions.initialLoad());
-      })
+    dispatch(initialLoad());
   }, [dispatch]);
 
 
@@ -45,7 +41,7 @@ const FeedPage = () => {
       {windowSize > 959 &&(
         <div className='feedpage-container flex'>
           <div className='storyfeed-wrapper'> <StoryFeed/> </div>
-          <div className='sidepanel-wrapper'> <SidePanel/> </div>
+          <div className='sidepanel-wrapper'><Suspense fallback={null}><SidePanel/></Suspense></div>
         </div>
       )}
 

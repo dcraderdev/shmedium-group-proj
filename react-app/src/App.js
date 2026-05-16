@@ -1,47 +1,34 @@
+import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
 import { useDispatch } from 'react-redux';
-import { React, useState, useEffect, useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { authenticate } from './store/session';
 import Navigation from './components/Navigation';
-import HomePage from './components/HomePage';
-import OurStoryPage from './components/OurStoryPage';
-import WritePage from './components/WritePage';
-import StoryPage from './components/StoryPage';
-import SigninModal from './components/SigninModal';
-import SignupModal from './components/SignupModal';
-import ProfileButtonModal from './components/ProfileButtonModal';
-import StoryOptionsModal from './components/StoryOptionsModal';
-import CreateStoryPage from './components/CreateStoryPage';
-import NotificationsPage from './components/NotificationsPage';
-
-import * as storyActions from './store/story';
 import { ModalContext } from './context/ModalContext';
-import FeedPage from './components/FeedPage';
-import SearchPage from './components/SearchPage';
+
+// Route-level chunks — each becomes its own JS file, loaded only when visited
+const HomePage = lazy(() => import(/* webpackChunkName: "home" */ './components/HomePage'));
+const FeedPage = lazy(() => import(/* webpackChunkName: "feed", webpackPrefetch: true */ './components/FeedPage'));
+const OurStoryPage = lazy(() => import(/* webpackChunkName: "about" */ './components/OurStoryPage'));
+const WritePage = lazy(() => import(/* webpackChunkName: "write" */ './components/WritePage'));
+const StoryPage = lazy(() => import(/* webpackChunkName: "story", webpackPrefetch: true */ './components/StoryPage'));
+const CreateStoryPage = lazy(() => import(/* webpackChunkName: "create" */ './components/CreateStoryPage'));
+const SearchPage = lazy(() => import(/* webpackChunkName: "search" */ './components/SearchPage'));
+const NotificationsPage = lazy(() => import(/* webpackChunkName: "notifications" */ './components/NotificationsPage'));
+
+// Modal chunks — only fetched when the user triggers one
+const SigninModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SigninModal'));
+const SignupModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SignupModal'));
+const ProfileButtonModal = lazy(() => import(/* webpackChunkName: "modal-profile" */ './components/ProfileButtonModal'));
+const StoryOptionsModal = lazy(() => import(/* webpackChunkName: "modal-options" */ './components/StoryOptionsModal'));
 
 function App() {
   const dispatch = useDispatch();
   const [isLoaded, setIsLoaded] = useState(false);
-  // const state = useSelector((state) => state);
-  // const search = useSelector((state) => state.session.search);
-  // const user = useSelector((state) => state.session.user);
-  const { modal } =
-    useContext(ModalContext);
-
-  // console.log(state);
-  // console.log(search);
-
-
+  const { modal } = useContext(ModalContext);
 
   useEffect(() => {
-    dispatch(authenticate())
-      .then(() => {
-        dispatch(storyActions.initialLoad());
-      })
-      .then(() => {
-        setIsLoaded(true);
-      });
+    dispatch(authenticate()).then(() => setIsLoaded(true));
   }, [dispatch]);
 
   return (
@@ -52,63 +39,65 @@ function App() {
         modal === 'storyOptionsModal') && (
         <div
           className={
-            modal === 'profileModal' ||
-            modal === 'storyOptionsModal'
+            modal === 'profileModal' || modal === 'storyOptionsModal'
               ? 'modal-container-transparent'
               : 'modal-container'
           }
         >
-          {modal === 'signin' && <SigninModal />}
-          {modal === 'signup' && <SignupModal />}
-          {modal === 'profileModal' && <ProfileButtonModal />}
-          {modal === 'storyOptionsModal' && <StoryOptionsModal />}
+          <Suspense fallback={null}>
+            {modal === 'signin' && <SigninModal />}
+            {modal === 'signup' && <SignupModal />}
+            {modal === 'profileModal' && <ProfileButtonModal />}
+            {modal === 'storyOptionsModal' && <StoryOptionsModal />}
+          </Suspense>
         </div>
       )}
 
       {isLoaded && <Navigation />}
       {isLoaded && (
-        <Switch>
-          <Route path="/home" exact>
-            <FeedPage />
-          </Route>
+        <Suspense fallback={null}>
+          <Switch>
+            <Route path="/home" exact>
+              <FeedPage />
+            </Route>
 
-          <Route path="/about" exact>
-            <OurStoryPage />
-          </Route>
+            <Route path="/about" exact>
+              <OurStoryPage />
+            </Route>
 
-          <Route path="/write" exact>
-            <WritePage />
-          </Route>
+            <Route path="/write" exact>
+              <WritePage />
+            </Route>
 
-          <Route path="/story/:id" exact>
-            <StoryPage />
-          </Route>
+            <Route path="/story/:id" exact>
+              <StoryPage />
+            </Route>
 
-          <Route path="/author/:id" exact>
-            <StoryPage />
-          </Route>
+            <Route path="/author/:id" exact>
+              <StoryPage />
+            </Route>
 
+            <Route path="/create" exact>
+              <CreateStoryPage />
+            </Route>
 
-          <Route path="/create" exact>
-            <CreateStoryPage />
-          </Route>
+            <Route path="/create/:id/edit" exact>
+              <CreateStoryPage />
+            </Route>
 
-          <Route path="/create/:id/edit" exact>
-            <CreateStoryPage />
-          </Route>
+            <Route path="/search" exact>
+              <SearchPage />
+            </Route>
 
-          <Route path="/search" exact>
-            <SearchPage />
-          </Route>
+            <Route path="/notifications" exact>
+              <NotificationsPage />
+            </Route>
 
-          <Route path="/notifications" exact>
-            <NotificationsPage />
-          </Route>
-
-          <Route path="/" exact>
-            <HomePage/>
-          </Route>
-        </Switch>
+            <Route path="/" exact>
+              <HomePage />
+            </Route>
+          </Switch>
+        </Suspense>
       )}
     </>
   );

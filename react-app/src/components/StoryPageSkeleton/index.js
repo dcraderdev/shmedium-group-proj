@@ -1,27 +1,14 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import './StoryPageSkeleton.css';
-import parse from 'html-react-parser';
-import CommentPanel from '../CommentPanel';
-import * as sessionActions from '../../store/session';
-import * as storyActions from '../../store/story';
-import { ModalContext } from '../../context/ModalContext';
 import claps from '../../public/claps.svg';
 import shining_star from '../../public/shining_star.svg';
 import triple_dots_icon from '../../public/triple_dots_icon.svg';
 import commentBubble from '../../public/comment.svg';
 
 const StoryPageSkeleton = () => {
-  const { openModal } = useContext(ModalContext);
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const { id } = useParams();
-
-  const [date, setDate] = useState('');
   const [showComments, setShowComments] = useState(false);
   const story = useSelector((state) => state.story.currentStory);
-  const user = useSelector((state) => state.session.user);
 
   // const currentUserId = useSelector(state => state.session.user?.id);
 

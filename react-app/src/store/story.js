@@ -77,7 +77,8 @@ const unfollowAuthorAction = (data) => ({
 
 const initialState = { stories: [], tags: [], loaded: false, currentStory: null};
 
-export const initialLoad = () => async (dispatch) => {
+export const initialLoad = () => async (dispatch, getState) => {
+	if (getState().story.loaded) return null;
 	const response = await fetch("/api/story/initialize", {
 		method: "GET",
 		headers: {

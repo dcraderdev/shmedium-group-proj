@@ -96,8 +96,7 @@ const MainPageContent = () => {
 
               <div className="main-page-small-view-footer">
                 <div className="footer-logo" onClick={handleLogoClick}>
-                  <img src={mediumLogoLarge} alt="medium cirlce logo"></img>
-
+                  <img src={mediumLogoLarge} alt="medium cirlce logo" loading="lazy" decoding="async"></img>
                 </div>
                 <div className="main-page-small-view-footer-item">About</div>
                 <div className="main-page-small-view-footer-item">Help</div>
@@ -217,8 +216,7 @@ const MainPageContent = () => {
 
               <div className="main-page-small-view-footer">
                 <div className="footer-logo" onClick={handleLogoClick}>
-                  <img src={mediumLogoCircles} alt="medium cirlce logo"></img>
-
+                  <img src={mediumLogoCircles} alt="medium cirlce logo" loading="lazy" decoding="async"></img>
                 </div>
                 <div className="main-page-small-view-footer-item" onClick={navToOurStory}>About</div>
                 <div className="main-page-small-view-footer-item" onClick={navToOurStory}>Help</div>
