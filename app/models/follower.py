@@ -1,8 +1,4 @@
 from .db import db, environment, SCHEMA, add_prefix_for_prod
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
-from datetime import datetime
-from sqlalchemy import Column, DateTime, func
 
 class Follower(db.Model):
     __tablename__ = 'followers'
@@ -21,5 +17,18 @@ class Follower(db.Model):
         return {
             'id': self.id,
             'followerId': self.follower_id,
-            'authorId': self.author_id
+            'authorId': self.author_id,
+            'followerUser': _user_stub(self.follower_user),
+            'authorUser': _user_stub(self.author_user),
         }
+
+
+def _user_stub(user):
+    if user is None:
+        return None
+    return {
+        'id': user.id,
+        'firstName': user.first_name,
+        'lastName': user.last_name,
+        'profileImage': user.profile_image,
+    }

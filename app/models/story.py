@@ -38,6 +38,7 @@ class Story(db.Model):
 
 
     def to_dict(self):
+        top_level = [c for c in self.comments if c.parent_id is None]
         plain = _TAG_RE.sub(' ', self.content or '')
         word_count = len([w for w in plain.split() if w])
         computed_read_time = max(1, round(word_count / 200))
@@ -45,14 +46,22 @@ class Story(db.Model):
         return {
             'id': self.id,
             'authorId': self.author_id,
-            'authorInfo': self.author.to_dict(),
+            'authorInfo': {
+                'id': self.author.id,
+                'firstName': self.author.first_name,
+                'lastName': self.author.last_name,
+                'profileImage': self.author.profile_image,
+                'numFollowers': len(self.author.followers),
+                'numFollowing': len(self.author.following),
+            },
             'title': self.title,
             'content': self.content,
             'createdAt': self.created_at.isoformat() if self.created_at else None,
             'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
             'tags': [tag.tag.to_dict() for tag in self.tags],
             'images': [image.to_dict() for image in self.images],
-            'comments': [comment.to_dict() for comment in self.comments],
+            'comments': [comment.to_dict() for comment in top_level],
+            'commentCount': len(self.comments),
             'claps': len(self.claps),
             'timeToRead': computed_read_time,
             'slicedIntro': self.sliced_intro,

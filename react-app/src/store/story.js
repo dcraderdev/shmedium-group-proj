@@ -1,5 +1,7 @@
 // constants
 const GET_STORIES = "story/GET_STORIES";
+const SET_AUTHOR_PROFILE = "story/SET_AUTHOR_PROFILE";
+const SET_AUTHOR_STORIES = "story/SET_AUTHOR_STORIES";
 const SET_CURRENT_STORY = "story/SET_CURRENT_STORY";
 const REMOVE_CURRENT_STORY = "story/REMOVE_CURRENT_STORY";
 const DELETE_STORY = "story/DELETE_STORY";
@@ -75,7 +77,10 @@ const unfollowAuthorAction = (data) => ({
 
 
 
-const initialState = { stories: [], tags: [], loaded: false, currentStory: null};
+const setAuthorProfileAction = (data) => ({ type: SET_AUTHOR_PROFILE, payload: data });
+const setAuthorStoriesAction = (data) => ({ type: SET_AUTHOR_STORIES, payload: data });
+
+const initialState = { stories: [], tags: [], loaded: false, currentStory: null, authorProfile: null, authorStories: null };
 
 export const initialLoad = () => async (dispatch, getState) => {
 	if (getState().story.loaded) return null;
@@ -501,6 +506,59 @@ export const addCommentClap = (commentId) => async (dispatch) => {
 
 
 
+export const postReply = (parentCommentId, content) => async (dispatch) => {
+	const response = await fetch(`/api/comment/${parentCommentId}/reply`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ content }),
+	});
+	if (response.ok) {
+		const data = await response.json();
+		dispatch(setCurrentStoryAction(data));
+		return data;
+	}
+	const data = await response.json();
+	return data;
+};
+
+export const getAuthorProfile = (userId) => async (dispatch) => {
+	const response = await fetch(`/api/users/${userId}/profile`);
+	if (response.ok) {
+		const data = await response.json();
+		dispatch(setAuthorProfileAction(data));
+		return data;
+	}
+	return null;
+};
+
+export const getAuthorStories = (userId, page = 1, sort = 'newest') => async (dispatch) => {
+	const response = await fetch(`/api/users/${userId}/stories?page=${page}&per_page=12&sort=${sort}`);
+	if (response.ok) {
+		const data = await response.json();
+		dispatch(setAuthorStoriesAction({ ...data, page, sort, userId }));
+		return data;
+	}
+	return null;
+};
+
+export const updateProfile = (formData) => async (dispatch) => {
+	const isFormData = formData instanceof FormData;
+	const response = await fetch('/api/users/profile', {
+		method: 'PUT',
+		...(isFormData ? { body: formData } : {
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(formData),
+		}),
+	});
+	if (response.ok) {
+		const data = await response.json();
+		dispatch(setAuthorProfileAction(data));
+		return data;
+	}
+	const data = await response.json();
+	return data;
+};
+
 export const removeCommentClap = (commentId) => async (dispatch) => {
 	const response = await fetch(`/api/comment/${commentId}/clap`, {
 		method: "DELETE",
@@ -656,6 +714,27 @@ export default function reducer(state = initialState, action) {
 			}
 		}
 		
+		case SET_AUTHOR_PROFILE:
+			return { ...newState, authorProfile: action.payload };
+
+		case SET_AUTHOR_STORIES: {
+			const { page, stories, totalPages, totalStories, sort, userId } = action.payload;
+			const existing = (newState.authorStories?.userId === userId && newState.authorStories?.sort === sort && page > 1)
+				? newState.authorStories.stories
+				: [];
+			return {
+				...newState,
+				authorStories: {
+					userId,
+					sort,
+					stories: [...existing, ...stories],
+					totalPages,
+					totalStories,
+					currentPage: page,
+				},
+			};
+		}
+
 		default:
 			return state;
 	}
