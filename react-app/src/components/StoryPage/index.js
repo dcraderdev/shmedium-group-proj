@@ -178,6 +178,8 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
+                loading="lazy"
+                decoding="async"
                 onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
               />
               <div className="author-information memo-text">
@@ -266,8 +268,9 @@ const StoryPage = () => {
                       <img
                         src={item.image}
                         alt={item?.altTag}
-                        // className={`story-image ${!user ? 'blur' : '' }`}
                         className={`story-image`}
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                   </div>
@@ -318,6 +321,8 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
+                loading="lazy"
+                decoding="async"
                 onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
               />
               <div className="author-information memo-text">
