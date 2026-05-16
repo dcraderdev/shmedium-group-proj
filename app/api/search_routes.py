@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, distinct
 from sqlalchemy.orm import joinedload, selectinload
 from app.models import db, Story, Tag, StoryTag, User, Comment, Clap, StoryImage, Follower
 from app.models.search_query import SearchQuery
@@ -126,16 +126,22 @@ def _get_matching_tags(terms):
     return Tag.query.filter(or_(*conds)).all()
 
 
-def _count_tagged_stories(tag_ids):
-    if not tag_ids:
-        return 0
+def _tagged_story_ids_subq(tag_ids):
+    """Subquery that returns distinct story IDs matching the given tag IDs."""
     return (
-        Story.query
+        db.session.query(Story.id)
         .join(StoryTag, StoryTag.story_id == Story.id)
         .filter(StoryTag.tag_id.in_(tag_ids))
         .distinct()
-        .count()
+        .subquery()
     )
+
+
+def _count_tagged_stories(tag_ids):
+    if not tag_ids:
+        return 0
+    subq = _tagged_story_ids_subq(tag_ids)
+    return db.session.query(func.count()).select_from(subq).scalar()
 
 
 # ── Fetch helpers (with eager loading + pagination) ───────────────────────────
@@ -177,11 +183,11 @@ def _fetch_authors(terms, page, per_page):
 
 
 def _fetch_tagged_stories(tag_ids, page, per_page, eager):
+    """Use a subquery for distinct story IDs to avoid DISTINCT+ORDER BY conflicts."""
+    subq = _tagged_story_ids_subq(tag_ids)
     return (
         Story.query.options(*eager)
-        .join(StoryTag, StoryTag.story_id == Story.id)
-        .filter(StoryTag.tag_id.in_(tag_ids))
-        .distinct()
+        .filter(Story.id.in_(subq))
         .order_by(Story.created_at.desc())
         .offset((page - 1) * per_page)
         .limit(per_page)
