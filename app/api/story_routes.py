@@ -1,9 +1,8 @@
-from flask import Blueprint, jsonify, session, render_template, request, redirect
+from flask import Blueprint, request
 from flask_login import login_required, current_user
 from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower
 from app.forms import StoryForm
 from app.forms import StoryImageForm
-from app.forms import CommentForm
 from sqlalchemy.orm import joinedload, selectinload
 from werkzeug.utils import secure_filename
 import os
@@ -387,40 +386,27 @@ def create_story_with_images():
 @story_routes.route('/<int:id>/comment', methods=['POST'])
 @login_required
 def create_comment(id):
-    """
-    Creates a new story comment
-    """
+    """Create a top-level comment on a story."""
+    data = request.get_json()
+    if not data or not data.get('content', '').strip():
+        return {'error': 'content is required'}, 422
 
-    form = CommentForm()
-    form['csrf_token'].data = request.cookies['csrf_token']
-    if not form.validate_on_submit(): 
+    story = _story_with_relations().filter(Story.id == id).first()
+    if story is None:
+        return {'error': 'Story not found'}, 404
 
-      print(form.errors)
+    already = any(c.user_id == current_user.id for c in story.comments if c.parent_id is None)
+    if already:
+        return {'error': 'You have already commented on this story'}, 403
 
-    if form.validate_on_submit():
-      data = form.data
-      story = Story.query.get(id)
-
-      for comment in story.comments:
-        if comment.user_id == current_user.id:
-            return{"error": "User has already commented on this story."}, 403
-
-      if story is None:
-          return {"error": "Story not found"}, 404
-
-      new_comment = Comment(
-          user_id=current_user.id,
-          story_id=id,
-          content=data['content'],
-
-      )
-      db.session.add(new_comment)
-      db.session.commit()
-      story = Story.query.get(comment.story_id)
-      return story.to_dict()
-
-    if form.errors:
-      return "Bad Data"
+    new_comment = Comment(
+        user_id=current_user.id,
+        story_id=id,
+        content=data['content'].strip(),
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+    return _story_with_relations().filter(Story.id == id).first().to_dict()
 
 
 

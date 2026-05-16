@@ -521,7 +521,7 @@ export const postReply = (parentCommentId, content) => async (dispatch) => {
 };
 
 export const getAuthorProfile = (userId) => async (dispatch) => {
-	const response = await fetch(`/api/user/${userId}/profile`);
+	const response = await fetch(`/api/users/${userId}/profile`);
 	if (response.ok) {
 		const data = await response.json();
 		dispatch(setAuthorProfileAction(data));
@@ -531,7 +531,7 @@ export const getAuthorProfile = (userId) => async (dispatch) => {
 };
 
 export const getAuthorStories = (userId, page = 1, sort = 'newest') => async (dispatch) => {
-	const response = await fetch(`/api/user/${userId}/stories?page=${page}&per_page=12&sort=${sort}`);
+	const response = await fetch(`/api/users/${userId}/stories?page=${page}&per_page=12&sort=${sort}`);
 	if (response.ok) {
 		const data = await response.json();
 		dispatch(setAuthorStoriesAction({ ...data, page, sort, userId }));
@@ -542,7 +542,7 @@ export const getAuthorStories = (userId, page = 1, sort = 'newest') => async (di
 
 export const updateProfile = (formData) => async (dispatch) => {
 	const isFormData = formData instanceof FormData;
-	const response = await fetch('/api/user/profile', {
+	const response = await fetch('/api/users/profile', {
 		method: 'PUT',
 		...(isFormData ? { body: formData } : {
 			headers: { 'Content-Type': 'application/json' },

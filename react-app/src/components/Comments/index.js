@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useCallback } from 'react';
+import { useEffect, useState, useContext, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -14,90 +14,145 @@ import './Comments.css';
 import { WindowContext } from '../../context/WindowContext';
 import { ModalContext } from '../../context/ModalContext';
 
-const EDIT_WINDOW_MS = 5 * 60 * 1000;
+const EDIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
-function timeAgo(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+/* ── helpers ─────────────────────────────────────────────────── */
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function canEdit(createdAt) {
-  return Date.now() - new Date(createdAt).getTime() < EDIT_WINDOW_MS;
+function msRemaining(createdAt) {
+  return EDIT_WINDOW_MS - (Date.now() - new Date(createdAt).getTime());
 }
 
-function CommentClaps({ comment, userId, onClap, onUnclap }) {
-  const [clapped, setClapped] = useState(false);
-  const isOwn = userId && userId === comment.userId;
+/* ── CommentInput ────────────────────────────────────────────── */
 
-  const handleClap = async () => {
-    if (clapped) {
-      setClapped(false);
-      await onUnclap(comment.id);
-    } else {
-      setClapped(true);
-      await onClap(comment.id);
-    }
-  };
-
-  if (!userId || isOwn) {
-    return (
-      <span className="cmt-clap-count">
-        <span className="cmt-clap-icon">👏</span>
-        {comment.clapCount || 0}
-      </span>
-    );
-  }
-
-  return (
-    <button className={`cmt-clap-btn ${clapped ? 'clapped' : ''}`} onClick={handleClap}>
-      <span className="cmt-clap-icon">👏</span>
-      <span>{comment.clapCount || 0}</span>
-    </button>
-  );
-}
-
-function CommentInput({ onSubmit, placeholder, initialValue = '', submitLabel = 'Post', onCancel }) {
+function CommentInput({ onSubmit, placeholder, initialValue = '', submitLabel = 'Respond', onCancel, autoFocus }) {
   const [text, setText] = useState(initialValue);
-  const [submitting, setSubmitting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (autoFocus && ref.current) ref.current.focus();
+  }, [autoFocus]);
+
+  const handleKey = (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    setSubmitting(true);
+    setBusy(true);
     await onSubmit(text.trim());
-    setSubmitting(false);
+    setBusy(false);
     setText('');
   };
 
   return (
     <form className="cmt-input-form" onSubmit={handleSubmit}>
       <textarea
+        ref={ref}
         className="cmt-textarea"
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onKeyDown={handleKey}
         placeholder={placeholder}
         rows={3}
       />
+      <div className="cmt-input-hint">⌘↵ to submit</div>
       <div className="cmt-input-actions">
         {onCancel && (
           <button type="button" className="cmt-btn-cancel" onClick={onCancel}>Cancel</button>
         )}
-        <button type="submit" className="cmt-btn-submit" disabled={submitting || !text.trim()}>
-          {submitting ? '…' : submitLabel}
+        <button type="submit" className="cmt-btn-submit" disabled={busy || !text.trim()}>
+          {busy ? '…' : submitLabel}
         </button>
       </div>
     </form>
   );
 }
 
-function ReplyThread({ replies, userId, storyId, onClap, onUnclap, onDelete }) {
+/* ── ClapButton ──────────────────────────────────────────────── */
+
+function ClapButton({ comment, userId }) {
+  const dispatch = useDispatch();
+  const [clapped, setClapped] = useState(false);
+  const [count, setCount] = useState(comment.clapCount ?? 0);
+  const [busy, setBusy] = useState(false);
+
+  // reset when server data changes
+  useEffect(() => {
+    setCount(comment.clapCount ?? 0);
+  }, [comment.clapCount]);
+
+  const isOwn = userId && userId === comment.userId;
+
+  if (!userId || isOwn) {
+    return (
+      <span className="cmt-clap-count">
+        <span>👏</span> {count}
+      </span>
+    );
+  }
+
+  const toggle = async () => {
+    if (busy) return;
+    setBusy(true);
+    const wasClapped = clapped;
+    setClapped(!wasClapped);
+    setCount((c) => wasClapped ? c - 1 : c + 1);   // optimistic
+    const res = wasClapped
+      ? await dispatch(removeCommentClap(comment.id))
+      : await dispatch(addCommentClap(comment.id));
+    // server will correct state via setCurrentStoryAction
+    setBusy(false);
+    if (res?.error) {
+      // revert optimistic
+      setClapped(wasClapped);
+      setCount((c) => wasClapped ? c + 1 : c - 1);
+    }
+  };
+
+  return (
+    <button className={`cmt-clap-btn ${clapped ? 'clapped' : ''}`} onClick={toggle} disabled={busy}>
+      <span>👏</span> {count}
+    </button>
+  );
+}
+
+/* ── EditTimer ───────────────────────────────────────────────── */
+
+function EditTimer({ createdAt }) {
+  const [remaining, setRemaining] = useState(() => msRemaining(createdAt));
+
+  useEffect(() => {
+    if (remaining <= 0) return;
+    const t = setInterval(() => {
+      setRemaining(msRemaining(createdAt));
+    }, 10000); // update every 10s
+    return () => clearInterval(t);
+  }, [createdAt, remaining]);
+
+  if (remaining <= 0) return null;
+  const mins = Math.ceil(remaining / 60000);
+  return <span className="cmt-edit-timer">{mins}m left to edit</span>;
+}
+
+/* ── ReplyThread ─────────────────────────────────────────────── */
+
+function ReplyThread({ replies, userId, storyId, onClap, onDelete }) {
   if (!replies || replies.length === 0) return null;
   return (
     <div className="cmt-replies">
@@ -105,23 +160,27 @@ function ReplyThread({ replies, userId, storyId, onClap, onUnclap, onDelete }) {
         <div key={reply.id} className="cmt-reply-tile">
           <div className="cmt-author-row">
             <img
+              className="cmt-avatar cmt-avatar-sm"
               src={reply.author?.profileImage}
               alt={reply.author?.firstName}
-              className="cmt-avatar cmt-avatar-sm"
               loading="lazy"
             />
             <div className="cmt-author-info">
-              <span className="cmt-author-name">{reply.author?.firstName} {reply.author?.lastName}</span>
+              <span className="cmt-author-name">
+                {reply.author?.firstName} {reply.author?.lastName}
+              </span>
               <span className="cmt-time">{timeAgo(reply.createdAt)}</span>
             </div>
           </div>
           <div className="cmt-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} className="cmt-markdown">{reply.content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} className="cmt-md">{reply.content}</ReactMarkdown>
           </div>
           <div className="cmt-footer">
-            <CommentClaps comment={reply} userId={userId} onClap={onClap} onUnclap={onUnclap} />
+            <ClapButton comment={reply} userId={userId} />
             {userId && userId === reply.userId && (
-              <button className="cmt-btn-danger" onClick={() => onDelete(storyId, reply.id)}>Delete</button>
+              <button className="cmt-btn-danger" onClick={() => onDelete(storyId, reply.id)}>
+                Delete
+              </button>
             )}
           </div>
         </div>
@@ -130,109 +189,123 @@ function ReplyThread({ replies, userId, storyId, onClap, onUnclap, onDelete }) {
   );
 }
 
-function CommentTile({ comment, userId, storyId, onClap, onUnclap, onEdit, onDelete, onReply }) {
-  const [showReplyForm, setShowReplyForm] = useState(false);
+/* ── CommentTile ─────────────────────────────────────────────── */
+
+function CommentTile({ comment, userId, storyId, onDelete, onReply }) {
+  const dispatch = useDispatch();
+  const [showReply, setShowReply] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editExpired, setEditExpired] = useState(!canEdit(comment.createdAt));
+  const [editExpired, setEditExpired] = useState(msRemaining(comment.createdAt) <= 0);
   const isOwn = userId && userId === comment.userId;
 
+  // expire the edit button when window closes
   useEffect(() => {
-    if (isOwn && !editExpired) {
-      const remaining = EDIT_WINDOW_MS - (Date.now() - new Date(comment.createdAt).getTime());
-      if (remaining <= 0) { setEditExpired(true); return; }
-      const t = setTimeout(() => setEditExpired(true), remaining);
-      return () => clearTimeout(t);
-    }
+    if (!isOwn || editExpired) return;
+    const rem = msRemaining(comment.createdAt);
+    if (rem <= 0) { setEditExpired(true); return; }
+    const t = setTimeout(() => setEditExpired(true), rem);
+    return () => clearTimeout(t);
   }, [isOwn, editExpired, comment.createdAt]);
 
-  const handleEditSubmit = async (text) => {
-    await onEdit(storyId, comment.id, text);
+  const handleEditSave = async (text) => {
+    await dispatch(editComment(storyId, comment.id, text));
     setEditing(false);
   };
 
   const handleReplySubmit = async (text) => {
     await onReply(comment.id, text);
-    setShowReplyForm(false);
+    setShowReply(false);
   };
 
   return (
     <div className="cmt-tile">
+      {/* author row */}
       <div className="cmt-author-row">
         <img
+          className="cmt-avatar"
           src={comment.author?.profileImage}
           alt={comment.author?.firstName}
-          className="cmt-avatar"
           loading="lazy"
         />
         <div className="cmt-author-info">
-          <span className="cmt-author-name">{comment.author?.firstName} {comment.author?.lastName}</span>
+          <span className="cmt-author-name">
+            {comment.author?.firstName} {comment.author?.lastName}
+          </span>
           <span className="cmt-time">{timeAgo(comment.createdAt)}</span>
         </div>
       </div>
 
+      {/* body */}
       <div className="cmt-body">
         {editing ? (
           <CommentInput
-            onSubmit={handleEditSubmit}
+            autoFocus
             initialValue={comment.content}
+            onSubmit={handleEditSave}
             submitLabel="Save"
-            placeholder="Edit your comment…"
+            placeholder="Edit your response…"
             onCancel={() => setEditing(false)}
           />
         ) : (
-          <ReactMarkdown remarkPlugins={[remarkGfm]} className="cmt-markdown">{comment.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} className="cmt-md">{comment.content}</ReactMarkdown>
         )}
       </div>
 
+      {/* footer */}
       {!editing && (
         <div className="cmt-footer">
-          <CommentClaps comment={comment} userId={userId} onClap={onClap} onUnclap={onUnclap} />
+          <ClapButton comment={comment} userId={userId} />
 
           {userId && (
-            <button
-              className="cmt-btn-ghost"
-              onClick={() => setShowReplyForm((v) => !v)}
-            >
-              Reply
+            <button className="cmt-btn-ghost" onClick={() => setShowReply((v) => !v)}>
+              {showReply ? 'Cancel reply' : 'Reply'}
             </button>
           )}
 
-          {isOwn && !editExpired && !editing && (
-            <button className="cmt-btn-ghost" onClick={() => setEditing(true)}>Edit</button>
+          {isOwn && !editExpired && (
+            <>
+              <button className="cmt-btn-ghost" onClick={() => setEditing(true)}>Edit</button>
+              <EditTimer createdAt={comment.createdAt} />
+            </>
           )}
 
           {isOwn && (
-            <button className="cmt-btn-danger" onClick={() => onDelete(storyId, comment.id)}>Delete</button>
+            <button className="cmt-btn-danger" onClick={() => onDelete(storyId, comment.id)}>
+              Delete
+            </button>
           )}
         </div>
       )}
 
-      {showReplyForm && (
-        <div className="cmt-reply-form-wrap">
+      {/* reply form */}
+      {showReply && (
+        <div className="cmt-reply-input-wrap">
           <CommentInput
+            autoFocus
             onSubmit={handleReplySubmit}
-            placeholder="Write a reply…"
             submitLabel="Reply"
-            onCancel={() => setShowReplyForm(false)}
+            placeholder="Write a reply… (Markdown supported)"
+            onCancel={() => setShowReply(false)}
           />
         </div>
       )}
 
+      {/* replies */}
       <ReplyThread
-        replies={comment.replies || []}
+        replies={comment.replies ?? []}
         userId={userId}
         storyId={storyId}
-        onClap={onClap}
-        onUnclap={onUnclap}
         onDelete={onDelete}
       />
     </div>
   );
 }
 
+/* ── Comments (root) ─────────────────────────────────────────── */
+
 const Comments = ({ userId, storyId, authorInfo, setShowComments }) => {
   const dispatch = useDispatch();
-  const story = useSelector((state) => state.story.currentStory);
+  const story = useSelector((s) => s.story.currentStory);
   const { commentRef } = useContext(WindowContext);
   const { openModal } = useContext(ModalContext);
 
@@ -242,85 +315,80 @@ const Comments = ({ userId, storyId, authorInfo, setShowComments }) => {
 
   useEffect(() => {
     if (!story) return;
-    const topLevel = story.comments || [];
-    setUserHasCommented(!!topLevel.find((c) => c.userId === userId));
+    const top = (story.comments ?? []).filter(c => c.parentId == null);
+    setUserHasCommented(top.some((c) => c.userId === userId));
 
-    let sorted = [...topLevel];
-    if (sort === 'top') {
-      sorted.sort((a, b) => (b.clapCount || 0) - (a.clapCount || 0));
-    } else {
-      sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
+    const sorted = [...top].sort(
+      sort === 'top'
+        ? (a, b) => (b.clapCount ?? 0) - (a.clapCount ?? 0)
+        : (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
     setComments(sorted);
   }, [story, userId, sort]);
 
   const handleSubmit = async (text) => {
     await dispatch(postComment(storyId, text));
-    setTimeout(() => {
-      commentRef?.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 400);
+    setTimeout(() => commentRef?.current?.scrollIntoView({ behavior: 'smooth' }), 400);
   };
 
-  const handleEdit = useCallback((sid, commentId, text) => {
-    return dispatch(editComment(sid, commentId, text));
-  }, [dispatch]);
+  const handleDelete = useCallback(
+    (sid, cid) => dispatch(deleteComment(sid, cid)),
+    [dispatch]
+  );
 
-  const handleDelete = useCallback((sid, commentId) => {
-    return dispatch(deleteComment(sid, commentId));
-  }, [dispatch]);
+  const handleReply = useCallback(
+    (parentId, text) => dispatch(postReply(parentId, text)),
+    [dispatch]
+  );
 
-  const handleClap = useCallback(async (commentId) => {
-    const res = await dispatch(addCommentClap(commentId));
-    if (res?.error) alert('Cannot clap this comment.');
-  }, [dispatch]);
-
-  const handleUnclap = useCallback(async (commentId) => {
-    const res = await dispatch(removeCommentClap(commentId));
-    if (res?.error) alert('No clap to remove.');
-  }, [dispatch]);
-
-  const handleReply = useCallback((parentId, text) => {
-    return dispatch(postReply(parentId, text));
-  }, [dispatch]);
-
-  const totalCount = story?.commentCount || 0;
+  const totalCount = story?.commentCount ?? 0;
 
   return (
     <div className="cmt-root">
+      {/* header */}
       <div className="cmt-header">
-        <h2 className="cmt-title">Responses <span className="cmt-count">({totalCount})</span></h2>
+        <h2 className="cmt-title">
+          Responses
+          {totalCount > 0 && <span className="cmt-count-badge">{totalCount}</span>}
+        </h2>
         <div className="cmt-sort-bar">
-          <button
-            className={`cmt-sort-btn ${sort === 'newest' ? 'active' : ''}`}
-            onClick={() => setSort('newest')}
-          >
-            Newest
-          </button>
-          <button
-            className={`cmt-sort-btn ${sort === 'top' ? 'active' : ''}`}
-            onClick={() => setSort('top')}
-          >
-            Top
-          </button>
+          {['newest', 'top'].map((s) => (
+            <button
+              key={s}
+              className={`cmt-sort-btn ${sort === s ? 'active' : ''}`}
+              onClick={() => setSort(s)}
+            >
+              {s === 'newest' ? 'Newest' : 'Top'}
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* new comment form */}
       {userId && userId !== authorInfo?.id && !userHasCommented && (
         <CommentInput
           onSubmit={handleSubmit}
-          placeholder="What are your thoughts? (Markdown supported)"
+          placeholder="What are your thoughts? (Markdown: **bold**, _italic_, `code`)"
         />
+      )}
+
+      {userId && userId !== authorInfo?.id && userHasCommented && (
+        <p className="cmt-already-msg">You've already responded to this story.</p>
       )}
 
       {!userId && (
         <div className="cmt-signin-prompt">
-          <span className="cmt-signin-link" onClick={() => { openModal('signin'); setShowComments(false); }}>
+          <span
+            className="cmt-signin-link"
+            onClick={() => { openModal('signin'); setShowComments(false); }}
+          >
             Sign in
-          </span>
-          {' '}to leave a response
+          </span>{' '}
+          to leave a response
         </div>
       )}
 
+      {/* comment list */}
       <div className="cmt-list">
         {comments.map((comment) => (
           <CommentTile
@@ -328,15 +396,12 @@ const Comments = ({ userId, storyId, authorInfo, setShowComments }) => {
             comment={comment}
             userId={userId}
             storyId={storyId}
-            onClap={handleClap}
-            onUnclap={handleUnclap}
-            onEdit={handleEdit}
             onDelete={handleDelete}
             onReply={handleReply}
           />
         ))}
         {comments.length === 0 && (
-          <p className="cmt-empty">No responses yet. Be the first!</p>
+          <p className="cmt-empty">No responses yet — be the first!</p>
         )}
       </div>
 

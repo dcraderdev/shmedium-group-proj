@@ -1,9 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from flask_login import login_required, current_user
 from app.models import db, User, Story, Clap, Follower
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy import func
-from datetime import datetime, timedelta
+from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
 
@@ -14,6 +14,20 @@ from ..models.story_tag import StoryTag
 user_routes = Blueprint('users', __name__)
 
 PER_PAGE = 12
+
+
+def _user_with_followers(user_id):
+    """Load a user with followers/following including nested user stubs."""
+    return User.query.options(
+        selectinload(User.followers).options(
+            joinedload(Follower.follower_user),
+            joinedload(Follower.author_user),
+        ),
+        selectinload(User.following).options(
+            joinedload(Follower.follower_user),
+            joinedload(Follower.author_user),
+        ),
+    ).get(user_id)
 
 
 def _author_stories_query(user_id):
@@ -46,39 +60,34 @@ def users():
 
 @user_routes.route('/<int:id>')
 def user(id):
-    user = User.query.options(
-        selectinload(User.followers),
-        selectinload(User.following),
-    ).get(id)
-    if not user:
+    u = _user_with_followers(id)
+    if not u:
         return {'error': 'User not found'}, 404
-    return user.to_dict()
+    return u.to_dict()
 
 
 @user_routes.route('/curr')
 @login_required
 def curr_user():
-    user = User.query.options(
-        selectinload(User.followers),
-        selectinload(User.following),
-    ).get(current_user.id)
-    return user.to_dict()
+    return _user_with_followers(current_user.id).to_dict()
 
 
 @user_routes.route('/<int:id>/profile')
 def author_profile(id):
     """Public author profile with story stats."""
-    user = User.query.options(
-        selectinload(User.followers),
-        selectinload(User.following),
-    ).get(id)
-    if not user:
+    u = _user_with_followers(id)
+    if not u:
         return {'error': 'User not found'}, 404
 
     total_stories = Story.query.filter_by(author_id=id).count()
-    total_claps = db.session.query(func.count(Clap.id)).join(Story).filter(Story.author_id == id).scalar() or 0
+    total_claps = (
+        db.session.query(func.count(Clap.id))
+        .join(Story, Story.id == Clap.story_id)
+        .filter(Story.author_id == id)
+        .scalar()
+    ) or 0
 
-    profile = user.to_dict()
+    profile = u.to_dict()
     profile['totalStories'] = total_stories
     profile['totalClaps'] = total_claps
     return profile
@@ -150,7 +159,4 @@ def update_profile():
         user.cover_image_url = data['coverImageUrl']
 
     db.session.commit()
-    return User.query.options(
-        selectinload(User.followers),
-        selectinload(User.following),
-    ).get(current_user.id).to_dict()
+    return _user_with_followers(current_user.id).to_dict()
