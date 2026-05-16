@@ -118,10 +118,10 @@ def create_comment_clap(id):
         new_clap = CommentClap(user_id=current_user.id, comment_id=id)
         db.session.add(new_clap)
         db.session.commit()
+        create_notification(comment.user_id, 'clap', current_user.id, 'story', comment.story_id)
+        db.session.commit()
         story = Story.query.get(comment.story_id)
         return story.to_dict()
-        # return {"newClap": new_clap.to_dict(),
-        #         "commentId": id}
     else:
         return {"error": "You have already clapped for this comment"}, 403
     

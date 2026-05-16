@@ -48,13 +48,14 @@ function timeAgo(dateStr) {
 
 function notificationText(n) {
   const actor = n.actorUsername || 'Someone';
+  const title = n.storyTitle ? `"${n.storyTitle}"` : 'your story';
   switch (n.type) {
-    case 'clap': return `${actor} clapped for your story`;
-    case 'comment': return `${actor} commented on your story`;
-    case 'follow': return `${actor} started following you`;
-    case 'mention': return `${actor} mentioned you in a comment`;
-    case 'reply': return `${actor} replied on a story you commented on`;
-    default: return `${actor} interacted with your content`;
+    case 'clap':    return `${actor} clapped for ${title}`;
+    case 'comment': return `${actor} commented on ${title}`;
+    case 'follow':  return `${actor} started following you`;
+    case 'mention': return `${actor} mentioned you in ${title}`;
+    case 'reply':   return `${actor} also commented on ${title}`;
+    default:        return `${actor} interacted with ${title}`;
   }
 }
 

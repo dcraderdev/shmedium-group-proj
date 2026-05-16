@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import {
   fetchAllNotifications,
   markAllRead,
+  markOneRead,
   updateDigestFrequency,
 } from '../../store/notifications';
 import './NotificationsPage.css';
@@ -20,13 +21,14 @@ function timeAgo(dateStr) {
 
 function notificationText(n) {
   const actor = n.actorUsername || 'Someone';
+  const title = n.storyTitle ? `"${n.storyTitle}"` : 'your story';
   switch (n.type) {
-    case 'clap': return `${actor} clapped for your story`;
-    case 'comment': return `${actor} commented on your story`;
-    case 'follow': return `${actor} started following you`;
-    case 'mention': return `${actor} mentioned you in a comment`;
-    case 'reply': return `${actor} replied on a story you commented on`;
-    default: return `${actor} interacted with your content`;
+    case 'clap':    return `${actor} clapped for ${title}`;
+    case 'comment': return `${actor} commented on ${title}`;
+    case 'follow':  return `${actor} started following you`;
+    case 'mention': return `${actor} mentioned you in a comment on ${title}`;
+    case 'reply':   return `${actor} also commented on ${title}`;
+    default:        return `${actor} interacted with ${title}`;
   }
 }
 
@@ -59,6 +61,7 @@ function NotificationsPage() {
   };
 
   const handleNotifClick = (n) => {
+    if (!n.read) dispatch(markOneRead(n.id));
     if (n.targetType === 'story' && n.targetId) {
       history.push(`/story/${n.targetId}`);
     }
@@ -100,7 +103,7 @@ function NotificationsPage() {
 
         <div className="notif-digest-panel">
           <h2>Email Digest</h2>
-          <p>Get a summary of stories from authors you follow.</p>
+          <p>Get a personalized summary of stories from authors you follow, delivered to {user?.email}.</p>
           <div className="notif-digest-controls">
             <select
               value={digestFreq}
@@ -108,12 +111,18 @@ function NotificationsPage() {
             >
               <option value="none">Off</option>
               <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
+              <option value="weekly">Weekly (Mondays)</option>
             </select>
             <button className="notif-save-btn" onClick={handleDigestSave}>
               {digestSaved ? 'Saved!' : 'Save'}
             </button>
           </div>
+          {digestFreq !== 'none' && (
+            <p className="notif-digest-hint">
+              You&rsquo;ll receive an email with the top 5 stories from authors you follow.
+              You can unsubscribe at any time from the email.
+            </p>
+          )}
         </div>
       </div>
     </div>

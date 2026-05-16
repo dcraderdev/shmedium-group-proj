@@ -1,10 +1,37 @@
-from flask import Blueprint, jsonify, request
+import os
+from flask import Blueprint, jsonify, request, redirect, make_response
 from flask_login import login_required, current_user
 from app.models import db, User
 from app.models.notification import Notification
 from sqlalchemy import desc
+import base64
+import hashlib
 
 notification_routes = Blueprint('notifications', __name__)
+
+# 1×1 transparent GIF bytes
+_PIXEL_GIF = (
+    b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00'
+    b'\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x00\x00\x00\x00'
+    b'\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02'
+    b'\x44\x01\x00\x3b'
+)
+
+
+def _make_track_token(user_id):
+    secret = os.environ.get('SECRET_KEY', 'dev-secret')
+    raw = f"{user_id}:{secret}"
+    return base64.urlsafe_b64encode(
+        hashlib.sha256(raw.encode()).digest()
+    ).rstrip(b'=').decode()
+
+
+def _user_from_track_token(token):
+    users = User.query.all()
+    for u in users:
+        if _make_track_token(u.id) == token:
+            return u
+    return None
 
 
 @notification_routes.route('/')
@@ -82,10 +109,67 @@ def update_digest():
 
 @notification_routes.route('/unsubscribe/<token>')
 def unsubscribe(token):
-    """Unsubscribe from email digest via token (no login required)."""
+    """Unsubscribe from email digest via token (no login required). Returns HTML."""
     user = User.query.filter_by(unsubscribe_token=token).first()
     if not user:
-        return jsonify({'error': 'Invalid token'}), 404
+        html = _unsubscribe_html(success=False)
+        return make_response(html, 404)
     user.digest_frequency = 'none'
     db.session.commit()
-    return jsonify({'message': 'Successfully unsubscribed from digest emails'})
+    html = _unsubscribe_html(success=True, name=user.first_name)
+    return make_response(html, 200)
+
+
+@notification_routes.route('/digest/track/open/<token>')
+def track_open(token):
+    """Email open tracking pixel. Returns a 1×1 transparent GIF."""
+    user = _user_from_track_token(token)
+    if user:
+        print(f"[digest-track] open uid={user.id}")
+    resp = make_response(_PIXEL_GIF)
+    resp.headers['Content-Type'] = 'image/gif'
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return resp
+
+
+@notification_routes.route('/digest/track/click/<token>')
+def track_click(token):
+    """Email click tracking redirect."""
+    url = request.args.get('url', '/')
+    user = _user_from_track_token(token)
+    if user:
+        print(f"[digest-track] click uid={user.id} url={url}")
+    return redirect(url)
+
+
+def _unsubscribe_html(success, name=''):
+    if success:
+        heading = f"You've been unsubscribed, {name}."
+        body = "You won't receive any more digest emails from Shmedium."
+    else:
+        heading = "Invalid unsubscribe link."
+        body = "This link may have already been used or is no longer valid."
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Unsubscribe — Shmedium</title>
+  <style>
+    body{{margin:0;padding:0;background:#f9f9f9;font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;min-height:100vh}}
+    .card{{background:#fff;border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.1);padding:48px 40px;max-width:480px;text-align:center}}
+    .logo{{font-size:22px;font-weight:900;background:#fec016;display:inline-block;padding:8px 18px;border-radius:4px;margin-bottom:28px}}
+    h1{{font-size:22px;font-weight:700;margin:0 0 12px;color:#111}}
+    p{{font-size:15px;color:#666;margin:0 0 24px;line-height:1.6}}
+    a{{color:#111;font-weight:600;font-size:14px}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Shmedium</div>
+    <h1>{heading}</h1>
+    <p>{body}</p>
+    <a href="/">Back to Shmedium</a>
+  </div>
+</body>
+</html>"""

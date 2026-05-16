@@ -20,6 +20,13 @@ class Notification(db.Model):
     recipient = db.relationship('User', foreign_keys=[user_id], backref='notifications')
     actor = db.relationship('User', foreign_keys=[actor_id])
 
+    def _story_title(self):
+        if self.target_type == 'story' and self.target_id:
+            from .story import Story
+            story = Story.query.get(self.target_id)
+            return story.title if story else None
+        return None
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -31,6 +38,7 @@ class Notification(db.Model):
             'actorImage': self.actor.profile_image,
             'targetType': self.target_type,
             'targetId': self.target_id,
+            'storyTitle': self._story_title(),
             'read': self.read,
             'createdAt': self.created_at,
         }

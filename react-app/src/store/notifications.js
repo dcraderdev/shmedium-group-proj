@@ -1,20 +1,16 @@
 const SET_NOTIFICATIONS = 'notifications/SET_NOTIFICATIONS';
-const SET_UNREAD_COUNT = 'notifications/SET_UNREAD_COUNT';
 const MARK_ALL_READ = 'notifications/MARK_ALL_READ';
 const MARK_ONE_READ = 'notifications/MARK_ONE_READ';
+const UPDATE_DIGEST = 'notifications/UPDATE_DIGEST';
 
 const setNotifications = (notifications, unreadCount) => ({
   type: SET_NOTIFICATIONS,
   payload: { notifications, unreadCount },
 });
 
-const setUnreadCount = (count) => ({
-  type: SET_UNREAD_COUNT,
-  payload: count,
-});
-
 const markAllReadAction = () => ({ type: MARK_ALL_READ });
 const markOneReadAction = (id) => ({ type: MARK_ONE_READ, payload: id });
+const updateDigestAction = (freq) => ({ type: UPDATE_DIGEST, payload: freq });
 
 const initialState = { notifications: [], unreadCount: 0 };
 
@@ -35,44 +31,33 @@ export const fetchAllNotifications = () => async (dispatch) => {
 };
 
 export const markAllRead = () => async (dispatch) => {
-  const csrfToken = document.cookie
-    .split('; ')
-    .find((r) => r.startsWith('csrf_token='))
-    ?.split('=')[1];
   const res = await fetch('/api/notifications/read', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+    headers: { 'Content-Type': 'application/json' },
   });
-  if (res.ok) {
-    dispatch(markAllReadAction());
-  }
+  if (res.ok) dispatch(markAllReadAction());
 };
 
 export const markOneRead = (id) => async (dispatch) => {
-  const csrfToken = document.cookie
-    .split('; ')
-    .find((r) => r.startsWith('csrf_token='))
-    ?.split('=')[1];
   const res = await fetch(`/api/notifications/${id}/read`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+    headers: { 'Content-Type': 'application/json' },
   });
-  if (res.ok) {
-    dispatch(markOneReadAction(id));
-  }
+  if (res.ok) dispatch(markOneReadAction(id));
 };
 
-export const updateDigestFrequency = (frequency) => async () => {
-  const csrfToken = document.cookie
-    .split('; ')
-    .find((r) => r.startsWith('csrf_token='))
-    ?.split('=')[1];
+export const updateDigestFrequency = (frequency) => async (dispatch) => {
   const res = await fetch('/api/notifications/digest', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ frequency }),
   });
-  return res.ok ? res.json() : null;
+  if (res.ok) {
+    const data = await res.json();
+    dispatch(updateDigestAction(data.digestFrequency));
+    return data;
+  }
+  return null;
 };
 
 export default function reducer(state = initialState, action) {
@@ -83,8 +68,6 @@ export default function reducer(state = initialState, action) {
         notifications: action.payload.notifications,
         unreadCount: action.payload.unreadCount,
       };
-    case SET_UNREAD_COUNT:
-      return { ...state, unreadCount: action.payload };
     case MARK_ALL_READ:
       return {
         ...state,
@@ -99,6 +82,8 @@ export default function reducer(state = initialState, action) {
           n.id === action.payload ? { ...n, read: true } : n
         ),
       };
+    case UPDATE_DIGEST:
+      return { ...state, digestFrequency: action.payload };
     default:
       return state;
   }

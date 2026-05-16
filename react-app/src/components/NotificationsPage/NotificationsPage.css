@@ -154,3 +154,10 @@
 .notif-save-btn:hover {
   background: #333;
 }
+
+.notif-digest-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+}
