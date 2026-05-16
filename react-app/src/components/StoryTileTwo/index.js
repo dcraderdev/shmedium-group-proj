@@ -127,6 +127,9 @@ const StoryTileTwo = ({story, titleHtml, hideIntro}) => {
           <div className="style2-date-read-time-content">
             {story?.timeToRead} min read
           </div>
+          {story?.commentCount > 0 && (
+            <div className="style2-comment-badge">💬 {story.commentCount}</div>
+          )}
         </div>
 
       </div>

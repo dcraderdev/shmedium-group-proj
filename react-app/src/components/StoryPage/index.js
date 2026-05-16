@@ -156,6 +156,10 @@ const StoryPage = () => {
     history.push('/home');
   };
 
+  const navToAuthorProfile = (authorId) => {
+    if (authorId) history.push(`/author/${authorId}`);
+  };
+
   const renderTags = () =>
     story?.tags?.map((tag) => (
       <button
@@ -203,11 +207,11 @@ const StoryPage = () => {
                   className="author-image"
                   loading="lazy"
                   decoding="async"
-                  onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}
+                  onClick={() => navToAuthorProfile(story.authorInfo?.id)}
                 />
                 <div className="author-information memo-text">
                   <div className="author-name-and-follow">
-                    <div onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}>
+                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
                     </div>
                     {user && user.id !== story.authorInfo?.id && (
@@ -353,11 +357,11 @@ const StoryPage = () => {
                   className="author-image"
                   loading="lazy"
                   decoding="async"
-                  onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}
+                  onClick={() => navToAuthorProfile(story.authorInfo?.id)}
                 />
                 <div className="author-information memo-text">
                   <div className="author-name-and-follow">
-                    <div onClick={() => navToFeed(`${story.authorInfo?.firstName} ${story.authorInfo?.lastName}`, 'authors')}>
+                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
                     </div>
                     {user && user.id !== story.authorInfo?.id && (

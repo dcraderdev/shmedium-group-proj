@@ -18,6 +18,11 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     profile_image = db.Column(db.String(255))
+    bio = db.Column(db.Text)
+    cover_image_url = db.Column(db.String(255))
+    twitter_handle = db.Column(db.String(100))
+    github_handle = db.Column(db.String(100))
+    website_url = db.Column(db.String(255))
     digest_frequency = db.Column(db.String(10), default='none', nullable=False, server_default='none')
     unsubscribe_token = db.Column(db.String(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -55,10 +60,16 @@ class User(db.Model, UserMixin):
             'username': self.username,
             'email': self.email,
             'profileImage': self.profile_image,
+            'bio': self.bio,
+            'coverImageUrl': self.cover_image_url,
+            'twitterHandle': self.twitter_handle,
+            'githubHandle': self.github_handle,
+            'websiteUrl': self.website_url,
             'digestFrequency': self.digest_frequency,
             'createdAt': self.created_at,
             'updatedAt': self.updated_at,
             'followers': [follower.to_dict() for follower in self.followers],
             'followings': [follow.to_dict() for follow in self.following],
-            'numFollowers': len(self.followers)
+            'numFollowers': len(self.followers),
+            'numFollowing': len(self.following),
         }

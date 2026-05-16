@@ -45,6 +45,11 @@ function ProfileButtonModal() {
     closeModal();
   };
 
+  const handleViewProfile = () => {
+    history.push(`/author/${user.id}`);
+    closeModal();
+  };
+
   
 
 
@@ -52,6 +57,7 @@ function ProfileButtonModal() {
     <div className="profile-menu" ref={formRef}>
       <div className="profile-dropdown">
         <div className="greeting">Hello, {user.firstName}</div>
+        <button className="my-stories" onClick={handleViewProfile}>View Profile</button>
         <button className="my-stories" onClick={handleMyStories}>My Stories</button>
         <button className="profile-menu-logout-button" onClick={logout}>
           Sign Out
