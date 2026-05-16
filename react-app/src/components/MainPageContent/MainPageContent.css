@@ -284,6 +284,12 @@
   .main-page-small-view-tags-extended {
     left: 0;
     width: 100%;
+    box-sizing: border-box;
+  }
+
+  .main-page-small-view-tag-header {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .see-more-topics {
