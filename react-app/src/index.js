@@ -3,13 +3,14 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 
-// import { ModalProvider, Modal } from "./context/Modal";
 import configureStore from "./store";
 import * as sessionActions from "./store/session";
 import App from "./App";
 
 import { WindowProvider } from './context/WindowContext';
 import { ModalProvider } from './context/ModalContext';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import reportWebVitals from './reportWebVitals';
 
 import "./index.css";
 
@@ -20,17 +21,14 @@ if (process.env.NODE_ENV !== "production") {
 	window.sessionActions = sessionActions;
 }
 
-// Wrap the application with the Modal provider and render the Modal component
-// after the App component so that all the Modal content will be layered as
-// HTML elements on top of the all the other HTML elements:
 function Root() {
 	return (
 		<ModalProvider>
 			<Provider store={store}>
 				<BrowserRouter>
-					<WindowProvider> 
+					<WindowProvider>
 						<App />
-					</WindowProvider> 
+					</WindowProvider>
 				</BrowserRouter>
 			</Provider>
 		</ModalProvider>
@@ -43,3 +41,10 @@ ReactDOM.render(
 	</React.StrictMode>,
 	document.getElementById("root")
 );
+
+// Cache the app shell offline with Workbox (production only).
+serviceWorkerRegistration.register();
+
+// Log Core Web Vitals to the console. Swap console.log for a Sentry/analytics
+// sender (e.g. sendToAnalytics) to track regressions in production.
+reportWebVitals(console.log);
