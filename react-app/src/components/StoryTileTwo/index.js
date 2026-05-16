@@ -5,12 +5,13 @@ import './StoryTileTwo.css';
 import { WindowContext } from '../../context/WindowContext';
 import * as sessionActions from '../../store/session'
 
-const StoryTileTwo = ({story}) => {
+const StoryTileTwo = ({story, titleHtml, hideIntro}) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [date, setDate] = useState('Dec 25, 2560')
   const {windowSize} = useContext(WindowContext)
   const [thumbnail, setThumbnail] = useState('')
+  const [thumbnailVariants, setThumbnailVariants] = useState(null)
   const [name, setName] = useState('')
 
   const [fadeTrigger, setFadeTrigger] = useState(false);
@@ -36,9 +37,11 @@ const StoryTileTwo = ({story}) => {
 
     if(story.images && !story.images.length){
       setThumbnail('https://miro.medium.com/v2/resize:fit:1200/1*jfdwtvU6V6g99q3G7gq7dQ.png')
-    }    
+      setThumbnailVariants(null)
+    }
     if(story.images && story.images.length){
       setThumbnail(story.images[0].url)
+      setThumbnailVariants(story.images[0].variants || null)
     }
 
 
@@ -98,13 +101,22 @@ const StoryTileTwo = ({story}) => {
         </div>
 
         <div className="style2-story-title-container">
-          <div 
-            className=" style2-story-title memo-text" onClick={() => history.push(`/story/${story.id}`)}>{story?.title}
-          </div>
+          {titleHtml ? (
+            <div
+              className=" style2-story-title memo-text"
+              onClick={() => history.push(`/story/${story.id}`)}
+              dangerouslySetInnerHTML={{ __html: titleHtml }}
+            />
+          ) : (
+            <div
+              className=" style2-story-title memo-text"
+              onClick={() => history.push(`/story/${story.id}`)}
+            >{story?.title}</div>
+          )}
         </div>
 
-        {windowSize > 699 && (<div className="style2-header-container flexbetween memo-text">
-          <div 
+        {!hideIntro && windowSize > 699 && (<div className="style2-header-container flexbetween memo-text">
+          <div
             className="style2-header-content" onClick={() => history.push(`/story/${story.id}`)}>{story.slicedIntro}
           </div>
         </div>)}
@@ -120,13 +132,32 @@ const StoryTileTwo = ({story}) => {
       </div>
 
       <div className={`style2-story-image`}>
-        <img
-          src={thumbnail}
-          alt={'profile image'}
-          loading="lazy"
-          decoding="async"
-          onClick={() => history.push(`/story/${story.id}`)}
-        ></img>
+        {thumbnailVariants ? (
+          <picture>
+            <source
+              type="image/webp"
+              srcSet={`${thumbnailVariants.thumbnail.webp} 400w, ${thumbnailVariants.card.webp} 800w`}
+              sizes="(max-width: 500px) 400px, 800px"
+            />
+            <img
+              src={thumbnailVariants.card.jpeg}
+              srcSet={`${thumbnailVariants.thumbnail.jpeg} 400w, ${thumbnailVariants.card.jpeg} 800w`}
+              sizes="(max-width: 500px) 400px, 800px"
+              alt="story thumbnail"
+              loading="lazy"
+              decoding="async"
+              onClick={() => history.push(`/story/${story.id}`)}
+            />
+          </picture>
+        ) : (
+          <img
+            src={thumbnail}
+            alt="story thumbnail"
+            loading="lazy"
+            decoding="async"
+            onClick={() => history.push(`/story/${story.id}`)}
+          />
+        )}
       </div>
     </div>
   );

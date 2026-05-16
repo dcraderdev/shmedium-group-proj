@@ -1,0 +1,88 @@
+.clip-tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: #292929;
+  border-radius: 4px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  pointer-events: auto;
+}
+
+.clip-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #292929;
+}
+
+.clip-tooltip-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.clip-tooltip-btn:hover {
+  color: #93d7b8;
+}
+
+.clip-tooltip--clipped {
+  background: #1a8917;
+}
+
+.clip-tooltip--already {
+  background: #555;
+}
+
+.clip-tooltip-fb {
+  color: #fff;
+  font-size: 13px;
+  font-family: sans-serif;
+}
+
+/* Highlighted passage in body text */
+mark.clip-mark {
+  background: rgba(26, 137, 23, 0.13);
+  border-radius: 2px;
+  padding: 1px 0;
+  cursor: default;
+  position: relative;
+}
+
+mark.clip-mark::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -9px;
+  right: -7px;
+  background: #1a8917;
+  color: #fff;
+  font-size: 9px;
+  font-family: sans-serif;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+mark.clip-mark[data-count="1"]::after {
+  display: none;
+}

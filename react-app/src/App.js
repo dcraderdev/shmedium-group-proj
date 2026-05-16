@@ -13,6 +13,8 @@ const OurStoryPage = lazy(() => import(/* webpackChunkName: "about" */ './compon
 const WritePage = lazy(() => import(/* webpackChunkName: "write" */ './components/WritePage'));
 const StoryPage = lazy(() => import(/* webpackChunkName: "story", webpackPrefetch: true */ './components/StoryPage'));
 const CreateStoryPage = lazy(() => import(/* webpackChunkName: "create" */ './components/CreateStoryPage'));
+const SearchPage = lazy(() => import(/* webpackChunkName: "search" */ './components/SearchPage'));
+const NotificationsPage = lazy(() => import(/* webpackChunkName: "notifications" */ './components/NotificationsPage'));
 
 // Modal chunks — only fetched when the user triggers one
 const SigninModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SigninModal'));
@@ -81,6 +83,14 @@ function App() {
 
             <Route path="/create/:id/edit" exact>
               <CreateStoryPage />
+            </Route>
+
+            <Route path="/search" exact>
+              <SearchPage />
+            </Route>
+
+            <Route path="/notifications" exact>
+              <NotificationsPage />
             </Route>
 
             <Route path="/" exact>

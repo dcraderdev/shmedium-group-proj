@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import Column, DateTime, func
+import secrets
 
 
 class User(db.Model, UserMixin):
@@ -17,6 +18,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     profile_image = db.Column(db.String(255))
+    digest_frequency = db.Column(db.String(10), default='none', nullable=False, server_default='none')
+    unsubscribe_token = db.Column(db.String(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     hashed_password = db.Column(db.String(255), nullable=False)
@@ -26,6 +29,8 @@ class User(db.Model, UserMixin):
     comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
     story_claps = db.relationship('Clap', back_populates='user', cascade='all, delete-orphan')
     comment_claps = db.relationship('CommentClap', back_populates='user', cascade='all, delete-orphan')
+    bookmarks = db.relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
+    highlights = db.relationship('StoryHighlight', back_populates='user', cascade='all, delete-orphan')
 
     @property
     def password(self):
@@ -38,6 +43,10 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    def generate_unsubscribe_token(self):
+        if not self.unsubscribe_token:
+            self.unsubscribe_token = secrets.token_urlsafe(32)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -46,6 +55,7 @@ class User(db.Model, UserMixin):
             'username': self.username,
             'email': self.email,
             'profileImage': self.profile_image,
+            'digestFrequency': self.digest_frequency,
             'createdAt': self.created_at,
             'updatedAt': self.updated_at,
             'followers': [follower.to_dict() for follower in self.followers],
