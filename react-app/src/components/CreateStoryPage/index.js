@@ -99,6 +99,7 @@ const CreateStoryPage = ({ story }) => {
           altTag,
           id: image.id,
           position: image.position,
+          variants: image.variants || null,
         });
 
         lastPosition = image.position;
@@ -434,7 +435,26 @@ const CreateStoryPage = ({ story }) => {
                 </button>
                 <div className="image-container">
                   {block.content ? (
-                    <img className="story-image" src={block.content} alt="" />
+                    block.variants ? (
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet={`${block.variants.thumbnail.webp} 400w, ${block.variants.card.webp} 800w`}
+                          sizes="(max-width: 700px) 400px, 800px"
+                        />
+                        <img
+                          className="story-image"
+                          src={block.variants.card.jpeg}
+                          srcSet={`${block.variants.thumbnail.jpeg} 400w, ${block.variants.card.jpeg} 800w`}
+                          sizes="(max-width: 700px) 400px, 800px"
+                          alt={block.altTag}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
+                    ) : (
+                      <img className="story-image" src={block.content} alt={block.altTag} loading="lazy" decoding="async" />
+                    )
                   ) : null}
                   <input
                     className="alt-text-input"
