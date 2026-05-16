@@ -104,9 +104,6 @@ function Navigation() {
       setIsHomePage(true);
     }
 
-  console.log(navColor);
-
-
     // Initialize with the default color scheme
     let newColorScheme =
       colorSchemes[location.pathname] || colorSchemes.default;

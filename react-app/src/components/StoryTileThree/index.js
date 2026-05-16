@@ -8,7 +8,6 @@ import openBook from '../../public/open-book.png';
 import quill from '../../public/quill.png';
 import userOutline from '../../public/user-outline.png';
 import fountainPen from '../../public/fountain-pen.png';
-import parse from 'html-react-parser';
 import * as sessionActions from '../../store/session'
 
 
@@ -48,7 +47,7 @@ import * as sessionActions from '../../store/session'
 
   useEffect(()=>{
     if(story){
-      let parsedContent = parse(story.content.slice(0,80) + '...')
+      let parsedContent = story.content.replace(/<[^>]*>/g, '').slice(0, 80) + '...'
       setStoryContent(parsedContent)
       let month = story?.createdAt.slice(8,11)
       let day = story?.createdAt.slice(5,7)
