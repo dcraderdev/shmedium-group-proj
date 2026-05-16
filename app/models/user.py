@@ -26,6 +26,8 @@ class User(db.Model, UserMixin):
     comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
     story_claps = db.relationship('Clap', back_populates='user', cascade='all, delete-orphan')
     comment_claps = db.relationship('CommentClap', back_populates='user', cascade='all, delete-orphan')
+    bookmarks = db.relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
+    highlights = db.relationship('StoryHighlight', back_populates='user', cascade='all, delete-orphan')
 
     @property
     def password(self):

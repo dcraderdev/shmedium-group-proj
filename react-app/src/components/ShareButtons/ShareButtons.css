@@ -1,0 +1,89 @@
+/* ── Desktop floating sidebar ── */
+.share-sidebar {
+  position: fixed;
+  left: calc(50% - 460px);
+  top: 50%;
+  transform: translate(-100%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 200;
+}
+
+.share-sidebar--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.share-label {
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #757575;
+  margin: 0 0 4px;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  cursor: pointer;
+  color: #757575;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  font-size: 0;
+}
+
+.share-btn:hover {
+  border-color: #292929;
+  color: #292929;
+}
+
+.share-btn--twitter:hover { color: #000; border-color: #000; }
+.share-btn--linkedin:hover { color: #0a66c2; border-color: #0a66c2; }
+.share-btn--copy:hover { color: #479275; border-color: #479275; }
+.share-btn--email:hover { color: #292929; border-color: #292929; }
+
+/* ── Mobile inline strip ── */
+.share-inline {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  font-family: sans-serif;
+}
+
+.share-inline .share-label {
+  font-size: 13px;
+  margin: 0;
+}
+
+.share-inline .share-btn {
+  width: auto;
+  height: auto;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+  color: #292929;
+}
+
+@media (max-width: 1100px) {
+  .share-sidebar {
+    display: none;
+  }
+  .share-inline {
+    display: flex;
+  }
+}

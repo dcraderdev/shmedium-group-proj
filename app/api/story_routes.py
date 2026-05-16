@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, session, render_template, request, redirect
 from flask_login import login_required, current_user
-from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower
+from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower, Bookmark
 from app.forms import StoryForm
 from app.forms import StoryImageForm
 from app.forms import CommentForm
@@ -23,6 +23,7 @@ def _story_with_relations():
     images, comments->user+claps, claps) into a small constant number of
     SELECTs regardless of story count.
     """
+    from app.models import Bookmark, StoryHighlight
     return Story.query.options(
         selectinload(Story.author).options(
             selectinload(User.followers),
@@ -35,6 +36,8 @@ def _story_with_relations():
             selectinload(Comment.claps),
         ),
         selectinload(Story.claps),
+        selectinload(Story.bookmarks),
+        selectinload(Story.highlights),
     )
 
 
@@ -115,8 +118,15 @@ def story(id):
     if current_user.is_authenticated:
         has_clapped = Clap.query.filter_by(user_id=current_user.id, story_id=story.id).first() is not None
 
+    has_bookmarked = False
+    if current_user.is_authenticated:
+        has_bookmarked = Bookmark.query.filter_by(
+            user_id=current_user.id, story_id=story.id
+        ).first() is not None
+
     story_dict = story.to_dict()
     story_dict['hasClapped'] = has_clapped
+    story_dict['hasBookmarked'] = has_bookmarked
     return story_dict
 
 
@@ -473,6 +483,46 @@ def create_clap(id):
 
     return story.to_dict()
 
+
+
+@story_routes.route('/<int:id>/related')
+def related_stories(id):
+    """Return up to 3 stories by same author and up to 3 stories sharing a tag."""
+    story = Story.query.get(id)
+    if not story:
+        return {"error": "Story not found"}, 404
+
+    by_author = (
+        _story_with_relations()
+        .filter(Story.author_id == story.author_id, Story.id != id)
+        .order_by(Story.created_at.desc())
+        .limit(3)
+        .all()
+    )
+
+    tag_ids = [st.tag_id for st in story.tags]
+    by_tag = []
+    if tag_ids:
+        tag_story_ids = (
+            db.session.query(StoryTag.story_id)
+            .filter(StoryTag.tag_id.in_(tag_ids), StoryTag.story_id != id)
+            .distinct()
+            .limit(20)
+            .all()
+        )
+        tag_story_ids = [r[0] for r in tag_story_ids]
+        by_tag = (
+            _story_with_relations()
+            .filter(Story.id.in_(tag_story_ids), Story.author_id != story.author_id)
+            .order_by(Story.created_at.desc())
+            .limit(3)
+            .all()
+        )
+
+    return {
+        'byAuthor': [s.to_dict() for s in by_author],
+        'byTag': [s.to_dict() for s in by_tag],
+    }
 
 
 @story_routes.route('/<int:id>/clap', methods=['DELETE'])
