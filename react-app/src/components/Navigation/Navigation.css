@@ -619,3 +619,122 @@ color: #878787;
   color: #111;
 }
 
+/* ===== HAMBURGER + MOBILE NAV ===== */
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: 200;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.mobile-nav-drawer {
+  display: none;
+  position: fixed;
+  top: 55px;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 9;
+  flex-direction: column;
+}
+
+.mobile-nav-drawer.open {
+  display: flex;
+}
+
+.mobile-nav-item {
+  padding: 0 24px;
+  font-size: 16px;
+  font-family: sans-serif;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-nav-item:hover {
+  background-color: #f7f7f7;
+}
+
+.mobile-nav-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-nav-get-started {
+  margin: 16px 24px;
+  padding: 12px 24px;
+  background-color: rgb(4, 4, 4);
+  color: white;
+  border-radius: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.mobile-nav-get-started:hover {
+  background-color: #333;
+}
+
+/* ===== MOBILE OVERRIDES (≤640px) ===== */
+
+@media screen and (max-width: 640px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .nav-search {
+    display: none !important;
+  }
+
+  .nav-link-buttons {
+    display: none !important;
+  }
+
+  .nav-user-buttons {
+    width: auto;
+    gap: 8px;
+  }
+
+  .nav-write .memo-text {
+    display: none;
+  }
+
+  .nav-write {
+    width: auto;
+    margin-right: 0;
+  }
+
+  .nav-bar {
+    overflow: visible;
+  }
+
+  .nav-buttons {
+    width: calc(100% - 24px);
+  }
+}
+
