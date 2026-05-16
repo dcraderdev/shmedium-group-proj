@@ -1,3 +1,5 @@
+import { patchUser } from './session';
+
 const SET_NOTIFICATIONS = 'notifications/SET_NOTIFICATIONS';
 const MARK_ALL_READ = 'notifications/MARK_ALL_READ';
 const MARK_ONE_READ = 'notifications/MARK_ONE_READ';
@@ -55,6 +57,7 @@ export const updateDigestFrequency = (frequency) => async (dispatch) => {
   if (res.ok) {
     const data = await res.json();
     dispatch(updateDigestAction(data.digestFrequency));
+    dispatch(patchUser({ digestFrequency: data.digestFrequency }));
     return data;
   }
   return null;

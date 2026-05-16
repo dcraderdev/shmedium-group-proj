@@ -1,4 +1,5 @@
 import os
+import hmac as _hmac
 from flask import Blueprint, jsonify, request, redirect, make_response
 from flask_login import login_required, current_user
 from app.models import db, User
@@ -19,19 +20,23 @@ _PIXEL_GIF = (
 
 
 def _make_track_token(user_id):
-    secret = os.environ.get('SECRET_KEY', 'dev-secret')
-    raw = f"{user_id}:{secret}"
-    return base64.urlsafe_b64encode(
-        hashlib.sha256(raw.encode()).digest()
-    ).rstrip(b'=').decode()
+    secret = os.environ.get('SECRET_KEY', 'dev-secret').encode()
+    id_b64 = base64.urlsafe_b64encode(str(user_id).encode()).rstrip(b'=').decode()
+    mac = _hmac.new(secret, str(user_id).encode(), hashlib.sha256).hexdigest()[:16]
+    return f"{id_b64}.{mac}"
 
 
 def _user_from_track_token(token):
-    users = User.query.all()
-    for u in users:
-        if _make_track_token(u.id) == token:
-            return u
-    return None
+    try:
+        id_b64, _ = token.split('.', 1)
+        padding = (4 - len(id_b64) % 4) % 4
+        user_id = int(base64.urlsafe_b64decode(id_b64 + '=' * padding).decode())
+    except Exception:
+        return None
+    expected = _make_track_token(user_id)
+    if not _hmac.compare_digest(token, expected):
+        return None
+    return User.query.get(user_id)
 
 
 @notification_routes.route('/')
@@ -136,6 +141,9 @@ def track_open(token):
 def track_click(token):
     """Email click tracking redirect."""
     url = request.args.get('url', '/')
+    base_url = os.environ.get('APP_BASE_URL', 'https://shmedium.onrender.com').rstrip('/')
+    if not (url.startswith('/') or url.startswith(base_url)):
+        url = '/'
     user = _user_from_track_token(token)
     if user:
         print(f"[digest-track] click uid={user.id} url={url}")
