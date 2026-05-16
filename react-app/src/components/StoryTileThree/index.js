@@ -87,6 +87,8 @@ import * as sessionActions from '../../store/session'
                   src={story?.authorInfo.profileImage}
                   alt="author profile icon"
                   onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
+                  loading="lazy"
+                  decoding="async"
                 ></img>
               )}
           </div>

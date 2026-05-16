@@ -1,5 +1,5 @@
 // frontend/src/components/Navigation/index.js
-import React, { useEffect, useRef, useContext, useState } from 'react';
+import React, { useEffect, useRef, useContext, useState, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -26,6 +26,7 @@ const colorSchemes = {
   '/home': ['nav-white', 'nav-white', 'button-black', 'button-green'],
   '/write': ['nav-red', 'nav-white', 'button-black', 'button-black'],
   '/about': ['nav-white', 'nav-white', 'button-black', 'button-black'],
+  '/search': ['nav-white', 'nav-white', 'button-black', 'button-black'],
   default: ['nav-white', 'nav-white', 'button-black', 'button-black'],
 };
 
@@ -35,6 +36,27 @@ const profileImages = {
   'open-book': openBook,
   'fountain-pen': fountainPen,
 };
+
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+/** Highlight query terms in a plain-text string — returns safe HTML. */
+function hlText(text, q) {
+  if (!text) return '';
+  const escaped = escHtml(text);
+  if (!q) return escaped;
+  const terms = [...new Set(q.trim().split(/\s+/).filter(Boolean))]
+    .sort((a, b) => b.length - a.length); // longest first prevents "py" inside "python"
+  if (!terms.length) return escaped;
+  // Escape query terms too so they match against the HTML-escaped text
+  const pattern = new RegExp(
+    '(' + terms.map((t) => escHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+    'gi'
+  );
+  return escaped.replace(pattern, '<mark>$1</mark>');
+}
 
 function Navigation() {
   const { openModal, closeModal, setUpdateObj } =
@@ -46,6 +68,11 @@ function Navigation() {
   const [buttonStylings, setButtonStylings] = useState('');
   const [search, setSearch] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [suggestions, setSuggestions] = useState({ stories: [], authors: [], tags: [] });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIdx, setHighlightedIdx] = useState(-1);
+  const suggestTimer = useRef(null);
+  const searchContainerRef = useRef(null);
 
   // const state = useSelector((state) => state);
   const user = useSelector((state) => state.session.user);
@@ -86,6 +113,19 @@ function Navigation() {
 
 
   }, [scrollPosition]);
+
+  // Keep nav input in sync with the /search page URL
+  useEffect(() => {
+    clearTimeout(suggestTimer.current);
+    setSuggestions({ stories: [], authors: [], tags: [] });
+    setShowSuggestions(false);
+    if (location.pathname === '/search') {
+      const params = new URLSearchParams(location.search);
+      setSearch(params.get('q') || '');
+    } else {
+      setSearch('');
+    }
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     setIsLoaded(false);
@@ -194,7 +234,7 @@ function Navigation() {
   const demoUser = async (e) => {
     e.preventDefault();
     const response = await dispatch(
-      sessionActions.signin({ email: 'demo@aa.io', password: 'password' })
+      sessionActions.signin({ email: 'demo@dcrader.dev', password: 'demouser' })
     );
     if (response.status === 200) {
       setUpdateObj(null);
@@ -203,13 +243,81 @@ function Navigation() {
     }
   };
 
-  const newSearch = async () => {
-    dispatch(sessionActions.search(search));
-    dispatch(sessionActions.setFeed(search));
-    dispatch(sessionActions.setSubFeed('stories'));
-    if (location.pathname !== '/home') {
-      history.push(`/home`);
+  // Debounced suggest fetch — fires 300 ms after the user stops typing
+  const debouncedFetch = useCallback((q) => {
+    clearTimeout(suggestTimer.current);
+    if (!q || q.length < 2) {
+      setSuggestions({ stories: [], authors: [], tags: [] });
+      setShowSuggestions(false);
+      return;
     }
+    suggestTimer.current = setTimeout(async () => {
+      const res = await fetch(`/api/search/suggest?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSuggestions(data);
+        setShowSuggestions(
+          data.stories.length > 0 || data.authors.length > 0 || data.tags.length > 0
+        );
+        setHighlightedIdx(-1);
+      }
+    }, 300);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    debouncedFetch(val);
+  };
+
+  const allSuggestions = [
+    ...suggestions.stories.map((s) => ({ ...s, _kind: 'story' })),
+    ...suggestions.authors.map((a) => ({ ...a, _kind: 'author' })),
+    ...suggestions.tags.map((t) => ({ ...t, _kind: 'tag' })),
+  ];
+
+  const commitSearch = (q) => {
+    if (!q || !q.trim()) return;
+    setShowSuggestions(false);
+    clearTimeout(suggestTimer.current);
+    // URL sync effect handles updating the input value on /search
+    history.push(`/search?q=${encodeURIComponent(q.trim())}&type=stories`);
+  };
+
+  const handleSuggestKeyDown = (e) => {
+    if (!showSuggestions) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIdx((i) => Math.min(i + 1, allSuggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIdx((i) => Math.max(i - 1, -1));
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setHighlightedIdx(-1);
+    } else if (e.key === 'Enter' && highlightedIdx >= 0) {
+      e.preventDefault();
+      const item = allSuggestions[highlightedIdx];
+      if (item._kind === 'story') commitSearch(item.title);
+      else if (item._kind === 'author') commitSearch(item.name);
+      else commitSearch(item.tag);
+    }
+  };
+
+  // Legacy newSearch kept for home feed pill compatibility
+  const newSearch = () => {
+    commitSearch(search);
   };
 
   if (!isLoaded) {
@@ -233,6 +341,8 @@ function Navigation() {
                 className={`nav-search ${
                   isLandingPage || isWritePage ? 'black' : ''
                 }`}
+                ref={searchContainerRef}
+                style={{ position: 'relative' }}
               >
                 {isWritePage && (
                   <div
@@ -256,7 +366,6 @@ function Navigation() {
                   onSubmit={(e) => {
                     e.preventDefault();
                     newSearch();
-                    setSearch('');
                   }}
                 >
                   <label>
@@ -267,12 +376,72 @@ function Navigation() {
                       }`}
                       type="search"
                       value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      required
+                      onChange={handleSearchChange}
+                      onKeyDown={handleSuggestKeyDown}
+                      onFocus={() => search.length >= 2 && setShowSuggestions(
+                        suggestions.stories.length > 0 || suggestions.authors.length > 0 || suggestions.tags.length > 0
+                      )}
                       placeholder={'Search Medium'}
+                      autoComplete="off"
                     />
                   </label>
                 </form>
+
+                {showSuggestions && (
+                  <div className="suggest-dropdown">
+                    {suggestions.stories.length > 0 && (
+                      <div className="suggest-group">
+                        <div className="suggest-group-label">Stories</div>
+                        {suggestions.stories.map((s, i) => (
+                          <div
+                            key={s.id}
+                            className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'story' && x.id === s.id) === highlightedIdx ? ' highlighted' : ''}`}
+                            onMouseDown={() => commitSearch(s.title)}
+                          >
+                            <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(s.title, search) }} />
+                            <span className="suggest-meta">{s.authorName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {suggestions.authors.length > 0 && (
+                      <div className="suggest-group">
+                        <div className="suggest-group-label">Authors</div>
+                        {suggestions.authors.map((a) => (
+                          <div
+                            key={a.id}
+                            className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'author' && x.id === a.id) === highlightedIdx ? ' highlighted' : ''}`}
+                            onMouseDown={() => commitSearch(a.name)}
+                          >
+                            <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(a.name, search) }} />
+                            <span className="suggest-meta">@{a.username}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {suggestions.tags.length > 0 && (
+                      <div className="suggest-group">
+                        <div className="suggest-group-label">Tags</div>
+                        <div className="suggest-tags-row">
+                          {suggestions.tags.map((t) => (
+                            <span
+                              key={t.id}
+                              className={`suggest-tag${allSuggestions.findIndex(x => x._kind === 'tag' && x.id === t.id) === highlightedIdx ? ' highlighted' : ''}`}
+                              onMouseDown={() => commitSearch(t.tag)}
+                              dangerouslySetInnerHTML={{ __html: hlText(t.tag, search) }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div
+                      className="suggest-see-all"
+                      onMouseDown={() => commitSearch(search)}
+                    >
+                      See all results for "{search}" →
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -385,7 +554,11 @@ function Navigation() {
               </div>
 
               {windowSize > 700 && (
-                <div className={`nav-search ${isWritePage ? 'black' : ''}`}>
+                <div
+                  className={`nav-search ${isWritePage ? 'black' : ''}`}
+                  style={{ position: 'relative' }}
+                  ref={searchContainerRef}
+                >
                   {isWritePage && (
                     <div
                       className="maginfy-container scaled-down"
@@ -408,7 +581,6 @@ function Navigation() {
                     onSubmit={(e) => {
                       e.preventDefault();
                       newSearch();
-                      setSearch('');
                     }}
                   >
                     <label>
@@ -417,12 +589,72 @@ function Navigation() {
                         className={`search-field ${isWritePage ? 'black' : ''}`}
                         type="search"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        required
+                        onChange={handleSearchChange}
+                        onKeyDown={handleSuggestKeyDown}
+                        onFocus={() => search.length >= 2 && setShowSuggestions(
+                          suggestions.stories.length > 0 || suggestions.authors.length > 0 || suggestions.tags.length > 0
+                        )}
                         placeholder={'Search Medium'}
+                        autoComplete="off"
                       />
                     </label>
                   </form>
+
+                  {showSuggestions && (
+                    <div className="suggest-dropdown">
+                      {suggestions.stories.length > 0 && (
+                        <div className="suggest-group">
+                          <div className="suggest-group-label">Stories</div>
+                          {suggestions.stories.map((s) => (
+                            <div
+                              key={s.id}
+                              className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'story' && x.id === s.id) === highlightedIdx ? ' highlighted' : ''}`}
+                              onMouseDown={() => commitSearch(s.title)}
+                            >
+                              <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(s.title, search) }} />
+                              <span className="suggest-meta">{s.authorName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {suggestions.authors.length > 0 && (
+                        <div className="suggest-group">
+                          <div className="suggest-group-label">Authors</div>
+                          {suggestions.authors.map((a) => (
+                            <div
+                              key={a.id}
+                              className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'author' && x.id === a.id) === highlightedIdx ? ' highlighted' : ''}`}
+                              onMouseDown={() => commitSearch(a.name)}
+                            >
+                              <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(a.name, search) }} />
+                              <span className="suggest-meta">@{a.username}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {suggestions.tags.length > 0 && (
+                        <div className="suggest-group">
+                          <div className="suggest-group-label">Tags</div>
+                          <div className="suggest-tags-row">
+                            {suggestions.tags.map((t) => (
+                              <span
+                                key={t.id}
+                                className={`suggest-tag${allSuggestions.findIndex(x => x._kind === 'tag' && x.id === t.id) === highlightedIdx ? ' highlighted' : ''}`}
+                                onMouseDown={() => commitSearch(t.tag)}
+                                dangerouslySetInnerHTML={{ __html: hlText(t.tag, search) }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div
+                        className="suggest-see-all"
+                        onMouseDown={() => commitSearch(search)}
+                      >
+                        See all results for "{search}" →
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

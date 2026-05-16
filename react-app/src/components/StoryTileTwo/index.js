@@ -5,7 +5,7 @@ import './StoryTileTwo.css';
 import { WindowContext } from '../../context/WindowContext';
 import * as sessionActions from '../../store/session'
 
-const StoryTileTwo = ({story}) => {
+const StoryTileTwo = ({story, titleHtml, hideIntro}) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [date, setDate] = useState('Dec 25, 2560')
@@ -82,6 +82,8 @@ const StoryTileTwo = ({story}) => {
                 <img
                   src={story?.authorInfo.profileImage}
                   alt="author profile picture"
+                  loading="lazy"
+                  decoding="async"
                   onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
                 ></img>
               )}
@@ -96,13 +98,22 @@ const StoryTileTwo = ({story}) => {
         </div>
 
         <div className="style2-story-title-container">
-          <div 
-            className=" style2-story-title memo-text" onClick={() => history.push(`/story/${story.id}`)}>{story?.title}
-          </div>
+          {titleHtml ? (
+            <div
+              className=" style2-story-title memo-text"
+              onClick={() => history.push(`/story/${story.id}`)}
+              dangerouslySetInnerHTML={{ __html: titleHtml }}
+            />
+          ) : (
+            <div
+              className=" style2-story-title memo-text"
+              onClick={() => history.push(`/story/${story.id}`)}
+            >{story?.title}</div>
+          )}
         </div>
 
-        {windowSize > 699 && (<div className="style2-header-container flexbetween memo-text">
-          <div 
+        {!hideIntro && windowSize > 699 && (<div className="style2-header-container flexbetween memo-text">
+          <div
             className="style2-header-content" onClick={() => history.push(`/story/${story.id}`)}>{story.slicedIntro}
           </div>
         </div>)}
@@ -121,6 +132,8 @@ const StoryTileTwo = ({story}) => {
         <img
           src={thumbnail}
           alt={'profile image'}
+          loading="lazy"
+          decoding="async"
           onClick={() => history.push(`/story/${story.id}`)}
         ></img>
       </div>
