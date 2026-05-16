@@ -1,3 +1,5 @@
+import re as _re
+
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from .user import User
 from .story_tag import StoryTag
@@ -7,6 +9,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import Column, DateTime, func
 from ..aws3 import s3, bucket
+
+_TAG_RE = _re.compile(r'<[^>]+>')
 
 
 class Story(db.Model):
@@ -34,8 +38,7 @@ class Story(db.Model):
 
 
     def to_dict(self):
-        import re
-        plain = re.sub(r'<[^>]+>', ' ', self.content or '')
+        plain = _TAG_RE.sub(' ', self.content or '')
         word_count = len([w for w in plain.split() if w])
         computed_read_time = max(1, round(word_count / 200))
 

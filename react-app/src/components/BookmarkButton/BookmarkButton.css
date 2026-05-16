@@ -8,10 +8,10 @@
   color: #757575;
   padding: 4px 6px;
   border-radius: 4px;
-  transition: color 0.15s;
+  transition: color 0.15s, transform 0.1s;
 }
 
-.bookmark-btn:hover:not(:disabled) {
+.bookmark-btn:hover:not(.bookmark-btn--saving) {
   color: #292929;
 }
 
@@ -19,9 +19,10 @@
   color: #292929;
 }
 
-.bookmark-btn:disabled {
+.bookmark-btn--saving {
+  opacity: 0.6;
   cursor: default;
-  opacity: 0.5;
+  transform: scale(0.95);
 }
 
 .bookmark-count {

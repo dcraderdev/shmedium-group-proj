@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 import './StoryPage.css';
-import parse from 'html-react-parser';
+import parse, { domToReact } from 'html-react-parser';
 import CommentPanel from '../CommentPanel';
 import * as sessionActions from '../../store/session';
 import * as storyActions from '../../store/story';
@@ -19,16 +19,26 @@ import RelatedStories from '../RelatedStories';
 import AuthorFollowCTA from '../AuthorFollowCTA';
 import BookmarkButton from '../BookmarkButton';
 
-// Assign stable slug IDs to h2/h3 nodes so ToC links work
 const slugify = (text) =>
   text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').slice(0, 60);
 
-const headingTransform = (domNode) => {
-  if (domNode.type !== 'tag' || !['h2', 'h3'].includes(domNode.name)) return undefined;
-  const text = domNode.children?.map((c) => c.data || '').join('') || '';
-  const id = slugify(text);
-  const Tag = domNode.name;
-  return <Tag id={id}>{text}</Tag>;
+// Recursively extract plain text from a domhandler node tree
+const nodeText = (node) => {
+  if (!node) return '';
+  if (node.type === 'text') return node.data || '';
+  if (node.children) return node.children.map(nodeText).join('');
+  return '';
+};
+
+// Add stable slug IDs to h2/h3; preserve inner HTML via domToReact
+const parseOpts = {
+  replace(domNode) {
+    if (domNode.type !== 'tag') return;
+    if (!['h2', 'h3'].includes(domNode.name)) return;
+    const id = slugify(nodeText(domNode));
+    const Tag = domNode.name;
+    return <Tag id={id}>{domToReact(domNode.children || [], parseOpts)}</Tag>;
+  },
 };
 
 const StoryPage = () => {
@@ -248,7 +258,7 @@ const StoryPage = () => {
                   <div key={index}>
                     {item.text && (
                       <div className="memo-text">
-                        {parse(item.text, { replace: headingTransform })}
+                        {parse(item.text, parseOpts)}
                       </div>
                     )}
                     {item.image && (
@@ -339,7 +349,12 @@ const StoryPage = () => {
 
       {/* Text highlight + clip */}
       {story && (
-        <HighlightClipper storyId={story.id} contentRef={contentRef} user={user} />
+        <HighlightClipper
+          storyId={story.id}
+          contentRef={contentRef}
+          user={user}
+          contentVersion={sortedContent.length}
+        />
       )}
 
       {/* Sticky author follow CTA */}

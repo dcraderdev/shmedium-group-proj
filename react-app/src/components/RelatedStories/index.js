@@ -31,10 +31,12 @@ const RelatedStories = ({ storyId, authorName }) => {
 
   useEffect(() => {
     if (!storyId) return;
-    fetch(`/api/story/${storyId}/related`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => data && setRelated(data))
-      .catch(() => {});
+    const controller = new AbortController();
+    fetch(`/api/story/${storyId}/related`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data) setRelated(data); })
+      .catch((err) => { if (err.name !== 'AbortError') console.error(err); });
+    return () => controller.abort();
   }, [storyId]);
 
   if (!related) return null;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addBookmark, removeBookmark } from '../../store/bookmark';
 import './BookmarkButton.css';
@@ -6,25 +6,38 @@ import './BookmarkButton.css';
 const BookmarkButton = ({ storyId, initialHasBookmarked, initialCount, user }) => {
   const dispatch = useDispatch();
   const bookmarkState = useSelector((state) => state.bookmark[storyId]);
+  const [saving, setSaving] = useState(false);
 
-  const hasBookmarked = bookmarkState ? bookmarkState.hasBookmarked : (initialHasBookmarked || false);
-  const count = bookmarkState ? bookmarkState.bookmarkCount : (initialCount || 0);
+  const hasBookmarked = bookmarkState
+    ? bookmarkState.hasBookmarked
+    : initialHasBookmarked || false;
+  const count = bookmarkState
+    ? bookmarkState.bookmarkCount
+    : initialCount || 0;
 
   const handleClick = async () => {
-    if (!user) return;
+    if (!user || saving) return;
+    setSaving(true);
     if (hasBookmarked) {
       await dispatch(removeBookmark(storyId));
     } else {
       await dispatch(addBookmark(storyId));
     }
+    setSaving(false);
   };
 
   return (
     <button
-      className={`bookmark-btn${hasBookmarked ? ' bookmark-btn--active' : ''}`}
+      className={`bookmark-btn${hasBookmarked ? ' bookmark-btn--active' : ''}${saving ? ' bookmark-btn--saving' : ''}`}
       onClick={handleClick}
-      title={hasBookmarked ? 'Remove bookmark' : 'Bookmark this story'}
-      disabled={!user}
+      title={
+        !user
+          ? 'Sign in to bookmark'
+          : hasBookmarked
+          ? 'Remove bookmark'
+          : 'Bookmark this story'
+      }
+      aria-label={hasBookmarked ? 'Remove bookmark' : 'Bookmark this story'}
     >
       <svg
         viewBox="0 0 24 24"
