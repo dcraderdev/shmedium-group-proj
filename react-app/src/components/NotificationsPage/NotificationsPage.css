@@ -1,0 +1,156 @@
+.notif-page {
+  padding-top: 75px;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.notif-page-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.notif-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 16px;
+}
+
+.notif-page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  font-family: Georgia, serif;
+}
+
+.notif-mark-all-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #555;
+}
+
+.notif-mark-all-btn:hover {
+  border-color: #111;
+  color: #111;
+}
+
+.notif-list {
+  margin-bottom: 48px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-item:hover {
+  background: #fafafa;
+  margin: 0 -12px;
+  padding: 16px 12px;
+  border-radius: 4px;
+}
+
+.notif-dot-wrapper {
+  width: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 3px;
+}
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  background: #fec016;
+  border-radius: 50%;
+  display: block;
+}
+
+.notif-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notif-text {
+  font-size: 15px;
+  color: #111;
+  line-height: 1.4;
+}
+
+.notif-item.notif-unread .notif-text {
+  font-weight: 600;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.notif-empty {
+  text-align: center;
+  color: #999;
+  padding: 60px 0;
+  font-size: 15px;
+}
+
+.notif-digest-panel {
+  border-top: 1px solid #e8e8e8;
+  padding-top: 32px;
+}
+
+.notif-digest-panel h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  font-family: Georgia, serif;
+}
+
+.notif-digest-panel p {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+.notif-digest-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notif-digest-controls select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.notif-save-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-save-btn:hover {
+  background: #333;
+}

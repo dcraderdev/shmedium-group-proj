@@ -11,9 +11,20 @@ import json
 
 from ..aws3 import s3, bucket, region
 import boto3
+from .notification_helpers import create_notification, notify_mentions
 
 
 story_routes = Blueprint('stories', __name__)
+
+
+def _notify_co_commenters(story, actor_id):
+    """Notify other people who commented on a story that there's a new reply."""
+    seen = set()
+    for comment in story.comments:
+        uid = comment.user_id
+        if uid != actor_id and uid != story.author_id and uid not in seen:
+            create_notification(uid, 'reply', actor_id, 'story', story.id)
+            seen.add(uid)
 
 
 def _story_with_relations():
@@ -412,7 +423,11 @@ def create_comment(id):
       )
       db.session.add(new_comment)
       db.session.commit()
-      story = Story.query.get(comment.story_id)
+      create_notification(story.author_id, 'comment', current_user.id, 'story', id)
+      notify_mentions(data['content'], current_user.id, id)
+      _notify_co_commenters(story, current_user.id)
+      db.session.commit()
+      story = Story.query.get(new_comment.story_id)
       return story.to_dict()
 
     if form.errors:
@@ -469,6 +484,8 @@ def create_clap(id):
     )
 
     db.session.add(new_clap)
+    db.session.commit()
+    create_notification(story.author_id, 'clap', current_user.id, 'story', id)
     db.session.commit()
 
     return story.to_dict()

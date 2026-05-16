@@ -4,8 +4,18 @@ from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, CommentCla
 from app.forms import StoryForm
 from app.forms import StoryImageForm
 from app.forms import CommentForm
+from .notification_helpers import create_notification, notify_mentions
 
 comment_routes = Blueprint('comments', __name__)
+
+
+def _notify_co_commenters(story, actor_id):
+    seen = set()
+    for c in story.comments:
+        uid = c.user_id
+        if uid != actor_id and uid != story.author_id and uid not in seen:
+            create_notification(uid, 'reply', actor_id, 'story', story.id)
+            seen.add(uid)
 
 
 @comment_routes.route('/<int:id>')
@@ -40,6 +50,10 @@ def create_comment(id):
         db.session.add(comment)
         db.session.commit()
         story = Story.query.get(comment.story_id)
+        create_notification(story.author_id, 'comment', current_user.id, 'story', story.id)
+        notify_mentions(form.data['content'], current_user.id, story.id)
+        _notify_co_commenters(story, current_user.id)
+        db.session.commit()
         return story.to_dict()
     else:
         return {'error': form.errors}, 422
