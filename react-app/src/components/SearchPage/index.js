@@ -261,15 +261,11 @@ const SearchPage = () => {
               tabIndex={0}
               data-result-row
             >
-              {/* Highlighted title above the tile */}
-              {story.titleHighlighted && story.titleHighlighted !== story.title && (
-                <div
-                  className="search-title-highlight"
-                  dangerouslySetInnerHTML={{ __html: story.titleHighlighted }}
-                  onClick={() => history.push(`/story/${story.id}`)}
-                />
-              )}
-              <StoryTileTwo story={story} />
+              <StoryTileTwo
+                story={story}
+                titleHtml={story.titleHighlighted || null}
+                hideIntro={!!story.snippet}
+              />
               {story.snippet && (
                 <div
                   className="search-snippet"
@@ -326,7 +322,17 @@ const SearchPage = () => {
                       tabIndex={0}
                       data-result-row
                     >
-                      <StoryTileTwo story={story} />
+                      <StoryTileTwo
+                        story={story}
+                        titleHtml={story.titleHighlighted || null}
+                        hideIntro={!!story.snippet}
+                      />
+                      {story.snippet && (
+                        <div
+                          className="search-snippet"
+                          dangerouslySetInnerHTML={{ __html: story.snippet }}
+                        />
+                      )}
                     </div>
                   ))}
                 </>
