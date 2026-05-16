@@ -79,6 +79,8 @@ const AuthorTile = ({ author }) => {
                   className='profile-picture'
                   src={author.profileImage}
                   alt="author profile icon"
+                  loading="lazy"
+                  decoding="async"
                 ></img>
               )}
           </div>

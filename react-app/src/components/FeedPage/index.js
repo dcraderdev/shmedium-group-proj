@@ -2,8 +2,7 @@ import React, { useEffect, useContext, lazy, Suspense } from 'react';
 // import { useHistory, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { WindowContext } from '../../context/WindowContext';
-import { authenticate } from '../../store/session';
-import * as storyActions from '../../store/story';
+import { initialLoad } from '../../store/story';
 import './FeedPage.css'
 import StoryFeed from '../StoryFeed';
 
@@ -21,10 +20,7 @@ const FeedPage = () => {
 
 
   useEffect(() => {
-    dispatch(authenticate())
-      .then(() => {
-        dispatch(storyActions.initialLoad());
-      })
+    dispatch(initialLoad());
   }, [dispatch]);
 
 

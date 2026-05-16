@@ -4,7 +4,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { authenticate } from './store/session';
 import Navigation from './components/Navigation';
-import * as storyActions from './store/story';
 import { ModalContext } from './context/ModalContext';
 
 // Route-level chunks — each becomes its own JS file, loaded only when visited
@@ -27,13 +26,7 @@ function App() {
   const { modal } = useContext(ModalContext);
 
   useEffect(() => {
-    dispatch(authenticate())
-      .then(() => {
-        dispatch(storyActions.initialLoad());
-      })
-      .then(() => {
-        setIsLoaded(true);
-      });
+    dispatch(authenticate()).then(() => setIsLoaded(true));
   }, [dispatch]);
 
   return (
