@@ -61,10 +61,8 @@ const StoryPage = () => {
 
   const contentRef = useRef(null);
 
-  // --- Reading time from word count ---
-  const readingTime = story
-    ? Math.max(1, Math.round(story.wordCount / 200))
-    : story?.timeToRead;
+  // --- Reading time ---
+  const readingTime = story ? Math.max(1, Math.round((story.wordCount || 0) / 200)) : null;
 
   // --- Claps ---
   const handleClapClick = async () => {
@@ -175,6 +173,13 @@ const StoryPage = () => {
       {(!story || isLoading) && <div><StoryPageSkeleton /></div>}
 
       <div className="story-layout">
+        {/* Left column — sticky share sidebar (desktop only) */}
+        {story && (
+          <div className="story-share-col">
+            <ShareButtons story={story} />
+          </div>
+        )}
+
         {/* Center column */}
         <div className="story-page">
           {story && (

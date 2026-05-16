@@ -9,12 +9,18 @@ const TableOfContents = ({ items, contentRef }) => {
   useEffect(() => {
     if (!items.length) return;
 
+    // Track which headings are currently in the viewport band
+    const visibleSet = new Set();
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) {
-          setActiveId(visible[0].target.id);
-        }
+        entries.forEach((e) => {
+          if (e.isIntersecting) visibleSet.add(e.target.id);
+          else visibleSet.delete(e.target.id);
+        });
+        // Pick the first item (document order) that's currently visible
+        const first = items.find(({ id }) => visibleSet.has(id));
+        if (first) setActiveId(first.id);
       },
       { rootMargin: '-10% 0px -80% 0px', threshold: 0 }
     );
@@ -24,7 +30,10 @@ const TableOfContents = ({ items, contentRef }) => {
       if (el) observerRef.current.observe(el);
     });
 
-    return () => observerRef.current && observerRef.current.disconnect();
+    return () => {
+      observerRef.current && observerRef.current.disconnect();
+      visibleSet.clear();
+    };
   }, [items]);
 
   const scrollTo = (id) => {

@@ -92,15 +92,20 @@ const HighlightClipper = ({ storyId, contentRef, user, contentVersion }) => {
     return () => document.removeEventListener('mouseup', handleMouseUp);
   }, [handleMouseUp]);
 
-  // Dismiss on outside click
+  // Dismiss on outside click or scroll
   useEffect(() => {
     const onDown = (e) => {
       if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
         setTooltip(null);
       }
     };
+    const onScroll = () => setTooltip(null);
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const handleClip = async () => {

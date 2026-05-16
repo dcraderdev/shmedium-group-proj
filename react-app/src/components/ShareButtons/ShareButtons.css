@@ -1,19 +1,15 @@
-/* ── Desktop floating sidebar (position: fixed) ── */
+/* ── Desktop sticky sidebar (lives inside .story-share-col flex column) ── */
 .share-sidebar {
-  position: fixed;
-  /* Aligned with article left edge: article is max 800px centered in 1320px wrapper */
-  left: calc(50% - 440px);
-  top: 50%;
-  transform: translate(-100%, -50%);
+  position: sticky;
+  top: 50vh;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding-right: 16px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s;
-  z-index: 200;
 }
 
 .share-sidebar--visible {

@@ -20,7 +20,9 @@ const StoryCard = ({ story }) => {
         </span>
       </div>
       <h4 className="related-card-title">{story.title}</h4>
-      <p className="related-card-intro">{story.slicedIntro}</p>
+      {story.slicedIntro && (
+        <p className="related-card-intro">{story.slicedIntro}</p>
+      )}
       <span className="related-card-time">{story.timeToRead} min read</span>
     </button>
   );
