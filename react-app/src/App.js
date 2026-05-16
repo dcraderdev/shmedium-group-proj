@@ -14,10 +14,12 @@ import ProfileButtonModal from './components/ProfileButtonModal';
 import StoryOptionsModal from './components/StoryOptionsModal';
 import CreateStoryPage from './components/CreateStoryPage';
 import AuthorProfilePage from './components/AuthorProfilePage';
+import NotificationsPage from './components/NotificationsPage';
 
 import * as storyActions from './store/story';
 import { ModalContext } from './context/ModalContext';
 import FeedPage from './components/FeedPage';
+import SearchPage from './components/SearchPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -94,6 +96,14 @@ function App() {
 
           <Route path="/create/:id/edit" exact>
             <CreateStoryPage />
+          </Route>
+
+          <Route path="/search" exact>
+            <SearchPage />
+          </Route>
+
+          <Route path="/notifications" exact>
+            <NotificationsPage />
           </Route>
 
           <Route path="/" exact>

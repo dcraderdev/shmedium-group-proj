@@ -1,0 +1,106 @@
+.author-cta {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 260px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  z-index: 300;
+  font-family: sans-serif;
+}
+
+.author-cta-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #9e9e9e;
+  line-height: 1;
+  padding: 2px;
+}
+
+.author-cta-dismiss:hover {
+  color: #292929;
+}
+
+.author-cta-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.author-cta-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e0e0e0;
+}
+
+.author-cta-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.author-cta-context {
+  font-size: 11px;
+  color: #9e9e9e;
+  margin: 0 0 2px;
+}
+
+.author-cta-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #292929;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.author-cta-followers {
+  font-size: 12px;
+  color: #757575;
+  margin: 0;
+}
+
+.author-cta-follow {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid #292929;
+  background: #292929;
+  color: #fff;
+  font-size: 14px;
+  font-family: sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.author-cta-follow--following {
+  background: #fff;
+  color: #292929;
+}
+
+.author-cta-follow:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  .author-cta {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

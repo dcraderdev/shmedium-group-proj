@@ -1,4 +1,5 @@
 import boto3
+import io
 import os
 from dotenv import load_dotenv
 
@@ -15,3 +16,71 @@ s3 = boto3.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=region,
 )
+
+# (size_name, url_suffix, target_width_px)
+_VARIANT_SIZES = [
+    ('thumbnail', '400w', 400),
+    ('card',      '800w', 800),
+    ('full',      '1600w', 1600),
+]
+
+
+def generate_image_variants(file_bytes, base_filename):
+    """Generate 3 widths × 2 formats (JPEG + WebP) from raw image bytes.
+
+    Uploads all 6 variants to S3 under keys derived from *base_filename*:
+        <stem>_400w.jpg / .webp
+        <stem>_800w.jpg / .webp
+        <stem>_1600w.jpg / .webp
+
+    All objects get a 1-year immutable cache header so CDN / browsers can
+    cache aggressively once the app switches to public URLs or a CDN.
+
+    Returns True on success, False if the format is skipped (e.g. GIF).
+    """
+    from PIL import Image, ImageOps  # deferred so startup isn't slowed when Pillow absent
+
+    ext = base_filename.rsplit('.', 1)[-1].lower() if '.' in base_filename else ''
+    if ext == 'gif':
+        return False  # animated GIFs would lose animation — skip
+
+    stem = base_filename.rsplit('.', 1)[0]
+
+    img = Image.open(io.BytesIO(file_bytes))
+
+    # Respect EXIF orientation so portraits don't display rotated
+    img = ImageOps.exif_transpose(img)
+
+    # Flatten alpha channels so JPEG encoding never fails
+    if img.mode in ('RGBA', 'LA', 'P'):
+        if img.mode == 'P':
+            img = img.convert('RGBA')
+        bg = Image.new('RGB', img.size, (255, 255, 255))
+        bg.paste(img, mask=img.split()[-1])
+        img = bg
+    elif img.mode != 'RGB':
+        img = img.convert('RGB')
+
+    for _name, suffix, target_width in _VARIANT_SIZES:
+        if img.width > target_width:
+            ratio = target_width / img.width
+            resized = img.resize(
+                (target_width, int(img.height * ratio)),
+                Image.LANCZOS,
+            )
+        else:
+            resized = img.copy()
+
+        for fmt, ext, ctype in [('JPEG', 'jpg', 'image/jpeg'), ('WEBP', 'webp', 'image/webp')]:
+            buf = io.BytesIO()
+            save_kwargs = {'quality': 85, 'optimize': True} if fmt == 'JPEG' else {'quality': 82}
+            resized.save(buf, format=fmt, **save_kwargs)
+            s3.put_object(
+                Bucket=bucket,
+                Key=f"{stem}_{suffix}.{ext}",
+                Body=buf.getvalue(),
+                ContentType=ctype,
+                CacheControl='max-age=31536000, immutable',
+            )
+
+    return True

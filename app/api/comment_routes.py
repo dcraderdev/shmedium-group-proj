@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app.models import db, Story, Comment, CommentClap
 from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload, selectinload
+from .notification_helpers import create_notification, notify_mentions
 
 comment_routes = Blueprint('comments', __name__)
 
@@ -43,6 +44,15 @@ def _comment_eager(comment_id):
     ).get(comment_id)
 
 
+def _notify_co_commenters(story, actor_id):
+    seen = set()
+    for c in story.comments:
+        uid = c.user_id
+        if uid != actor_id and uid != story.author_id and uid not in seen:
+            create_notification(uid, 'reply', actor_id, 'story', story.id)
+            seen.add(uid)
+
+
 @comment_routes.route('/<int:id>')
 def get_comment(id):
     comment = _comment_eager(id)
@@ -66,7 +76,9 @@ def create_comment(id):
     )
     db.session.add(comment)
     db.session.commit()
-    return _story_eager(id).to_dict()
+    story = _story_eager(id)
+    create_notification(story.author_id, 'comment', current_user.id, 'story', id)
+    return story.to_dict()
 
 
 @comment_routes.route('/<int:id>/reply', methods=['POST'])
@@ -146,7 +158,9 @@ def create_comment_clap(id):
 
     db.session.add(CommentClap(user_id=current_user.id, comment_id=id))
     db.session.commit()
+    create_notification(comment.user_id, 'clap', current_user.id, 'story', comment.story_id)
     return _story_eager(comment.story_id).to_dict()
+
 
 
 @comment_routes.route('/<int:id>/clap', methods=['DELETE'])

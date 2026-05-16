@@ -1,0 +1,95 @@
+/* ── Desktop sticky sidebar (lives inside .story-share-col flex column) ── */
+.share-sidebar {
+  position: sticky;
+  top: 50vh;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.share-sidebar--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.share-label {
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #9e9e9e;
+  margin: 0 0 2px;
+}
+
+/* ── Individual share button ── */
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  cursor: pointer;
+  color: #757575;
+  transition: color 0.15s, border-color 0.15s;
+  padding: 0;
+}
+
+.share-btn:hover {
+  color: #292929;
+  border-color: #292929;
+}
+
+.share-btn--twitter:hover   { color: #000;      border-color: #000; }
+.share-btn--linkedin:hover  { color: #0a66c2;   border-color: #0a66c2; }
+.share-btn--copy:hover      { color: #479275;   border-color: #479275; }
+.share-btn--copy.share-btn--copied { color: #1a8917; border-color: #1a8917; }
+.share-btn--email:hover     { color: #292929;   border-color: #292929; }
+
+/* ── Mobile inline strip ── */
+.share-inline {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0 8px;
+  font-family: sans-serif;
+}
+
+.share-inline .share-label {
+  font-size: 13px;
+  color: #9e9e9e;
+  margin: 0;
+}
+
+.share-btn--inline {
+  width: auto;
+  height: auto;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 13px;
+  gap: 6px;
+  border: 1px solid #e0e0e0;
+  color: #292929;
+}
+
+.share-btn--inline span {
+  line-height: 1;
+}
+
+@media (max-width: 1100px) {
+  .share-sidebar {
+    display: none;
+  }
+  .share-inline {
+    display: flex;
+  }
+}

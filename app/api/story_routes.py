@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_login import login_required, current_user
-from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower
+from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower, Bookmark
 from app.forms import StoryForm
 from app.forms import StoryImageForm
 from sqlalchemy.orm import joinedload, selectinload
@@ -8,11 +8,22 @@ from werkzeug.utils import secure_filename
 import os
 import json
 
-from ..aws3 import s3, bucket, region
+from ..aws3 import s3, bucket, region, generate_image_variants
 import boto3
+from .notification_helpers import create_notification, notify_mentions
 
 
 story_routes = Blueprint('stories', __name__)
+
+
+def _notify_co_commenters(story, actor_id):
+    """Notify other people who commented on a story that there's a new reply."""
+    seen = set()
+    for comment in story.comments:
+        uid = comment.user_id
+        if uid != actor_id and uid != story.author_id and uid not in seen:
+            create_notification(uid, 'reply', actor_id, 'story', story.id)
+            seen.add(uid)
 
 
 def _story_with_relations():
@@ -22,6 +33,7 @@ def _story_with_relations():
     images, comments->user+claps, claps) into a small constant number of
     SELECTs regardless of story count.
     """
+    from app.models import StoryHighlight
     return Story.query.options(
         selectinload(Story.author).options(
             selectinload(User.followers),
@@ -38,6 +50,8 @@ def _story_with_relations():
             ),
         ),
         selectinload(Story.claps),
+        selectinload(Story.bookmarks),
+        selectinload(Story.highlights),
     )
 
 
@@ -118,8 +132,15 @@ def story(id):
     if current_user.is_authenticated:
         has_clapped = Clap.query.filter_by(user_id=current_user.id, story_id=story.id).first() is not None
 
+    has_bookmarked = False
+    if current_user.is_authenticated:
+        has_bookmarked = Bookmark.query.filter_by(
+            user_id=current_user.id, story_id=story.id
+        ).first() is not None
+
     story_dict = story.to_dict()
     story_dict['hasClapped'] = has_clapped
+    story_dict['hasBookmarked'] = has_bookmarked
     return story_dict
 
 
@@ -143,71 +164,66 @@ def delete_story(id):
 
 
 @story_routes.route('/<int:id>/image', methods=['POST'])
+@login_required
 def create_story_image(id):
     """
-    Creates a new story image
+    Creates a new story image attached to an existing story.
+    Expects a file under the 'images' or 'file' key plus form fields:
+    position (int) and alt_tag (str).
     """
+    story = Story.query.get(id)
+    if story is None:
+        return {"error": "Story not found"}, 404
+    if current_user.id != story.author_id:
+        return {"error": "You do not have permission to edit this story"}, 403
 
+    # Determine the uploaded file
+    file = None
     if 'images' in request.files:
         files = request.files.getlist('images')
-        for file in files:
-            if file.filename == '':
-                return {"error": "No file selected"}, 400
-            filename = secure_filename(file.filename)
-            file.save(filename)
-            s3.upload_file(
-                Bucket=bucket,
-                Filename=filename,
-                Key=filename
-            )
-            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+        if files:
+            file = files[0]
+    if file is None and 'file' in request.files:
+        file = request.files['file']
 
-    if 'file' in request.files:
-            file = request.files['file']
-            if file.filename == '':
-                return {"error": "No file selected"}, 400
+    if file is None or file.filename == '':
+        return {"error": "No file selected"}, 400
 
-            filename = secure_filename(file.filename)
-            file.save(filename)
+    filename = secure_filename(file.filename)
+    file.save(filename)
+    s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
+    url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
-            s3.upload_file(
-                Bucket=bucket,
-                Filename=filename,
-                Key=filename
-            )
+    has_variants = False
+    try:
+        with open(filename, 'rb') as fh:
+            result = generate_image_variants(fh.read(), filename)
+        has_variants = result is True
+    except Exception as e:
+        print(f"Warning: variant generation failed for {filename}: {e}")
+    finally:
+        try:
+            os.remove(filename)
+        except Exception:
+            pass
 
-            url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+    position = request.form.get('position')
+    alt_tag = request.form.get('alt_tag', '')
 
-    form = StoryImageForm()
-    form['csrf_token'].data = request.cookies['csrf_token']
-    if not form.validate_on_submit(): 
+    if not position:
+        return {"error": "position is required"}, 400
 
-      print(form.errors)
-
-
-    if form.validate_on_submit():
-      data = form.data
-      story = Story.query.get(id)
-
-      if story is None:
-          return {"error": "Story not found"}, 404
-      if current_user.id != story.author_id:
-          return {"error": "You do not have permission to edit this story"}, 403
-
-
-      new_story_image = StoryImage(
-          story_id=story.id,
-          url=data['url'],
-          position=data['position'],
-          alt_tag=data['alt_tag']
-      )
-      db.session.add(new_story_image)
-      db.session.commit()
-      # return new_story_image.to_dict()
-      return jsonify({**new_story_image.to_dict(), 'message': 'Story image successfully created'}), 201
-
-    if form.errors:
-      return {'error': "Bad Data"}
+    new_story_image = StoryImage(
+        story_id=story.id,
+        url=url,
+        file_name=filename,
+        has_variants=has_variants,
+        position=int(position),
+        alt_tag=alt_tag,
+    )
+    db.session.add(new_story_image)
+    db.session.commit()
+    return jsonify({**new_story_image.to_dict(), 'message': 'Story image successfully created'}), 201
 
 
 @story_routes.route('/', methods=['POST'])
@@ -277,10 +293,19 @@ def update_story(id):
             s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
             url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
+            has_variants = False
+            try:
+                with open(filename, 'rb') as fh:
+                    generate_image_variants(fh.read(), filename)
+                has_variants = True
+            except Exception as e:
+                print(f"Warning: variant generation failed for {filename}: {e}")
+
             new_story_image = StoryImage(
                 story_id=story.id,
                 url=url,
                 file_name=filename,
+                has_variants=has_variants,
                 position=request.form.get(f'position{i}'),
                 alt_tag=request.form.get(f'altTag{i}')
             )
@@ -344,6 +369,14 @@ def create_story_with_images():
             )
             url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
 
+            has_variants = False
+            try:
+                with open(filename, 'rb') as fh:
+                    generate_image_variants(fh.read(), filename)
+                has_variants = True
+            except Exception as e:
+                print(f"Warning: variant generation failed for {filename}: {e}")
+
             alt_tag = request.form.get(f'altTag{i}')
             position = request.form.get(f'position{i}')
 
@@ -351,6 +384,7 @@ def create_story_with_images():
                 story_id=new_story.id,
                 url=url,
                 file_name=filename,
+                has_variants=has_variants,
                 position=position,
                 alt_tag=alt_tag
             )
@@ -406,6 +440,9 @@ def create_comment(id):
     )
     db.session.add(new_comment)
     db.session.commit()
+    create_notification(story.author_id, 'comment', current_user.id, 'story', id)
+    notify_mentions(data['content'], current_user.id, id)
+    _notify_co_commenters(story, current_user.id)
     return _story_with_relations().filter(Story.id == id).first().to_dict()
 
 
@@ -460,9 +497,51 @@ def create_clap(id):
 
     db.session.add(new_clap)
     db.session.commit()
+    create_notification(story.author_id, 'clap', current_user.id, 'story', id)
+    db.session.commit()
 
     return story.to_dict()
 
+
+
+@story_routes.route('/<int:id>/related')
+def related_stories(id):
+    """Return up to 3 stories by same author and up to 3 stories sharing a tag."""
+    story = _story_with_relations().filter(Story.id == id).first()
+    if not story:
+        return {"error": "Story not found"}, 404
+
+    by_author = (
+        _story_with_relations()
+        .filter(Story.author_id == story.author_id, Story.id != id)
+        .order_by(Story.created_at.desc())
+        .limit(3)
+        .all()
+    )
+
+    tag_ids = [st.tag_id for st in story.tags]
+    by_tag = []
+    if tag_ids:
+        tag_story_ids = (
+            db.session.query(StoryTag.story_id)
+            .filter(StoryTag.tag_id.in_(tag_ids), StoryTag.story_id != id)
+            .distinct()
+            .limit(20)
+            .all()
+        )
+        tag_story_ids = [r[0] for r in tag_story_ids]
+        by_tag = (
+            _story_with_relations()
+            .filter(Story.id.in_(tag_story_ids), Story.author_id != story.author_id)
+            .order_by(Story.created_at.desc())
+            .limit(3)
+            .all()
+        )
+
+    return {
+        'byAuthor': [s.to_dict() for s in by_author],
+        'byTag': [s.to_dict() for s in by_tag],
+    }
 
 
 @story_routes.route('/<int:id>/clap', methods=['DELETE'])

@@ -1,3 +1,5 @@
+import re as _re
+
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from .user import User
 from .story_tag import StoryTag
@@ -7,6 +9,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy import Column, DateTime, func
 from ..aws3 import s3, bucket
+
+_TAG_RE = _re.compile(r'<[^>]+>')
 
 
 class Story(db.Model):
@@ -29,10 +33,16 @@ class Story(db.Model):
     tags = db.relationship('StoryTag', back_populates='story', overlaps='story_tags', cascade="all, delete-orphan")
     images = db.relationship('StoryImage', back_populates='story', cascade="all, delete-orphan")
     comments = db.relationship('Comment', back_populates='story', cascade="all, delete-orphan")
+    bookmarks = db.relationship('Bookmark', back_populates='story', cascade="all, delete-orphan")
+    highlights = db.relationship('StoryHighlight', back_populates='story', cascade="all, delete-orphan")
 
 
     def to_dict(self):
         top_level = [c for c in self.comments if c.parent_id is None]
+        plain = _TAG_RE.sub(' ', self.content or '')
+        word_count = len([w for w in plain.split() if w])
+        computed_read_time = max(1, round(word_count / 200))
+
         return {
             'id': self.id,
             'authorId': self.author_id,
@@ -46,15 +56,17 @@ class Story(db.Model):
             },
             'title': self.title,
             'content': self.content,
-            'createdAt': self.created_at,
-            'updatedAt': self.updated_at,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
             'tags': [tag.tag.to_dict() for tag in self.tags],
             'images': [image.to_dict() for image in self.images],
             'comments': [comment.to_dict() for comment in top_level],
             'commentCount': len(self.comments),
             'claps': len(self.claps),
-            'timeToRead': self.time_to_read,
+            'timeToRead': computed_read_time,
             'slicedIntro': self.sliced_intro,
+            'bookmarkCount': len(self.bookmarks),
+            'wordCount': word_count,
         }
 
         
