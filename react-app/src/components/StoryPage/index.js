@@ -125,6 +125,10 @@ const StoryPage = () => {
     return
   }
 
+  const navToAuthorProfile = (authorId) => {
+    if (authorId) history.push(`/author/${authorId}`);
+  };
+
   
 
   const renderTags = () => {
@@ -178,11 +182,14 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
-                onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
+                onClick={() => navToAuthorProfile(story?.authorInfo?.id)}
               />
               <div className="author-information memo-text">
                 <div className='author-name-and-follow'>
-                  <div onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}>
+                  <div
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navToAuthorProfile(story?.authorInfo?.id)}
+                  >
                     {story?.authorInfo?.firstName} {story?.authorInfo?.lastName}
                   </div>
 
@@ -318,11 +325,14 @@ const StoryPage = () => {
                 src={story?.authorInfo?.profileImage}
                 alt="author profile icon"
                 className="author-image"
-                onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
+                onClick={() => navToAuthorProfile(story?.authorInfo?.id)}
               />
               <div className="author-information memo-text">
                 <div className='author-name-and-follow'>
-                  <div onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}>
+                  <div
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navToAuthorProfile(story?.authorInfo?.id)}
+                  >
                     {story?.authorInfo?.firstName} {story?.authorInfo?.lastName}
                   </div>
 

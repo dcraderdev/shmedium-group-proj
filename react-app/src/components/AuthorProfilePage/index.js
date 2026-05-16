@@ -373,22 +373,24 @@ export default function AuthorProfilePage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="apc-tabs-bar">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            className={`apc-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-            {tab === 'Followers' && profile.numFollowers > 0 && (
-              <span className="apc-tab-badge">{profile.numFollowers}</span>
-            )}
-            {tab === 'Following' && profile.numFollowing > 0 && (
-              <span className="apc-tab-badge">{profile.numFollowing}</span>
-            )}
-          </button>
-        ))}
+      <div className="apc-tabs-sticky">
+        <div className="apc-tabs-bar">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              className={`apc-tab ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+              {tab === 'Followers' && profile.numFollowers > 0 && (
+                <span className="apc-tab-badge">{profile.numFollowers}</span>
+              )}
+              {tab === 'Following' && profile.numFollowing > 0 && (
+                <span className="apc-tab-badge">{profile.numFollowing}</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Tab content ── */}

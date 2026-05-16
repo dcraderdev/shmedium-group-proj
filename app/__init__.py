@@ -98,6 +98,10 @@ def initial_load():
         selectinload(Story.comments).options(
             joinedload(Comment.user),
             selectinload(Comment.claps),
+            selectinload(Comment.replies).options(
+                joinedload(Comment.user),
+                selectinload(Comment.claps),
+            ),
         ),
         selectinload(Story.claps),
     ).all()
