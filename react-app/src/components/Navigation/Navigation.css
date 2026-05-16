@@ -453,3 +453,13 @@ color: #878787;
   background: #f0f0f0;
 }
 
+/* Highlight matching terms inside suggest items */
+.suggest-title mark,
+.suggest-tag mark {
+  background: #fff3b0;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+  font-style: normal;
+}
+

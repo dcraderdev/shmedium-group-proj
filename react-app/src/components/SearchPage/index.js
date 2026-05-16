@@ -4,10 +4,10 @@ import './SearchPage.css';
 import StoryTileTwo from '../StoryTileTwo';
 import AuthorTile from '../AuthorTile';
 
-const MAX_PAGES_SHOWN = 7;
+// ── Pagination helper ─────────────────────────────────────────────────────────
 
 function pagesToShow(current, total) {
-  if (total <= MAX_PAGES_SHOWN) return Array.from({ length: total }, (_, i) => i + 1);
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   const pages = new Set([1, total, current]);
   for (let d = 1; d <= 2; d++) {
     if (current - d >= 1) pages.add(current - d);
@@ -15,6 +15,24 @@ function pagesToShow(current, total) {
   }
   return [...pages].sort((a, b) => a - b);
 }
+
+// ── Skeleton card ─────────────────────────────────────────────────────────────
+
+function SkeletonCard() {
+  return (
+    <div className="skeleton-card">
+      <div className="skeleton-author-row">
+        <div className="skeleton-avatar" />
+        <div className="skeleton-line short" />
+      </div>
+      <div className="skeleton-line long" style={{ marginBottom: 8 }} />
+      <div className="skeleton-line medium" />
+      <div className="skeleton-line short" style={{ marginTop: 12 }} />
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 const SearchPage = () => {
   const location = useLocation();
@@ -26,13 +44,23 @@ const SearchPage = () => {
 
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [popular, setPopular] = useState([]);
   const listRef = useRef(null);
 
+  // Fetch popular searches when there is no query
+  useEffect(() => {
+    if (query) return;
+    fetch('/api/search/popular')
+      .then((r) => r.ok ? r.json() : { queries: [] })
+      .then((d) => setPopular(d.queries || []));
+  }, [query]);
+
   const fetchResults = useCallback(async () => {
-    if (!query) return;
+    if (!query) { setResults(null); return; }
     setLoading(true);
     try {
-      const url = `/api/search/?q=${encodeURIComponent(query)}&type=${type}&page=${page}`;
+      const url =
+        `/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`;
       const res = await fetch(url);
       const data = await res.json();
       setResults(data);
@@ -46,64 +74,94 @@ const SearchPage = () => {
     fetchResults();
   }, [fetchResults]);
 
-  // Keyboard navigation on the result list
+  // Keyboard navigation in the result list
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
-    const rows = el.querySelectorAll('[data-result-row]');
-    if (!rows.length) return;
+    const rows = () => el.querySelectorAll('[data-result-row]');
     const handle = (e) => {
-      const active = document.activeElement;
-      const idx = Array.from(rows).indexOf(active);
+      const all = rows();
+      const idx = Array.from(all).indexOf(document.activeElement);
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        const next = rows[idx + 1] || rows[0];
-        next && next.focus();
+        (all[idx + 1] || all[0])?.focus();
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        const prev = rows[idx - 1] || rows[rows.length - 1];
-        prev && prev.focus();
+        (all[idx - 1] || all[all.length - 1])?.focus();
       }
     };
     el.addEventListener('keydown', handle);
     return () => el.removeEventListener('keydown', handle);
   }, [results, type]);
 
-  const setType = (newType) =>
-    history.push(`/search?q=${encodeURIComponent(query)}&type=${newType}&page=1`);
+  const setType = (t) =>
+    history.push(`/search?q=${encodeURIComponent(query)}&type=${t}&page=1`);
 
   const setPage = (p) => {
     history.push(`/search?q=${encodeURIComponent(query)}&type=${type}&page=${p}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ── Derived values ──────────────────────────────────────────────────────────
+
+  const totalStories = results?.totalStories ?? 0;
+  const totalAuthors = results?.totalAuthors ?? 0;
+  const totalTags    = results?.totalTags ?? 0;           // distinct matching tags
+  const totalTagged  = results?.totalTaggedStories ?? 0;  // stories bearing those tags
+
+  // The "active" total drives the count label + pagination.
+  // For the Tags tab we paginate over tagged stories, not the tag chips themselves.
+  const activeTotal =
+    type === 'stories' ? totalStories :
+    type === 'authors' ? totalAuthors :
+    totalTagged;
+
+  const perPage    = results?.perPage ?? 20;
+  const totalPages = Math.ceil(activeTotal / perPage);
+
+  const storyItems      = results?.stories      ?? [];
+  const authorItems     = results?.authors      ?? [];
+  const tagItems        = results?.tags         ?? [];
+  const taggedItems     = results?.taggedStories ?? [];
+
+  // For the empty state: prefer tags from the response if in stories tab; use tagItems otherwise
+  const relatedTags = (type === 'stories' ? tagItems : tagItems).slice(0, 5);
+
+  const isEmpty = !loading && results && activeTotal === 0 &&
+    !(type === 'tags' && tagItems.length > 0); // tags tab: chips alone are enough
+
+  // ── No-query landing ────────────────────────────────────────────────────────
+
   if (!query) {
     return (
       <div className="search-page">
-        <p className="empty-hint">Enter a search query to find stories, authors, or tags.</p>
+        <header className="search-header">
+          <h1 className="search-query-title">Search Shmedium</h1>
+          <p className="search-count">Find stories, authors, and topics.</p>
+        </header>
+        {popular.length > 0 && (
+          <section className="popular-section">
+            <p className="popular-label">Trending searches</p>
+            <div className="popular-chips">
+              {popular.map((p) => (
+                <button
+                  key={p.query}
+                  className="popular-chip"
+                  onClick={() =>
+                    history.push(`/search?q=${encodeURIComponent(p.query)}&type=stories`)
+                  }
+                >
+                  {p.query}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     );
   }
 
-  const totalStories = results?.totalStories ?? 0;
-  const totalAuthors = results?.totalAuthors ?? 0;
-  const totalTags = results?.totalTags ?? 0;
-
-  const activeTotal =
-    type === 'stories' ? totalStories :
-    type === 'authors' ? totalAuthors :
-    totalTags;
-
-  const perPage = results?.perPage ?? 20;
-  const totalPages = Math.ceil(activeTotal / perPage);
-
-  const storyItems = results?.stories ?? [];
-  const authorItems = results?.authors ?? [];
-  const tagItems = results?.tags ?? [];
-  const taggedStoryItems = results?.taggedStories ?? [];
-
-  const relatedTags = (results?.tags ?? []).slice(0, 5);
-  const isEmpty = !loading && results && activeTotal === 0;
+  // ── Results page ────────────────────────────────────────────────────────────
 
   return (
     <div className="search-page">
@@ -112,7 +170,9 @@ const SearchPage = () => {
         <p className="search-count">
           {loading
             ? 'Searching…'
-            : `${activeTotal.toLocaleString()} ${type} found`}
+            : activeTotal === 0
+              ? 'No results'
+              : `${activeTotal.toLocaleString()} ${type === 'tags' ? 'tagged stories' : type} found`}
         </p>
       </header>
 
@@ -120,7 +180,7 @@ const SearchPage = () => {
         {[
           { key: 'stories', label: 'Stories', count: totalStories },
           { key: 'authors', label: 'Authors', count: totalAuthors },
-          { key: 'tags', label: 'Tags', count: totalTags },
+          { key: 'tags',    label: 'Tags',    count: totalTags },
         ].map(({ key, label, count }) => (
           <button
             key={key}
@@ -136,27 +196,34 @@ const SearchPage = () => {
         ))}
       </nav>
 
-      {loading && <div className="search-loading" role="status">Searching…</div>}
+      {/* Loading skeleton */}
+      {loading && (
+        <div>
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      )}
 
-      {isEmpty && (
+      {/* Empty state */}
+      {!loading && isEmpty && (
         <div className="search-empty" role="status">
           <p className="empty-message">No {type} found for "{query}".</p>
-          {type !== 'stories' && (
+          {type !== 'stories' && totalStories > 0 && (
             <p className="empty-hint">
-              Try searching{' '}
+              There {totalStories === 1 ? 'is' : 'are'} {totalStories.toLocaleString()}{' '}
+              matching{' '}
               <button className="try-link" onClick={() => setType('stories')}>
-                Stories
-              </button>{' '}
-              instead.
+                {totalStories === 1 ? 'story' : 'stories'}
+              </button>
+              .
             </p>
           )}
           {type === 'stories' && totalTags > 0 && (
             <p className="empty-hint">
-              Try the{' '}
+              Try browsing by{' '}
               <button className="try-link" onClick={() => setType('tags')}>
-                Tags
-              </button>{' '}
-              tab — there are {totalTags} matching tags.
+                tags
+              </button>
+              {' '}— {totalTags} matching.
             </p>
           )}
           {relatedTags.length > 0 && (
@@ -182,44 +249,55 @@ const SearchPage = () => {
         </div>
       )}
 
+      {/* Results */}
       {!loading && results && (
         <div ref={listRef} className="search-results">
-          {type === 'stories' &&
-            storyItems.map((story) => (
-              <div
-                key={story.id}
-                className="search-story-item search-result-row"
-                tabIndex={0}
-                data-result-row
-              >
-                <StoryTileTwo story={story} />
-                {story.snippet && (
-                  <div
-                    className="search-snippet"
-                    dangerouslySetInnerHTML={{ __html: story.snippet }}
-                  />
-                )}
-              </div>
-            ))}
 
-          {type === 'authors' &&
-            authorItems.map((author) => (
-              <div
-                key={author.id}
-                className="search-result-row"
-                tabIndex={0}
-                data-result-row
-              >
-                <AuthorTile author={author} />
-              </div>
-            ))}
+          {/* Stories tab */}
+          {type === 'stories' && storyItems.map((story) => (
+            <div
+              key={story.id}
+              className="search-story-item search-result-row"
+              tabIndex={0}
+              data-result-row
+            >
+              {/* Highlighted title above the tile */}
+              {story.titleHighlighted && story.titleHighlighted !== story.title && (
+                <div
+                  className="search-title-highlight"
+                  dangerouslySetInnerHTML={{ __html: story.titleHighlighted }}
+                  onClick={() => history.push(`/story/${story.id}`)}
+                />
+              )}
+              <StoryTileTwo story={story} />
+              {story.snippet && (
+                <div
+                  className="search-snippet"
+                  dangerouslySetInnerHTML={{ __html: story.snippet }}
+                />
+              )}
+            </div>
+          ))}
 
+          {/* Authors tab */}
+          {type === 'authors' && authorItems.map((author) => (
+            <div
+              key={author.id}
+              className="search-result-row"
+              tabIndex={0}
+              data-result-row
+            >
+              <AuthorTile author={author} />
+            </div>
+          ))}
+
+          {/* Tags tab: chips then tagged stories */}
           {type === 'tags' && (
             <>
               {tagItems.length > 0 && (
-                <div className="search-tags-grid" style={{ marginBottom: 24 }}>
+                <div className="search-tags-block">
                   <p className="tags-section-header">Matching tags</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div className="search-tags-chips">
                     {tagItems.map((tag) => (
                       <button
                         key={tag.id}
@@ -236,21 +314,42 @@ const SearchPage = () => {
                   </div>
                 </div>
               )}
-              {taggedStoryItems.map((story) => (
-                <div
-                  key={story.id}
-                  className="search-story-item search-result-row"
-                  tabIndex={0}
-                  data-result-row
-                >
-                  <StoryTileTwo story={story} />
+              {taggedItems.length > 0 && (
+                <>
+                  <p className="tags-section-header" style={{ marginBottom: 12 }}>
+                    Stories with these tags
+                  </p>
+                  {taggedItems.map((story) => (
+                    <div
+                      key={story.id}
+                      className="search-story-item search-result-row"
+                      tabIndex={0}
+                      data-result-row
+                    >
+                      <StoryTileTwo story={story} />
+                    </div>
+                  ))}
+                </>
+              )}
+              {tagItems.length === 0 && taggedItems.length === 0 && (
+                <div className="search-empty" role="status">
+                  <p className="empty-message">No tags found for "{query}".</p>
+                  {totalStories > 0 && (
+                    <p className="empty-hint">
+                      <button className="try-link" onClick={() => setType('stories')}>
+                        Browse stories
+                      </button>{' '}
+                      instead — {totalStories.toLocaleString()} found.
+                    </p>
+                  )}
                 </div>
-              ))}
+              )}
             </>
           )}
         </div>
       )}
 
+      {/* Pagination */}
       {totalPages > 1 && !loading && (
         <nav className="search-pagination" aria-label="Pagination">
           <button
@@ -264,7 +363,11 @@ const SearchPage = () => {
 
           {pagesToShow(page, totalPages).reduce((acc, p, i, arr) => {
             if (i > 0 && p - arr[i - 1] > 1) {
-              acc.push(<span key={`ellipsis-${p}`} style={{ padding: '0 4px', color: '#999' }}>…</span>);
+              acc.push(
+                <span key={`ell-${p}`} style={{ padding: '0 4px', color: '#999' }}>
+                  …
+                </span>
+              );
             }
             acc.push(
               <button

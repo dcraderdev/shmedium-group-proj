@@ -26,6 +26,7 @@ const colorSchemes = {
   '/home': ['nav-white', 'nav-white', 'button-black', 'button-green'],
   '/write': ['nav-red', 'nav-white', 'button-black', 'button-black'],
   '/about': ['nav-white', 'nav-white', 'button-black', 'button-black'],
+  '/search': ['nav-white', 'nav-white', 'button-black', 'button-black'],
   default: ['nav-white', 'nav-white', 'button-black', 'button-black'],
 };
 
@@ -35,6 +36,18 @@ const profileImages = {
   'open-book': openBook,
   'fountain-pen': fountainPen,
 };
+
+/** Highlight query terms in a plain string — returns HTML string. */
+function hlText(text, q) {
+  if (!text || !q) return text || '';
+  const terms = [...new Set(q.trim().split(/\s+/).filter(Boolean))];
+  if (!terms.length) return text;
+  const pattern = new RegExp(
+    '(' + terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')',
+    'gi'
+  );
+  return text.replace(pattern, '<mark>$1</mark>');
+}
 
 function Navigation() {
   const { openModal, closeModal, setUpdateObj } =
@@ -363,7 +376,7 @@ function Navigation() {
                             className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'story' && x.id === s.id) === highlightedIdx ? ' highlighted' : ''}`}
                             onMouseDown={() => commitSearch(s.title)}
                           >
-                            <span className="suggest-title">{s.title}</span>
+                            <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(s.title, search) }} />
                             <span className="suggest-meta">{s.authorName}</span>
                           </div>
                         ))}
@@ -378,7 +391,7 @@ function Navigation() {
                             className={`suggest-item${allSuggestions.findIndex(x => x._kind === 'author' && x.id === a.id) === highlightedIdx ? ' highlighted' : ''}`}
                             onMouseDown={() => commitSearch(a.name)}
                           >
-                            <span className="suggest-title">{a.name}</span>
+                            <span className="suggest-title" dangerouslySetInnerHTML={{ __html: hlText(a.name, search) }} />
                             <span className="suggest-meta">@{a.username}</span>
                           </div>
                         ))}
@@ -393,9 +406,8 @@ function Navigation() {
                               key={t.id}
                               className={`suggest-tag${allSuggestions.findIndex(x => x._kind === 'tag' && x.id === t.id) === highlightedIdx ? ' highlighted' : ''}`}
                               onMouseDown={() => commitSearch(t.tag)}
-                            >
-                              {t.tag}
-                            </span>
+                              dangerouslySetInnerHTML={{ __html: hlText(t.tag, search) }}
+                            />
                           ))}
                         </div>
                       </div>

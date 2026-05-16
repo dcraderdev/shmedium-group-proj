@@ -1,3 +1,4 @@
+/* ── Layout ── */
 .search-page {
   max-width: 740px;
   margin: 80px auto 60px;
@@ -18,6 +19,7 @@
   color: #1a1a1a;
   margin: 0 0 6px;
   line-height: 1.2;
+  word-break: break-word;
 }
 
 .search-count {
@@ -63,29 +65,55 @@
 
 .pill-count {
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
   border-radius: 10px;
   padding: 1px 7px;
-  font-weight: 600;
-}
-
-.filter-pill.active .pill-count {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.filter-pill:not(.active) .pill-count {
   background: #f0f0f0;
   color: #555;
 }
 
-/* ── Loading ── */
-.search-loading {
-  text-align: center;
-  padding: 60px 0;
-  color: #999;
-  font-family: 'Helvetica Neue', sans-serif;
-  font-size: 16px;
+.filter-pill.active .pill-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
+
+/* ── Skeleton loading ── */
+@keyframes skeleton-pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.skeleton-card {
+  padding: 20px 0;
+  border-bottom: 1px solid #e6e6e6;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  flex-shrink: 0;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: #e0e0e0;
+}
+
+.skeleton-line.short  { width: 30%; }
+.skeleton-line.medium { width: 55%; }
+.skeleton-line.long   { width: 85%; height: 18px; }
 
 /* ── Results list ── */
 .search-results {
@@ -97,9 +125,31 @@
   border-bottom: 1px solid #e6e6e6;
   padding-bottom: 8px;
   margin-bottom: 4px;
+  outline: none;
 }
 
-/* ── Snippet highlighting ── */
+.search-story-item:focus {
+  outline: 2px solid #fec016;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ── Highlighted title (when title contains a match) ── */
+.search-title-highlight {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+}
+
+.search-title-highlight:hover {
+  text-decoration: underline;
+}
+
+/* ── Snippet ── */
 .search-snippet {
   font-size: 14px;
   color: #6b6b6b;
@@ -108,6 +158,7 @@
   font-family: 'Helvetica Neue', sans-serif;
 }
 
+/* ── Mark highlighting ── */
 .search-snippet mark,
 .search-title-highlight mark {
   background: #fff3b0;
@@ -116,16 +167,20 @@
   padding: 0 1px;
 }
 
-/* ── Tags section ── */
-.search-tags-grid {
+/* ── Tags block ── */
+.search-tags-block {
+  margin-bottom: 24px;
+}
+
+.search-tags-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 32px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .search-tag-chip {
-  padding: 8px 16px;
+  padding: 7px 16px;
   border-radius: 20px;
   border: 1px solid #d0d0d0;
   font-size: 14px;
@@ -143,12 +198,12 @@
 }
 
 .tags-section-header {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 12px;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
   font-family: 'Helvetica Neue', sans-serif;
 }
 
@@ -167,7 +222,7 @@
 .empty-hint {
   font-size: 15px;
   color: #757575;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   font-family: 'Helvetica Neue', sans-serif;
 }
 
@@ -218,6 +273,45 @@
   border-color: #1a8917;
 }
 
+/* ── Popular searches (no-query landing) ── */
+.popular-section {
+  margin-top: 32px;
+}
+
+.popular-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.popular-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.popular-chip {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  font-size: 14px;
+  font-family: 'Helvetica Neue', sans-serif;
+  cursor: pointer;
+  color: #1a1a1a;
+  transition: all 0.15s;
+}
+
+.popular-chip:hover {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+}
+
 /* ── Pagination ── */
 .search-pagination {
   display: flex;
@@ -260,9 +354,13 @@
   cursor: not-allowed;
 }
 
-/* ── Keyboard focus ── */
-.search-result-row:focus {
+/* ── Search result row focus ── */
+.search-result-row {
+  outline: none;
+}
+
+.search-result-row:focus-visible {
   outline: 2px solid #fec016;
-  outline-offset: 2px;
+  outline-offset: 4px;
   border-radius: 4px;
 }

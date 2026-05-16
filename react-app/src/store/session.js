@@ -108,13 +108,11 @@ export const logout = () => async (dispatch) => {
 };
 
 export const search = (searchQuery) => async (dispatch) => {
-
-	const response = await fetch(`/api/search?q=${searchQuery}`);
+	const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
 	if (response.ok) {
 		const data = await response.json();
 		dispatch(newSearch(data));
-		dispatch(setFeedAction(searchQuery))
-
+		dispatch(setFeedAction(searchQuery));
 	}
 };
 
