@@ -1,3 +1,4 @@
+import json
 from .db import db, environment, SCHEMA, add_prefix_for_prod
 from datetime import datetime
 from ..aws3 import s3, bucket
@@ -20,6 +21,7 @@ class StoryImage(db.Model):
     url = db.Column(db.String(255), nullable=False)
     file_name = db.Column(db.String(255), nullable=True, default=None)
     has_variants = db.Column(db.Boolean, nullable=True, default=False)
+    variants_json = db.Column(db.Text, nullable=True)
     position = db.Column(db.Integer, nullable=False)
     alt_tag = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -50,7 +52,11 @@ class StoryImage(db.Model):
             'variants': None,
         }
 
-        if self.has_variants and self.file_name:
+        # variants_json: pre-computed URLs stored by backfill (external CDN images)
+        if self.variants_json:
+            result['variants'] = json.loads(self.variants_json)
+        # has_variants + file_name: generate presigned S3 variant URLs on demand
+        elif self.has_variants and self.file_name:
             stem = self.file_name.rsplit('.', 1)[0]
             result['variants'] = {
                 name: {
