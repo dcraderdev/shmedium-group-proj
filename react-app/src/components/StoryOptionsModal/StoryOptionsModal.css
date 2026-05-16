@@ -61,14 +61,17 @@
 } */
 
 .edit-story-button {
-    padding: 10px;
+    padding: 10px 16px;
+    min-height: 44px;
     border: 1px solid black;
     border-radius: 4px;
     background-color: #4caf50;
     color: white;
-    /* color: #4caf50; */
     cursor: pointer;
     transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .edit-story-button:hover {
@@ -82,13 +85,17 @@
 }
 
 .delete-story-button {
-    padding: 10px;
+    padding: 10px 16px;
+    min-height: 44px;
     border: 1px solid black;
     border-radius: 4px;
     background-color: #f44336;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .delete-story-button:hover {

@@ -56,6 +56,13 @@
   z-index: 10;
 }
 
+@media screen and (max-width: 640px) {
+  .title-label {
+    left: 0;
+    top: -28px;
+  }
+}
+
 
 .input-label{
   width: 90%;
@@ -162,8 +169,8 @@
 
 .createstorypage-buttons-container {
   position: fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: 24px;
+  left: 24px;
   width: 50px;
   height: 50px;
   background-color: #fff;
@@ -179,6 +186,32 @@
 .createstorypage-buttons-container:hover {
   width: 155px;
   transition: .5s ease all;
+}
+
+@media screen and (max-width: 640px) {
+  .createstorypage-buttons-container {
+    bottom: 32px;
+    left: 16px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .createstorypage-buttons-container:hover {
+    width: 155px;
+  }
+
+  .article-container {
+    padding: 16px;
+  }
+
+  .createstory-container {
+    top: 70px;
+    padding: 12px;
+  }
+
+  .title-input {
+    font-size: 28px;
+  }
 }
 
 .createstorypage-add-content-button{
@@ -231,17 +264,19 @@
 .createstorypage-publish{
   background-color: green;
   color: white;
-  width: 70px;
-  height: 20px;
-  padding: 2px;
+  min-width: 70px;
+  min-height: 44px;
+  padding: 8px 16px;
   border-radius: 15px;
   position: relative;
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 300;
   font-size: 14px;
   cursor: pointer;
   user-select: none;
-} 
+}
 
 .createstorypage-publish:hover{
   background-color: rgb(0, 93, 0);

@@ -44,7 +44,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: fit-content;
+  width: min(90%, 400px);
   margin: 0 auto;
   margin-top: 30px;
 }
@@ -69,12 +69,13 @@
 
 .signup-div input {
   width: 100%;
+  padding: 5px 10px;
   margin-top: 5px;
   margin-bottom: 10px;
   border-radius: 20px;
-  height: 35px;
+  height: 44px;
   font-size: 17px;
-
+  box-sizing: border-box;
 }
 
 
@@ -158,8 +159,8 @@
 .signup-demo-container {
   color: #757575;
   margin-top: 50px;
-  height: 40px;
-  width: 500px;
+  height: fit-content;
+  width: min(90%, 500px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,14 +202,12 @@
 
 .profile-image-buttons-container{
   height: 120px;
-  width: 300px;
+  width: 100%;
   margin: auto 0;
   margin-top: -10px;
   margin-bottom: 15px;
   display: flex;
   flex-direction: column;
-
-
 }
 
 .profile-image-buttons-header{

@@ -57,13 +57,10 @@
   font-weight: 300;
   position: relative;
   width: 90%;
-  height: 70px;
-  top: 130px;
-  font-size: 25px;
-
-  width: 400px;
+  height: fit-content;
   top: 110px;
-
+  font-size: 25px;
+  max-width: 400px;
 }
 
 
@@ -78,16 +75,15 @@
   justify-content: center;
   align-items: center;
   width: 200px;
-  height: 43px;
+  height: 44px;
   left: 0%;
   top: 150px;
   z-index: 1;
   font-size: 20px;
-
+  cursor: pointer;
 }
 
 .start-reading:hover{
-  cursor: pointer;
   background-color: black;
 }
 
@@ -136,8 +132,48 @@
 
 
 
-/* 
+/*
 width: fit-content;
 text-align: center;
 font-size: 8vw;
 line-height: 0.9; */
+
+@media screen and (max-width: 500px) {
+  .stay-curious {
+    font-size: 44px;
+    letter-spacing: -2px;
+    top: 60px;
+  }
+
+  .discover-stories {
+    font-size: 18px;
+    top: 80px;
+    width: 85%;
+  }
+
+  .start-reading {
+    top: 110px;
+    width: 170px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .main-page-banner-container {
+    height: 340px !important;
+  }
+}
+
+@media screen and (min-width: 501px) and (max-width: 768px) {
+  .stay-curious {
+    font-size: 56px;
+    top: 70px;
+  }
+
+  .discover-stories {
+    top: 100px;
+  }
+
+  .start-reading {
+    top: 130px;
+  }
+}

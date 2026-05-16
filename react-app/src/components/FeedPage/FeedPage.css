@@ -11,7 +11,6 @@
 .storyfeed-wrapper{
   width: 65%;
   border-right: #e6e6e6 solid 1px;
-
 }
 
 .storyfeed-wrapper.wide{
@@ -20,12 +19,26 @@
 
 
 .sidepanel-wrapper{
-
   position: relative;
   width: 35%;
   min-width: 300px;
   height: 1000px;
   position: sticky;
   top: -450px;
+}
+
+@media screen and (max-width: 900px) {
+  .feedpage-container {
+    flex-direction: column;
+  }
+
+  .storyfeed-wrapper {
+    width: 100%;
+    border-right: none;
+  }
+
+  .sidepanel-wrapper {
+    display: none;
+  }
 }
 

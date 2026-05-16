@@ -1,7 +1,6 @@
 .authortile-style1-wrapper{
   border-bottom: rgba(0, 0, 0, 0.481) solid 1px;
-  height: 40px;
-  /* margin-bottom: 5px; */
+  min-height: 44px;
   font-family: sans-serif;
   font-size: 14px;
 }
@@ -29,8 +28,7 @@
 
 .authortile-style1-follow-button{
   width: 100px;
-  height: 40px;
-  /* border: black solid 1px; */
+  min-height: 44px;
   display: flex;
   justify-content: center;
   align-items: center;

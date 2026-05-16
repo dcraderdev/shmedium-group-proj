@@ -19,16 +19,18 @@
 
 .style2-content{
   margin-left: 20px;
-
   display: flex;
   flex-direction: column;
-  margin-right: 20px;
+  margin-right: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .style2-author-container{
   display: flex;
   align-items: center;
-  width: 240px;
+  width: 100%;
+  max-width: 240px;
   height: 30px;
 }
 
@@ -66,9 +68,11 @@
 
 .style2-story-title-container{
   margin-top: 5px;
-  height: 50px;
-  width: 300px;
-  word-break:keep-all;
+  height: fit-content;
+  width: 100%;
+  max-width: 300px;
+  word-break: break-word;
+  overflow-wrap: break-word;
   text-overflow: ellipsis;
   font-weight: bold;
 }
@@ -100,11 +104,13 @@
 
 
 .style2-story-image{
-  height: 105px;
-  width: 150px;
+  height: 90px;
+  width: 120px;
+  min-width: 90px;
   right: 0px;
   overflow: hidden;
   border: 1px solid black;
+  flex-shrink: 0;
 }
 
 
@@ -188,4 +194,22 @@
   animation: fadeIn 1s ease-in;
 }
 
+/* ===== STORY TILE 2 MOBILE ===== */
 
+@media screen and (max-width: 500px) {
+  .story-tile-style2 {
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  .style2-content {
+    margin-left: 0;
+    margin-right: 10px;
+  }
+
+  .style2-story-image {
+    height: 80px;
+    width: 80px;
+    min-width: 80px;
+  }
+}
