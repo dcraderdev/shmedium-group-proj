@@ -119,8 +119,7 @@ const SearchPage = () => {
   const tagItems        = results?.tags         ?? [];
   const taggedItems     = results?.taggedStories ?? [];
 
-  // For the empty state: prefer tags from the response if in stories tab; use tagItems otherwise
-  const relatedTags = (type === 'stories' ? tagItems : tagItems).slice(0, 5);
+  const relatedTags = tagItems.slice(0, 5);
 
   const isEmpty = !loading && results && activeTotal === 0 &&
     !(type === 'tags' && tagItems.length > 0); // tags tab: chips alone are enough
@@ -165,9 +164,15 @@ const SearchPage = () => {
         <p className="search-count">
           {loading
             ? 'Searching…'
-            : activeTotal === 0
-              ? 'No results'
-              : `${activeTotal.toLocaleString()} ${type === 'tags' ? 'tagged stories' : type} found`}
+            : type === 'tags'
+              ? totalTagged > 0
+                ? `${totalTagged.toLocaleString()} tagged ${totalTagged === 1 ? 'story' : 'stories'} found`
+                : totalTags > 0
+                  ? `${totalTags.toLocaleString()} matching ${totalTags === 1 ? 'tag' : 'tags'}`
+                  : 'No results'
+              : activeTotal === 0
+                ? 'No results'
+                : `${activeTotal.toLocaleString()} ${activeTotal === 1 ? (type === 'stories' ? 'story' : 'author') : type} found`}
         </p>
       </header>
 
