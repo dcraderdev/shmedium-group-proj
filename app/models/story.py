@@ -21,10 +21,11 @@ class Story(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     author_id = db.Column(db.Integer, db.ForeignKey(add_prefix_for_prod('users.id')), nullable=False)
-    title = db.Column(db.String(255), nullable=False)
-    content = db.Column(db.String(6000), nullable=False)
+    title = db.Column(db.String(255), nullable=False, default='')
+    content = db.Column(db.String(6000), nullable=False, default='')
     time_to_read = db.Column(db.Integer, nullable=True, default=10)
-    sliced_intro = db.Column(db.String(255), nullable=True,default='Click to continue reading')
+    sliced_intro = db.Column(db.String(255), nullable=True, default='Click to continue reading')
+    is_published = db.Column(db.Boolean, nullable=False, server_default='true', default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -65,6 +66,7 @@ class Story(db.Model):
             'claps': len(self.claps),
             'timeToRead': computed_read_time,
             'slicedIntro': self.sliced_intro,
+            'isPublished': self.is_published,
             'bookmarkCount': len(self.bookmarks),
             'wordCount': word_count,
         }

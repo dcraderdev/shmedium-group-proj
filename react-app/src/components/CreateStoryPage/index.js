@@ -1,529 +1,440 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import './CreateStoryPage.css';
-import addContent from '../../public/add-content.svg';
-// import textIcon from '../../public/text-icon.svg';
-
 import * as storyActions from '../../store/story';
+import { initialLoad } from '../../store/story';
 import AutoExpandTextArea from '../AutoExpandTextArea';
 
-const CreateStoryPage = ({ story }) => {
+/* ─── PublishModal ─────────────────────────────────────────────── */
+
+function PublishModal({ draftId, title, content, allTags, onClose, onPublished }) {
+  const dispatch = useDispatch();
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [summary, setSummary] = useState(content.replace(/<[^>]+>/g, '').slice(0, 140));
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [publishing, setPublishing] = useState(false);
+  const [error, setError] = useState('');
+
+  const toggleTag = (tagStr) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagStr) ? prev.filter((t) => t !== tagStr) : [...prev, tagStr]
+    );
+  };
+
+  const handleCover = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setCoverFile(f);
+    setCoverPreview(URL.createObjectURL(f));
+  };
+
+  const handlePublish = async () => {
+    if (!title.trim()) { setError('A title is required to publish.'); return; }
+    setPublishing(true);
+    setError('');
+
+    const fd = new FormData();
+    fd.append('title', title.trim());
+    fd.append('content', content);
+    fd.append('slicedIntro', summary.slice(0, 140));
+    selectedTags.forEach((tagStr) => fd.append('tags', tagStr));
+    if (coverFile) {
+      fd.append('images', coverFile);
+      fd.append('position0', 0);
+      fd.append('altTag0', 'Cover image');
+    }
+
+    const result = await dispatch(storyActions.publishStory(draftId, fd));
+    setPublishing(false);
+    if (result && result.id) {
+      onPublished(result.id);
+    } else {
+      setError('Publish failed. Please try again.');
+    }
+  };
+
+  return (
+    <div className="pub-overlay" onClick={onClose}>
+      <div className="pub-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="pub-modal-header">
+          <span className="pub-modal-title">Ready to publish?</span>
+          <button className="pub-modal-close" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="pub-two-col">
+          {/* Left: cover preview */}
+          <div className="pub-cover-col">
+            <label className="pub-section-label">Story preview</label>
+            <div className="pub-cover-zone" style={coverPreview ? { backgroundImage: `url(${coverPreview})` } : {}}>
+              {!coverPreview && <span className="pub-cover-placeholder">No cover image</span>}
+            </div>
+            <label className="pub-cover-btn">
+              {coverPreview ? 'Change image' : 'Add cover image'}
+              <input type="file" accept="image/*" onChange={handleCover} style={{ display: 'none' }} />
+            </label>
+
+            <label className="pub-section-label pub-summary-label">Story summary</label>
+            <textarea
+              className="pub-summary-input"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value.slice(0, 140))}
+              placeholder="Write a brief description of your story…"
+              rows={3}
+            />
+            <span className="pub-char-count">{summary.length}/140</span>
+          </div>
+
+          {/* Right: tags */}
+          <div className="pub-tags-col">
+            <label className="pub-section-label">Add topics (up to 5)</label>
+            <p className="pub-tags-hint">Let readers know what your story is about</p>
+            <div className="pub-tags-grid">
+              {allTags.map((tagStr) => {
+                const active = selectedTags.includes(tagStr);
+                return (
+                  <button
+                    key={tagStr}
+                    type="button"
+                    className={`pub-tag ${active ? 'pub-tag-active' : ''}`}
+                    onClick={() => (selectedTags.length < 5 || active) ? toggleTag(tagStr) : null}
+                  >
+                    {tagStr}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {error && <p className="pub-error">{error}</p>}
+
+        <div className="pub-footer">
+          <button className="pub-cancel-btn" onClick={onClose} disabled={publishing}>Cancel</button>
+          <button className="pub-submit-btn" onClick={handlePublish} disabled={publishing}>
+            {publishing ? 'Publishing…' : 'Publish now'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── CreateStoryPage ──────────────────────────────────────────── */
+
+const AUTOSAVE_INTERVAL = 30_000;
+
+const CreateStoryPage = () => {
   const location = useLocation();
-  const [blocks, setBlocks] = useState([]);
-  const [titleText, setTitleText] = useState('');
-  const [storyTags, setStoryTags] = useState([{ id: 2, tag: 'Programming' }]);
-  const [imagesToUpdate, setImagesToUpdate] = useState({});
-  const [validationErrors, setValidationErrors] = useState({hasBlockContent:false, hasTitle:false});
-  const [buttonDisabled, setButtonDisabled] = useState(true)
-  const [showPublishButton, setShowPublishButton] = useState(false)
-
-
-  
-  const fileInputRef = useRef(null);
-
   const dispatch = useDispatch();
   const history = useHistory();
+  const { id } = useParams();
+  const fileInputRef = useRef(null);
 
   const user = useSelector((state) => state.session.user);
-  // const tags = useSelector((state) => state.story.tags);
+  const allTags = useSelector((state) => state.story.tags);
   const currentStory = useSelector((state) => state.story.currentStory);
 
-  const { id } = useParams();
+  const [blocks, setBlocks] = useState([]);
+  const [titleText, setTitleText] = useState('');
+  const [imagesToUpdate, setImagesToUpdate] = useState({});
+  const [draftId, setDraftId] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(''); // '' | 'saving' | 'saved' | 'error'
+  const [lastSaved, setLastSaved] = useState(null);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
+  const isEditing = location.pathname === `/create/${id}/edit`;
 
-
+  // Redirect if not logged in
   useEffect(() => {
-
-    if (!user) {
-      history.push('/home')
-    }
-
+    if (!user) history.push('/home');
   }, [user]);
 
-
+  // Ensure tags are loaded for the publish modal
   useEffect(() => {
+    if (allTags.length === 0) dispatch(initialLoad());
+  }, []);
 
-    if (location.pathname === `/create/${id}/edit`) {
-      if (id) {
-        dispatch(storyActions.getStoryById(id));
-      }
+  // Load existing story when editing
+  useEffect(() => {
+    if (isEditing && id) {
+      dispatch(storyActions.getStoryById(id));
     }
-
   }, [id]);
 
-
+  // Reset on route change
   useEffect(() => {
     setBlocks([]);
     setTitleText('');
-  }, [location]);
+    setDraftId(null);
+    setSaveStatus('');
+    setLastSaved(null);
+  }, [location.pathname]);
 
-
+  // Populate blocks from loaded story
   useEffect(() => {
+    if (!isEditing || !currentStory) return;
+    if (currentStory.authorId !== user?.id) { history.push('/create'); return; }
 
-    if (location.pathname !== `/create/${id}/edit`) {
-      return
+    setTitleText(currentStory.title || '');
+    setDraftId(currentStory.id);
+
+    const updatedImages = {};
+    let lastPos = 0;
+    const blocksTemp = [];
+
+    currentStory.images.forEach((image) => {
+      updatedImages[image.id] = image;
+      const text = currentStory.content.slice(lastPos, image.position);
+      if (image.position > 0) blocksTemp.push({ type: 'text', content: text });
+      blocksTemp.push({ type: 'awsimage', content: image.url, altTag: image.altTag, id: image.id, position: image.position, variants: image.variants || null });
+      lastPos = image.position;
+    });
+
+    if (lastPos < currentStory.content.length) {
+      blocksTemp.push({ type: 'text', content: currentStory.content.slice(lastPos) });
     }
 
-
-    if (currentStory && currentStory.authorId !== user.id) {
-      history.push('/create');
-    }
-
-    if (currentStory && currentStory.authorId === user.id) {
-      // let tempArr = [];
-      let lastPosition = 0;
-      let blocksTemp = [];
-
-      setTitleText(currentStory.title);
-
-      currentStory.images.forEach((image, i) => {
-        // console.log(image);
-
-        imagesToUpdate[image.id] = image;
-        setImagesToUpdate({ ...imagesToUpdate });
-
-        let text = currentStory.content.slice(lastPosition, image.position);
-        let img = image.url;
-        let altTag = image.altTag;
-
-        // add text block if there is text before the image
-        if (image.position > 0) {
-          blocksTemp.push({ type: 'text', content: text });
-        }
-
-        // add image block
-        blocksTemp.push({
-          type: 'awsimage',
-          content: img,
-          altTag,
-          id: image.id,
-          position: image.position,
-          variants: image.variants || null,
-        });
-
-        lastPosition = image.position;
-      });
-
-      // Check if there's remaining content
-      if (lastPosition < currentStory.content.length) {
-        let remainingText = currentStory.content.slice(lastPosition);
-        blocksTemp.push({ type: 'text', content: remainingText });
-      }
-
-      // set blocks for the current currentStory
-      setBlocks(blocksTemp);
-    }
+    setImagesToUpdate(updatedImages);
+    setBlocks(blocksTemp);
   }, [currentStory]);
 
+  /* ── Autosave ── */
 
+  const buildContent = useCallback(() => {
+    let content = '';
+    blocks.forEach((b) => { if (b.type === 'text') content += b.content; });
+    return content;
+  }, [blocks]);
 
-  useEffect(() => {
-    setButtonDisabled(true)
-  
-    setShowPublishButton(false)
-  
-    if(blocks.length > 3){
-      setShowPublishButton(true)
-    }
-  
-    const errors = {};
-    
-    if (!titleText.length){ 
-      errors['hasTitle'] = true;
-      setButtonDisabled(true)
+  const doAutosave = useCallback(async (idToSave, currentTitle, currentContent) => {
+    if (!idToSave) return;
+    setSaveStatus('saving');
+    const result = await dispatch(storyActions.autosaveStory(idToSave, currentTitle, currentContent));
+    if (result?.savedAt) {
+      setSaveStatus('saved');
+      setLastSaved(new Date());
     } else {
-      errors['hasTitle'] = false;
+      setSaveStatus('error');
     }
+  }, [dispatch]);
 
-    if(!blocks.length){
-      errors['hasBlock'] = true;
+  // Ensure a draft exists before autosaving new stories
+  const ensureDraft = useCallback(async () => {
+    if (draftId) return draftId;
+    const result = await dispatch(storyActions.createDraft());
+    if (result?.id) {
+      setDraftId(result.id);
+      return result.id;
     }
-  
-    if(blocks.length){
-      errors['hasBlockContent'] = !blocks.some(block=> block.type === 'text' && block.content.length > 0);
-    }
-  
-    setValidationErrors(errors);
-  }, [blocks, titleText]);
+    return null;
+  }, [draftId, dispatch]);
 
-  
-
+  // 30s autosave timer
   useEffect(() => {
-    const hasTrueValue = obj => Object.values(obj).some(v => v === true);
-    if(hasTrueValue(validationErrors)) {
-      setButtonDisabled(true)
-    } else{
-      setButtonDisabled(false)
-    }
-  
-  }, [validationErrors, blocks, titleText]);
+    const timer = setInterval(async () => {
+      const content = buildContent();
+      if (!titleText && !content) return;
+      const id = await ensureDraft();
+      await doAutosave(id, titleText, content);
+    }, AUTOSAVE_INTERVAL);
+    return () => clearInterval(timer);
+  }, [titleText, buildContent, ensureDraft, doAutosave]);
 
+  /* ── Manual save draft ── */
 
-  const addBlock = (type, content = '', altTag = '') => {
-    if (type === 'image') {
-      fileInputRef.current.click();
-    }
-    if (type === 'text') {
-      
-      const newBlock = { type:'text', content, altTag };
-      setBlocks([...blocks, newBlock]);
-      
-      setTimeout(() => {
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth',
-        });
-      }, 500);
-    }
+  const handleSaveDraft = async () => {
+    const content = buildContent();
+    const id = await ensureDraft();
+    await doAutosave(id, titleText, content);
   };
 
+  /* ── Block management ── */
+
+  const addBlock = (type) => {
+    if (type === 'image') { fileInputRef.current.click(); return; }
+    setBlocks((prev) => [...prev, { type: 'text', content: '' }]);
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
+  };
 
   const deleteBlock = (index) => {
-    //if this block contains an image that we need to update, handle the block in imagesToUpdate
-    if (imagesToUpdate[blocks[index].id]) {
-      delete imagesToUpdate[blocks[index].id];
-      setImagesToUpdate({ ...imagesToUpdate });
+    const b = blocks[index];
+    if (imagesToUpdate[b?.id]) {
+      const updated = { ...imagesToUpdate };
+      delete updated[b.id];
+      setImagesToUpdate(updated);
     }
-
-    const newBlocks = [...blocks];
-    newBlocks.splice(index, 1);
-    setBlocks(newBlocks);
+    setBlocks((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleFileSelect = (e) => {
-
-    
-    let file = e.target.files[0];
-    let timestamp = Date.now();
-    
-    let filenameParts = file.name.split('.');
-    let extension = filenameParts.pop();
-    let filename = filenameParts.join('.');
-    
-    // Create a new file name with timestamp
-    let newFileName = `${filename}_${timestamp}.${extension}`;
-    
-    // Create a new file with the same content but with a new name
-    let newFile = new File([file], newFileName, { type: file.type });
-    
-    if (newFile) {
-      const newBlock = { type:'image', content: newFile, altTag:'' };
-      setBlocks(prevBlocks => [...prevBlocks, newBlock]);
-    }
-
-   
-    setTimeout(() => {
-      window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: 'smooth',
-      });
-    }, 500);
-
+    const file = e.target.files[0];
+    if (!file) return;
+    const ts = Date.now();
+    const parts = file.name.split('.');
+    const ext = parts.pop();
+    const newFile = new File([file], `${parts.join('.')}_${ts}.${ext}`, { type: file.type });
+    setBlocks((prev) => [...prev, { type: 'image', content: newFile, altTag: '' }]);
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
     e.target.value = null;
   };
 
-  // console.log(document.body.scrollHeight);
-  
-  const handleSubmit = async (e) => {
+  /* ── Publish ── */
 
-    if (!user) return;
-    if(buttonDisabled) return;
-      
-    
+  const hasContent = titleText.trim() && blocks.some((b) => b.type === 'text' && b.content.trim());
 
-    e.preventDefault();
-    let createStoryObj = {};
-    let content = [];
-    let storyImages = [];
-    let lastPos = 0;
-
-    createStoryObj['author'] = user.id;
-    createStoryObj['title'] = titleText;
-    createStoryObj['id'] = id;
-    createStoryObj['timeToRead'] = Math.floor(Math.random() * 20 + 4);
-    createStoryObj['tags'] = storyTags;
-
-    if (location.pathname !== `/create/${id}/edit`) {
-      blocks.map((block) => {
-        // console.log(lastPos);
-        if (block.type === 'text') {
-          content.push(block.content);
-          lastPos += block.content.length;
-        }
-
-        if (block.type === 'image') {
-          // console.log(lastPos);
-          // console.log(block.altTag);
-          storyImages.push({
-            file: block.content,
-            altTag: block.altTag ? block.altTag : 'Story image',
-            position: lastPos,
-          });
-        }
-      });
-
-      let joinedContent = content.join('');
-      createStoryObj['slicedIntro'] = joinedContent.slice(0, 130) + '...';
-      createStoryObj['content'] = joinedContent;
-      createStoryObj['images'] = storyImages;
-    }
-
-    if (location.pathname === `/create/${id}/edit`) {
-      blocks.map((block) => {
-        // console.log(lastPos);
-        if (block.type === 'text') {
-          content.push(block.content);
-          lastPos += block.content.length;
-        }
-
-        if (block.type === 'awsimage') {
-          // if the image is still at the position we delete the image from the imagesToUpdate obj
-          if (lastPos === imagesToUpdate[block.id].position) {
-            delete imagesToUpdate[block.id];
-            setImagesToUpdate({ ...imagesToUpdate });
-          }
-
-          // if the image is NOT at the position we update the image's position in the imagesToUpdate obj
-          else if (lastPos !== imagesToUpdate[block.id].position) {
-            imagesToUpdate[block.id].position = lastPos;
-            setImagesToUpdate({ ...imagesToUpdate });
-          }
-        }
-
-        if (block.type === 'image') {
-          // console.log(lastPos);
-          // console.log(block.altTag);
-          storyImages.push({
-            file: block.content,
-            altTag: block.altTag ? block.altTag : 'Story image',
-            position: lastPos,
-          });
-        }
-      });
-
-      let joinedContent = content.join('');
-      createStoryObj['slicedIntro'] = joinedContent.slice(0, 130) + '...';
-      createStoryObj['content'] = joinedContent;
-      createStoryObj['images'] = storyImages;
-      createStoryObj['imagesToUpdate'] = imagesToUpdate;
-    }
-
-    let response;
-
-    if (location.pathname === `/create/${id}/edit`) {
-      response = await dispatch(storyActions.updateStory(createStoryObj));
-    }
-
-    if (location.pathname !== `/create/${id}/edit`) {
-      response = await dispatch(storyActions.createStory(createStoryObj));
-    }
-
-    if (response && response.id) {
-      history.push(`/story/${response.id}`);
-      return;
-    }
+  const handlePublishClick = async () => {
+    if (!hasContent) return;
+    const content = buildContent();
+    const id = await ensureDraft();
+    // Autosave first so the server has the latest content
+    await doAutosave(id, titleText, content);
+    setShowPublishModal(true);
   };
 
+  const handlePublished = (storyId) => {
+    setShowPublishModal(false);
+    history.push(`/story/${storyId}`);
+  };
 
+  /* ── Status label ── */
+
+  const statusLabel = (() => {
+    if (saveStatus === 'saving') return 'Saving…';
+    if (saveStatus === 'error') return 'Save failed';
+    if (saveStatus === 'saved' && lastSaved) {
+      const mins = Math.round((Date.now() - lastSaved) / 60000);
+      return mins < 1 ? 'Draft saved' : `Saved ${mins}m ago`;
+    }
+    return '';
+  })();
+
+  /* ── Render ── */
 
   return (
     <div className="createstory-container">
-      <form className="article-container">
-
-<div className='flex publish-container'>
-
-      <div 
-        className={`createstorypage-publish memo-text flexcenter ${buttonDisabled ? 'disabled' : ''}`}
-        type="submit" 
-        onClick={handleSubmit}
-        >
-          Publish
+      {/* Top toolbar */}
+      <div className="csp-toolbar">
+        <div className="csp-status">{statusLabel}</div>
+        <div className="csp-toolbar-right">
+          <button className="csp-save-btn" onClick={handleSaveDraft} title="Save draft">
+            Save draft
+          </button>
+          <button
+            className={`csp-publish-btn ${!hasContent ? 'disabled' : ''}`}
+            onClick={handlePublishClick}
+            disabled={!hasContent}
+          >
+            Publish
+          </button>
         </div>
-</div>
+      </div>
 
+      <form className="article-container" onSubmit={(e) => e.preventDefault()}>
+        <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleFileSelect} />
 
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          accept="image/*"
-          onChange={handleFileSelect}
-        />
-
+        {/* Title */}
         <div className="title-input-container">
-          <label className="input-label">
-            <input
-              className="title-input header-text"
-              type="text"
-              value={titleText}
-              onChange={(e) => setTitleText(e.target.value)}
-              placeholder="Title"
-            />
-          </label>
+          <input
+            className="title-input header-text"
+            type="text"
+            value={titleText}
+            onChange={(e) => setTitleText(e.target.value)}
+            placeholder="Title"
+          />
         </div>
 
+        {/* Blocks */}
         {blocks.map((block, index) => {
           if (block.type === 'text') {
             return (
               <div className="text-wrapper" key={index}>
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => deleteBlock(index)}
-                >
-                  X
-                </button>
-              
+                <button type="button" className="delete-button" onClick={() => deleteBlock(index)} title="Remove block">×</button>
                 <div className="text-container memo-text">
                   <AutoExpandTextArea
                     text={block.content}
                     onTextChange={(value) => {
-                      const newBlocks = [...blocks];
-                      newBlocks[index].content = value;
-                      setBlocks(newBlocks);
+                      setBlocks((prev) => { const n = [...prev]; n[index] = { ...n[index], content: value }; return n; });
                     }}
-      
-                  />
-                </div>
-
-
-
-              </div>
-            );
-          } else if (block.type === 'image') {
-            return (
-              <div className="image-wrapper" key={index}>
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => deleteBlock(index)}
-                >
-                  X
-                </button>
-                <div className="image-container">
-                  {block.content ? (
-                    <img
-                      className="story-image"
-                      src={URL.createObjectURL(block.content)}
-                      alt=""
-                    />
-                  ) : null}
-                  <input
-                    className="alt-text-input"
-                    value={block.altTag}
-                    onChange={(e) => {
-                      const newBlocks = [...blocks];
-                      newBlocks[index].altTag = e.target.value;
-                      setBlocks(newBlocks);
-                    }}
-                    placeholder="Add alt tag"
-                  />
-                </div>
-              </div>
-            );
-          } else if (block.type === 'awsimage') {
-            return (
-              <div className="image-wrapper" key={index}>
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => deleteBlock(index)}
-                >
-                  X
-                </button>
-                <div className="image-container">
-                  {block.content ? (
-                    block.variants ? (
-                      <picture>
-                        <source
-                          type="image/webp"
-                          srcSet={`${block.variants.thumbnail.webp} 400w, ${block.variants.card.webp} 800w`}
-                          sizes="(max-width: 700px) 400px, 800px"
-                        />
-                        <img
-                          className="story-image"
-                          src={block.variants.card.jpeg}
-                          srcSet={`${block.variants.thumbnail.jpeg} 400w, ${block.variants.card.jpeg} 800w`}
-                          sizes="(max-width: 700px) 400px, 800px"
-                          alt={block.altTag}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </picture>
-                    ) : (
-                      <img className="story-image" src={block.content} alt={block.altTag} loading="lazy" decoding="async" />
-                    )
-                  ) : null}
-                  <input
-                    className="alt-text-input"
-                    value={block.altTag}
-                    onChange={(e) => {
-                      const newBlocks = [...blocks];
-                      newBlocks[index].altTag = e.target.value;
-                      setBlocks(newBlocks);
-                    }}
-                    placeholder="Add alt tag"
                   />
                 </div>
               </div>
             );
           }
+
+          if (block.type === 'image') {
+            return (
+              <div className="image-wrapper" key={index}>
+                <button type="button" className="delete-button" onClick={() => deleteBlock(index)} title="Remove image">×</button>
+                <div className="image-container">
+                  {block.content && <img className="story-image" src={URL.createObjectURL(block.content)} alt="" />}
+                  <input
+                    className="alt-text-input"
+                    value={block.altTag}
+                    onChange={(e) => setBlocks((prev) => { const n = [...prev]; n[index] = { ...n[index], altTag: e.target.value }; return n; })}
+                    placeholder="Add alt text"
+                  />
+                </div>
+              </div>
+            );
+          }
+
+          if (block.type === 'awsimage') {
+            return (
+              <div className="image-wrapper" key={index}>
+                <button type="button" className="delete-button" onClick={() => deleteBlock(index)} title="Remove image">×</button>
+                <div className="image-container">
+                  {block.content && (
+                    block.variants ? (
+                      <picture>
+                        <source type="image/webp" srcSet={`${block.variants.thumbnail?.webp} 400w, ${block.variants.card?.webp} 800w`} sizes="(max-width: 700px) 400px, 800px" />
+                        <img className="story-image" src={block.variants.card?.jpeg || block.content} alt={block.altTag} loading="lazy" decoding="async" />
+                      </picture>
+                    ) : (
+                      <img className="story-image" src={block.content} alt={block.altTag} loading="lazy" decoding="async" />
+                    )
+                  )}
+                  <input
+                    className="alt-text-input"
+                    value={block.altTag}
+                    onChange={(e) => setBlocks((prev) => { const n = [...prev]; n[index] = { ...n[index], altTag: e.target.value }; return n; })}
+                    placeholder="Add alt text"
+                  />
+                </div>
+              </div>
+            );
+          }
+
+          return null;
         })}
 
-        <div className="tags-container">
-          <div className="added-tags-container"></div>
-          <div className="tags-container"></div>
-        </div>
-
+        {/* Add content buttons */}
         <div className="createstorypage-buttons-container">
           <div className="createstorypage-add-content-button">
-            {' '}
-            <img src={addContent} alt="" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </div>
-          {blocks.length > 0 && blocks[blocks.length - 1].type !== 'text' && (
-            <button
-              type="button"
-              className="add-button"
-              onClick={() => addBlock('text')}
-            >
-            <i className="fa-solid fa-font"></i>
-
+          {(blocks.length === 0 || blocks[blocks.length - 1]?.type !== 'text') && (
+            <button type="button" className="add-button" onClick={() => addBlock('text')} title="Add text block">
+              <i className="fa-solid fa-font" />
             </button>
           )}
-          {blocks.length === 0 && (
-            <button
-              type="button"
-              className="add-button"
-              onClick={() => addBlock('text')}
-            >
-           <i className="fa-solid fa-font"></i>
-
-            </button>
-          )}
-          <button
-            type="button"
-            className="add-button"
-            onClick={() => addBlock('image')}
-          >
-            <i className="fa-solid fa-camera"></i>
+          <button type="button" className="add-button" onClick={() => addBlock('image')} title="Add image">
+            <i className="fa-solid fa-camera" />
           </button>
         </div>
-
-        <div className='flex publish-container bottom'>
-
-
-</div>
-{showPublishButton&&(<div 
-  className={`createstorypage-publish memo-text flexcenter ${buttonDisabled ? 'disabled' : ''}`}
-  type="submit" 
-  onClick={handleSubmit}
-  >
-    Publish
-  </div>)}
       </form>
-      
+
+      {showPublishModal && (
+        <PublishModal
+          draftId={draftId}
+          title={titleText}
+          content={buildContent()}
+          allTags={allTags}
+          onClose={() => setShowPublishModal(false)}
+          onPublished={handlePublished}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower, Bookmark
 from app.forms import StoryForm
@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from werkzeug.utils import secure_filename
 import os
 import json
+from datetime import datetime
 
 from ..aws3 import s3, bucket, region, generate_image_variants
 import boto3
@@ -57,23 +58,15 @@ def _story_with_relations():
 
 @story_routes.route('/')
 def stories():
-    """
-    Query for all stories and returns them in a list of story dictionaries
-    """
-    stories = _story_with_relations().all()
+    stories = _story_with_relations().filter(Story.is_published == True).all()
     return {'stories': [story.to_dict() for story in stories]}
 
 
 
 @story_routes.route('/initialize')
 def initial_load():
-    """
-    Eager Load data upon initialization
-    """
-
-    stories = _story_with_relations().all()
+    stories = _story_with_relations().filter(Story.is_published == True).all()
     tags = Tag.query.all()
-
     return {
         'stories': [story.to_dict() for story in stories],
         'tags': [tag.tag for tag in tags],
@@ -85,13 +78,139 @@ def initial_load():
 @story_routes.route('/curr')
 @login_required
 def curr_user_stories():
-    """
-    Query for current user's stories and returns them in a list of story dictionaries
-    """
-    stories = _story_with_relations().filter(Story.author_id == current_user.id).all()
+    stories = _story_with_relations().filter(
+        Story.author_id == current_user.id,
+        Story.is_published == True,
+    ).all()
     if stories is None:
         return {"error": "No stories found"}, 404
     return {'stories': [story.to_dict() for story in stories]}
+
+
+@story_routes.route('/drafts')
+@login_required
+def get_drafts():
+    """Return current user's unpublished drafts (lightweight, no comments eager-loaded)."""
+    drafts = (
+        Story.query
+        .filter(Story.author_id == current_user.id, Story.is_published == False)
+        .order_by(Story.updated_at.desc())
+        .all()
+    )
+    return {'drafts': [
+        {
+            'id': d.id,
+            'title': d.title or 'Untitled',
+            'slicedIntro': d.sliced_intro or '',
+            'updatedAt': d.updated_at.isoformat() if d.updated_at else None,
+            'createdAt': d.created_at.isoformat() if d.created_at else None,
+            'wordCount': len([w for w in (d.content or '').split() if w]),
+        }
+        for d in drafts
+    ]}
+
+
+@story_routes.route('/draft', methods=['POST'])
+@login_required
+def create_draft():
+    """Create an empty draft and return its id."""
+    draft = Story(
+        author_id=current_user.id,
+        title='',
+        content='',
+        is_published=False,
+    )
+    db.session.add(draft)
+    db.session.commit()
+    return jsonify({'id': draft.id, 'isPublished': False})
+
+
+@story_routes.route('/<int:id>/autosave', methods=['PATCH'])
+@login_required
+def autosave_story(id):
+    """Save title + content without publishing. Returns {savedAt}."""
+    story = Story.query.get(id)
+    if story is None:
+        return {'error': 'Story not found'}, 404
+    if story.author_id != current_user.id:
+        return {'error': 'Forbidden'}, 403
+
+    data = request.get_json() or {}
+    if 'title' in data:
+        story.title = data['title']
+    if 'content' in data:
+        story.content = data['content'][:6000]
+    story.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'savedAt': story.updated_at.isoformat()})
+
+
+@story_routes.route('/<int:id>/publish', methods=['POST'])
+@login_required
+def publish_draft(id):
+    """Publish a draft: accept multipart/form with title, content, tags, images, summary."""
+    story = _story_with_relations().filter(Story.id == id).first()
+    if story is None:
+        return {'error': 'Story not found'}, 404
+    if story.author_id != current_user.id:
+        return {'error': 'Forbidden'}, 403
+
+    title = request.form.get('title', story.title or '').strip()
+    content = request.form.get('content', story.content or '')[:6000]
+    sliced_intro = request.form.get('slicedIntro') or content[:130] + '...'
+    tags_raw = request.form.getlist('tags')
+
+    story.title = title
+    story.content = content
+    story.sliced_intro = sliced_intro
+    story.is_published = True
+    story.updated_at = datetime.utcnow()
+
+    # Replace tags — accepts either tag IDs (int strings) or tag names
+    StoryTag.query.filter_by(story_id=story.id).delete()
+    for tag_val in tags_raw:
+        tag_val = tag_val.strip()
+        if not tag_val:
+            continue
+        try:
+            tag_id = int(tag_val)
+            db.session.add(StoryTag(story_id=story.id, tag_id=tag_id))
+        except ValueError:
+            # It's a name, look up or create
+            tag_obj = Tag.query.filter_by(tag=tag_val).first()
+            if tag_obj:
+                db.session.add(StoryTag(story_id=story.id, tag_id=tag_obj.id))
+
+    # Handle new images
+    files = request.files.getlist('images')
+    for i, file in enumerate(files):
+        if not file or file.filename == '':
+            continue
+        filename = secure_filename(file.filename)
+        file.save(filename)
+        s3.upload_file(Bucket=bucket, Filename=filename, Key=filename)
+        url = f"https://{bucket}.s3.{region}.amazonaws.com/{filename}"
+        has_variants = False
+        try:
+            with open(filename, 'rb') as fh:
+                generate_image_variants(fh.read(), filename)
+            has_variants = True
+        except Exception:
+            pass
+        finally:
+            try:
+                os.remove(filename)
+            except Exception:
+                pass
+        position = int(request.form.get(f'position{i}', 0))
+        alt_tag = request.form.get(f'altTag{i}', '')
+        db.session.add(StoryImage(
+            story_id=story.id, url=url, file_name=filename,
+            has_variants=has_variants, position=position, alt_tag=alt_tag,
+        ))
+
+    db.session.commit()
+    return _story_with_relations().filter(Story.id == id).first().to_dict()
 
 
 
@@ -99,18 +218,15 @@ def curr_user_stories():
 @story_routes.route('/subscribed')
 @login_required
 def subscribed_stories():
-    """
-    Query for all stories from  user's followed authors and returns them in a list of story dictionaries
-    """
-
     followings = Follower.query.filter_by(follower_id=current_user.id).all()
     followed_authors_ids = [following.author_id for following in followings]
-    subscribed_stories = _story_with_relations().filter(Story.author_id.in_(followed_authors_ids)).all()
-
-
+    subscribed_stories = _story_with_relations().filter(
+        Story.author_id.in_(followed_authors_ids),
+        Story.is_published == True,
+    ).all()
     if subscribed_stories is None:
         return {"error": "No stories found"}, 404
-    return {'subscribedStories': [story.to_dict() for story in subscribed_stories],}
+    return {'subscribedStories': [story.to_dict() for story in subscribed_stories]}
 
 
 

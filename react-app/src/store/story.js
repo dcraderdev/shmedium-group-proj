@@ -1,5 +1,7 @@
 // constants
 const GET_STORIES = "story/GET_STORIES";
+const SET_DRAFTS = "story/SET_DRAFTS";
+const REMOVE_DRAFT = "story/REMOVE_DRAFT";
 const SET_AUTHOR_PROFILE = "story/SET_AUTHOR_PROFILE";
 const SET_AUTHOR_STORIES = "story/SET_AUTHOR_STORIES";
 const SET_CURRENT_STORY = "story/SET_CURRENT_STORY";
@@ -79,8 +81,10 @@ const unfollowAuthorAction = (data) => ({
 
 const setAuthorProfileAction = (data) => ({ type: SET_AUTHOR_PROFILE, payload: data });
 const setAuthorStoriesAction = (data) => ({ type: SET_AUTHOR_STORIES, payload: data });
+const setDraftsAction = (drafts) => ({ type: SET_DRAFTS, payload: drafts });
+const removeDraftAction = (id) => ({ type: REMOVE_DRAFT, payload: id });
 
-const initialState = { stories: [], tags: [], loaded: false, currentStory: null, authorProfile: null, authorStories: null };
+const initialState = { stories: [], tags: [], loaded: false, currentStory: null, authorProfile: null, authorStories: null, drafts: [] };
 
 export const initialLoad = () => async (dispatch, getState) => {
 	if (getState().story.loaded) return null;
@@ -584,6 +588,54 @@ export const removeCommentClap = (commentId) => async (dispatch) => {
 
 
 
+export const getDrafts = () => async (dispatch) => {
+	const res = await fetch('/api/story/drafts');
+	if (res.ok) {
+		const data = await res.json();
+		dispatch(setDraftsAction(data.drafts));
+		return data.drafts;
+	}
+	return [];
+};
+
+export const createDraft = () => async () => {
+	const res = await fetch('/api/story/draft', { method: 'POST' });
+	if (res.ok) return await res.json();
+	return null;
+};
+
+export const autosaveStory = (id, title, content) => async () => {
+	const res = await fetch(`/api/story/${id}/autosave`, {
+		method: 'PATCH',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ title, content }),
+	});
+	if (res.ok) return await res.json();
+	return null;
+};
+
+export const publishStory = (id, formData) => async (dispatch) => {
+	const res = await fetch(`/api/story/${id}/publish`, {
+		method: 'POST',
+		body: formData,
+	});
+	if (res.ok) {
+		const data = await res.json();
+		dispatch(removeDraftAction(id));
+		return data;
+	}
+	return null;
+};
+
+export const deleteDraft = (id) => async (dispatch) => {
+	const res = await fetch(`/api/story/${id}`, { method: 'DELETE' });
+	if (res.ok) {
+		dispatch(removeDraftAction(id));
+		return true;
+	}
+	return false;
+};
+
 //first version
 export default function reducer(state = initialState, action) {
 	const newState = {...state}
@@ -734,6 +786,12 @@ export default function reducer(state = initialState, action) {
 				},
 			};
 		}
+
+		case SET_DRAFTS:
+			return { ...newState, drafts: action.payload };
+
+		case REMOVE_DRAFT:
+			return { ...newState, drafts: newState.drafts.filter(d => d.id !== action.payload) };
 
 		default:
 			return state;

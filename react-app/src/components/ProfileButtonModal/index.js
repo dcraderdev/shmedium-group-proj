@@ -50,7 +50,10 @@ function ProfileButtonModal() {
     closeModal();
   };
 
-  
+  const handleDrafts = () => {
+    history.push('/drafts');
+    closeModal();
+  };
 
 
   return (
@@ -59,6 +62,7 @@ function ProfileButtonModal() {
         <div className="greeting">Hello, {user.firstName}</div>
         <button className="my-stories" onClick={handleViewProfile}>View Profile</button>
         <button className="my-stories" onClick={handleMyStories}>My Stories</button>
+        <button className="my-stories" onClick={handleDrafts}>Drafts</button>
         <button className="profile-menu-logout-button" onClick={logout}>
           Sign Out
         </button>

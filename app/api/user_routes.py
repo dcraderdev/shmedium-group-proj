@@ -48,7 +48,7 @@ def _author_stories_query(user_id):
             ),
         ),
         selectinload(Story.claps),
-    ).filter(Story.author_id == user_id)
+    ).filter(Story.author_id == user_id, Story.is_published == True)
 
 
 @user_routes.route('/')
@@ -79,7 +79,7 @@ def author_profile(id):
     if not u:
         return {'error': 'User not found'}, 404
 
-    total_stories = Story.query.filter_by(author_id=id).count()
+    total_stories = Story.query.filter_by(author_id=id, is_published=True).count()
     total_claps = (
         db.session.query(func.count(Clap.id))
         .join(Story, Story.id == Clap.story_id)
