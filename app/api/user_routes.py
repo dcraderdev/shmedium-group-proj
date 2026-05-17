@@ -158,5 +158,13 @@ def update_profile():
     elif 'coverImageUrl' in data and data['coverImageUrl']:
         user.cover_image_url = data['coverImageUrl']
 
+    avatar_file = request.files.get('avatarImage') if hasattr(request, 'files') else None
+    if avatar_file and avatar_file.filename:
+        filename = secure_filename(avatar_file.filename)
+        key = f"avatars/{current_user.id}/{filename}"
+        s3.upload_fileobj(avatar_file, bucket, key, ExtraArgs={'ContentType': avatar_file.content_type})
+        url = f"https://{bucket}.s3.{region}.amazonaws.com/{key}"
+        user.profile_image = url
+
     db.session.commit()
     return _user_with_followers(current_user.id).to_dict()

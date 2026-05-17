@@ -4,7 +4,7 @@ import { useHistory, useParams, useLocation } from 'react-router-dom';
 import './CreateStoryPage.css';
 import * as storyActions from '../../store/story';
 import { initialLoad } from '../../store/story';
-import AutoExpandTextArea from '../AutoExpandTextArea';
+import RichTextBlock from '../RichTextBlock';
 
 /* ─── PublishModal ─────────────────────────────────────────────── */
 
@@ -352,11 +352,12 @@ const CreateStoryPage = () => {
               <div className="text-wrapper" key={index}>
                 <button type="button" className="delete-button" onClick={() => deleteBlock(index)} title="Remove block">×</button>
                 <div className="text-container memo-text">
-                  <AutoExpandTextArea
-                    text={block.content}
-                    onTextChange={(value) => {
+                  <RichTextBlock
+                    initialContent={block.content}
+                    onChange={(value) => {
                       setBlocks((prev) => { const n = [...prev]; n[index] = { ...n[index], content: value }; return n; });
                     }}
+                    placeholder="Tell your story…"
                   />
                 </div>
               </div>

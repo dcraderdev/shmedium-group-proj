@@ -547,6 +547,33 @@
 
 .apc-cover-upload-btn:hover { background: rgba(0,0,0,0.72); }
 
+.apc-avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.apc-avatar-edit-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ebebeb;
+  flex-shrink: 0;
+}
+
+.apc-avatar-upload-btn {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: #1a8917;
+  border-bottom: 1px solid #1a8917;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.apc-avatar-upload-btn:hover { color: #0f6b0c; border-color: #0f6b0c; }
+
 .apc-textarea {
   width: 100%;
   box-sizing: border-box;

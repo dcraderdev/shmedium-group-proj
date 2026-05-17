@@ -33,6 +33,8 @@ function EditProfileModal({ profile, onClose, onSave }) {
   const [website, setWebsite] = useState(profile.websiteUrl || '');
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(profile.coverImageUrl || '');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(profile.profileImage || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,18 +45,26 @@ function EditProfileModal({ profile, onClose, onSave }) {
     setCoverPreview(URL.createObjectURL(f));
   };
 
+  const handleAvatarChange = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setAvatarFile(f);
+    setAvatarPreview(URL.createObjectURL(f));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError('');
     let payload;
-    if (coverFile) {
+    if (coverFile || avatarFile) {
       const fd = new FormData();
       fd.append('bio', bio);
       fd.append('twitterHandle', twitter);
       fd.append('githubHandle', github);
       fd.append('websiteUrl', website);
-      fd.append('coverImage', coverFile);
+      if (coverFile) fd.append('coverImage', coverFile);
+      if (avatarFile) fd.append('avatarImage', avatarFile);
       payload = fd;
     } else {
       payload = { bio, twitterHandle: twitter, githubHandle: github, websiteUrl: website, coverImageUrl: coverPreview };
@@ -77,6 +87,22 @@ function EditProfileModal({ profile, onClose, onSave }) {
         </div>
 
         <form onSubmit={handleSubmit} className="apc-edit-form">
+          {/* Avatar / profile photo */}
+          <div className="apc-form-section">
+            <label className="apc-form-label">Profile photo</label>
+            <div className="apc-avatar-upload-row">
+              <img
+                className="apc-avatar-edit-preview"
+                src={avatarPreview || DEFAULT_AVATAR}
+                alt="Profile"
+              />
+              <label className="apc-avatar-upload-btn">
+                Change photo
+                <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+              </label>
+            </div>
+          </div>
+
           {/* Cover image */}
           <div className="apc-form-section">
             <label className="apc-form-label">Cover image</label>

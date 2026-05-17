@@ -1,0 +1,109 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RichTextBlock — contenteditable story editor
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.rtb-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Editor surface ────────────────────────────────────────────────── */
+
+.rtb-editor {
+  width: 100%;
+  min-height: 120px;
+  font-family: source-serif-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-size: 20px;
+  line-height: 1.78;
+  color: #1a1a1a;
+  outline: none;
+  caret-color: #1a1a1a;
+  word-break: break-word;
+}
+
+/* CSS-only placeholder */
+.rtb-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #b8b8b8;
+  pointer-events: none;
+}
+
+/* ── Rich formatting ───────────────────────────────────────────────── */
+
+.rtb-editor h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 28px 0 8px;
+  line-height: 1.3;
+  color: #111;
+}
+
+.rtb-editor h3 {
+  font-size: 21px;
+  font-weight: 700;
+  margin: 22px 0 6px;
+  line-height: 1.35;
+  color: #111;
+}
+
+.rtb-editor blockquote {
+  border-left: 3px solid #1a1a1a;
+  padding: 6px 0 6px 22px;
+  margin: 22px 0;
+  color: #555;
+  font-style: italic;
+  font-size: 20px;
+}
+
+.rtb-editor strong { font-weight: 700; }
+.rtb-editor em { font-style: italic; }
+
+.rtb-editor p { margin: 0 0 0.3em; }
+
+/* ── Floating formatting toolbar ───────────────────────────────────── */
+
+.rtb-toolbar {
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 5px 7px;
+  display: flex;
+  gap: 2px;
+  pointer-events: all;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+/* Down-pointing caret */
+.rtb-toolbar::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 5px;
+  background: #1a1a1a;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.rtb-toolbar button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 4px 9px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.13s;
+  line-height: 1;
+  min-width: 28px;
+}
+
+.rtb-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
