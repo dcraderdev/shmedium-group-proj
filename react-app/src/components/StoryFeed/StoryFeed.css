@@ -201,7 +201,7 @@
   transition: background 0.15s ease;
 }
 
-.feed-empty-cta:hover { background: #333; }
+.feed-empty-cta:hover { background: var(--color-text-secondary); }
 
 /* ── Mobile ──────────────────────────────────────────────────────────── */
 

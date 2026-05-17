@@ -74,16 +74,16 @@
   padding: 9px;
   font-size: 22px;
   margin-top: 10px;
-  background-color: #ffffff;
-  border: #ffffff 1px solid;
-  color: #000000;
+  background-color: var(--color-card);
+  border: var(--color-card) 1px solid;
+  color: var(--color-text-primary);
   border-radius: 20px;
   width: 170px;
   transition: all .5s;
 }
 
 .writepage-started-button:hover {
-  background-color: #357720;
+  background-color: var(--color-accent-hover);
   color: #ffffff;
   transition: all .5s;
 
@@ -93,8 +93,7 @@
 
 /*  DIV 2 stylings */
 .writepage-container2-wrapper {
-
-  background-color: #000000;
+  background-color: var(--color-text-primary);
 }
 
 .writepage-container2 {
@@ -102,7 +101,7 @@
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
-  background-color: #000000;
+  background-color: var(--color-text-primary);
 }
 
 .writepage-container2-header{

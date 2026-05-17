@@ -2,7 +2,7 @@
 
 .main-page-banner-container {
   position: relative;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--color-text-primary);
   background-color: var(--color-yellow);
   width: 100%;
   left: 0;
@@ -76,7 +76,7 @@
   letter-spacing: 0.01em;
 }
 
-.start-reading:hover { background: #000; }
+.start-reading:hover { background: var(--color-text-primary); }
 
 /* ── Breakpoints ─────────────────────────────────────────────────────── */
 

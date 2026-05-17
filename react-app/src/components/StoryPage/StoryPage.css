@@ -506,10 +506,10 @@
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1a1a1a;
+  background: var(--color-text-primary);
   color: #fff;
   font-size: 13px;
-  font-family: 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
   padding: 10px 20px;
   border-radius: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);

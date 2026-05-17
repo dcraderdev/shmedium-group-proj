@@ -157,7 +157,7 @@
  
 
 .signup-demo-container {
-  color: #757575;
+  color: var(--color-text-secondary);
   margin-top: 50px;
   height: fit-content;
   width: min(90%, 500px);
@@ -170,7 +170,7 @@
 }
 
 .demo-user-singin {
-  color: #757575;
+  color: var(--color-text-secondary);
   text-decoration: underline;
   cursor: pointer;
   margin: 0 5px;
@@ -193,7 +193,7 @@
   left: 14px;
   display: block;
   margin-top: 30px;
-  color: #757575;
+  color: var(--color-text-secondary);
   text-decoration: underline;
   cursor: pointer;
 }
