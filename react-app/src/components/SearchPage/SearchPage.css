@@ -380,6 +380,12 @@
   cursor: not-allowed;
 }
 
+/* ── Pagination ellipsis ── */
+.page-ellipsis {
+  padding: 0 4px;
+  color: var(--color-text-tertiary);
+}
+
 /* ── Search result row focus ── */
 .search-result-row {
   outline: none;

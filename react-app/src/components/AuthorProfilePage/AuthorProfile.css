@@ -352,14 +352,14 @@
 
 .apc-skeleton-hero {
   height: 340px;
-  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: apc-shimmer 1.4s infinite;
 }
 
 .apc-skeleton-stats {
   height: 80px;
-  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: apc-shimmer 1.4s infinite;
 }
@@ -369,7 +369,7 @@
   margin: 32px auto;
   height: 240px;
   border-radius: var(--radius-md);
-  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: apc-shimmer 1.4s infinite;
 }
@@ -658,7 +658,7 @@
   transition: background 0.15s;
 }
 
-.apc-btn-save:hover { background: #333; }
+.apc-btn-save:hover { background: var(--color-text-secondary); }
 .apc-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Mobile ────────────────────────────────────────────────────────── */

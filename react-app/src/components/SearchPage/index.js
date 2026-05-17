@@ -407,7 +407,7 @@ const SearchPage = () => {
           {pagesToShow(page, totalPages).reduce((acc, p, i, arr) => {
             if (i > 0 && p - arr[i - 1] > 1) {
               acc.push(
-                <span key={`ell-${p}`} style={{ padding: '0 4px', color: '#999' }}>
+                <span key={`ell-${p}`} className="page-ellipsis">
                   …
                 </span>
               );

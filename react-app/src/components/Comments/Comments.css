@@ -139,7 +139,7 @@
   transition: background 0.15s;
 }
 
-.cmt-btn-submit:hover { background: #333; }
+.cmt-btn-submit:hover { background: var(--color-text-secondary); }
 .cmt-btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .cmt-btn-cancel {
