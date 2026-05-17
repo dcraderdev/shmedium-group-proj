@@ -445,8 +445,8 @@
     gap: 4px;
   }
 
-  .sticky-clap-btn,
-  .sticky-unclap-btn {
+  .m-clap-btn,
+  .m-unclap-btn {
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -461,8 +461,8 @@
     transition: background 0.15s, border-color 0.15s;
   }
 
-  .sticky-clap-btn:hover { border-color: #1a8917; color: #1a8917; }
-  .sticky-unclap-btn:hover { border-color: #c0392b; color: #c0392b; }
+  .m-clap-btn:hover { border-color: #1a8917; color: #1a8917; }
+  .m-unclap-btn:hover { border-color: #c0392b; color: #c0392b; }
 
   .story-layout {
     padding-bottom: 64px;

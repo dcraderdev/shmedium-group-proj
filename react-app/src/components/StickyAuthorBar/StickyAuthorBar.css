@@ -104,6 +104,5 @@
 }
 
 @media (max-width: 640px) {
-  .sticky-author-bar { padding: 10px 16px; gap: 8px; }
-  .sticky-author-name { max-width: 120px; }
+  .sticky-author-bar { display: none; }
 }

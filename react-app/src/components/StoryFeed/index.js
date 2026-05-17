@@ -198,9 +198,6 @@ const StoryFeed = () => {
               </div>
             </div>
           ))}
-              </div>
-            </div>
-          ))}
         </div>
       </nav>
 

@@ -1,11 +1,11 @@
 .story-tile-two-skeleton {
-  width: 99%;
+  width: calc(100% - 40px);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  margin-top: 20px;
-  padding: 0 0 20px 20px;
+  margin: 20px 15px 0 25px;
+  padding-bottom: 20px;
   border-bottom: 1px solid #f0f0f0;
   box-sizing: border-box;
 }

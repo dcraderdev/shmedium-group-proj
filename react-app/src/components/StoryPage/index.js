@@ -466,8 +466,8 @@ const StoryPage = () => {
             <span>{story.claps}</span>
           </div>
           <div className="sticky-clap-actions">
-            <button className="sticky-unclap-btn" onClick={handleUnclapClick}>−</button>
-            <button className="sticky-clap-btn" onClick={handleClapClick}>+</button>
+            <button className="m-unclap-btn" onClick={handleUnclapClick}>−</button>
+            <button className="m-clap-btn" onClick={handleClapClick}>+</button>
           </div>
         </div>
       )}
