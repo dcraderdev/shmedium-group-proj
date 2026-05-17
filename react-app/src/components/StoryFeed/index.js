@@ -121,8 +121,13 @@ const StoryFeed = () => {
           <div
             className="feed-select small memo-text flexcenter"
             onClick={() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              searchInputRef.current.focus();
+              const input = searchInputRef.current;
+              if (input && input.offsetParent !== null) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                input.focus();
+              } else {
+                window.dispatchEvent(new CustomEvent('open-search-modal'));
+              }
             }}
           >
             <div className="add-container flexcenter">

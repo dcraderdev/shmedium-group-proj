@@ -29,7 +29,7 @@ function ProfileButtonModal() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  });
+  }, [closeModal]);
 
   const logout = (e) => {
 
