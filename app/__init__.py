@@ -145,7 +145,7 @@ def not_found(e):
 def _warmup_cache():
     """Pre-populate the feed cache on startup so the first real request is fast."""
     import time
-    time.sleep(3)  # wait for DB connections to settle after Gunicorn fork
+    time.sleep(1)  # wait for DB connections to settle after Gunicorn fork
     try:
         with app.app_context():
             from app.api.story_routes import _build_feed_payload, _FEED_CACHE_TTL
