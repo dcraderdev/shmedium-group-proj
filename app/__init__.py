@@ -1,4 +1,5 @@
 import os
+import threading
 from flask import Flask, render_template, request, session, redirect, make_response, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -139,3 +140,20 @@ def react_root(path):
 @app.errorhandler(404)
 def not_found(e):
     return app.send_static_file('index.html')
+
+
+def _warmup_cache():
+    """Pre-populate the feed cache on startup so the first real request is fast."""
+    import time
+    time.sleep(3)  # wait for DB connections to settle after Gunicorn fork
+    try:
+        with app.app_context():
+            from app.api.story_routes import _build_feed_payload, _FEED_CACHE_TTL
+            import app.api.story_routes as sr
+            sr._FEED_CACHE = {'data': _build_feed_payload(), 'ts': time.time()}
+    except Exception:
+        pass  # non-fatal: first real request will cold-fill the cache
+
+
+# Kick off cache warmup in the background so it doesn't block server startup
+threading.Thread(target=_warmup_cache, daemon=True).start()

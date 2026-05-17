@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { authenticate } from './store/session';
+import { initialLoad } from './store/story';
 import Navigation from './components/Navigation';
 import { ModalContext } from './context/ModalContext';
 
@@ -56,6 +57,10 @@ function App() {
   const { modal } = useContext(ModalContext);
 
   useEffect(() => {
+    // Fire story data fetch immediately — public endpoint, no auth needed.
+    // Runs in parallel with authenticate so FeedPage has data ready by the
+    // time the auth check resolves and isLoaded flips to true.
+    dispatch(initialLoad());
     dispatch(authenticate()).then(() => setIsLoaded(true));
   }, [dispatch]);
 
