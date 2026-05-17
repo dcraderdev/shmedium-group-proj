@@ -93,11 +93,14 @@ const AuthorTile = ({ author }) => {
 
             <div className='authortile-style1-followers-container'>
               <div className='authortile-style1-followers-header'>
+                {author.followers?.length > 0 && (
+                  <span>{author.followers.length.toLocaleString()} {author.followers.length === 1 ? 'follower' : 'followers'} · </span>
+                )}
                 Joined {new Date(author.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
               </div>
             </div>
 
-            {userId !== author.id || !userId && (
+            {userId && userId !== author.id && (
               <div className='authortile-style1-followers-container'>
                 <div className='authortile-style1-follow-button' onClick={handleFollow}>{following ? 'Unfollow' : 'Follow'}</div>
               </div>

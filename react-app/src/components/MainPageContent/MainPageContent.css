@@ -234,8 +234,8 @@
 }
 
 .footer-logo {
-  color: #fff;
-  background: #000;
+  color: var(--color-card);
+  background: var(--color-text-primary);
   width: 100px;
   height: 100px;
   display: flex;

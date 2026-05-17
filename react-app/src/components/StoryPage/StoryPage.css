@@ -266,7 +266,7 @@
 .story-content code {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 0.85em;
-  background: #f4f4f4;
+  background: var(--color-tag-bg);
   border-radius: var(--radius-sm);
   padding: 2px 6px;
 }
@@ -498,4 +498,28 @@
 
 @media screen and (min-width: 1025px) {
   .story-page { padding: 80px 0; }
+}
+
+/* ── Clap / action toast ── */
+.story-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  font-family: 'Helvetica Neue', sans-serif;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  z-index: 99999;
+  white-space: nowrap;
+  animation: toast-in 0.2s ease;
+  pointer-events: none;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

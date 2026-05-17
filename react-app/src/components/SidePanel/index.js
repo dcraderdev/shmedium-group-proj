@@ -44,9 +44,11 @@ const SidePanel = () => {
 
 
 
+  const staffPicks = stories ? stories.slice(7, 17).filter(Boolean) : [];
+
   return (
     <>
-      {!loaded || !stories && (
+      {!loaded && (
       <div className="sidepanel-container">
       <div className='sidepanel-banner-cover'></div>
 
@@ -120,14 +122,9 @@ const SidePanel = () => {
 
 
         <div className="sidepanel-staff-picks-content flex">
-          <StoryTileThree story={stories[7]}/>
-          <StoryTileThree story={stories[8]}/>
-          <StoryTileThree story={stories[9]}/>
-          <StoryTileThree story={stories[12]}/>
-          <StoryTileThree story={stories[13]}/>
-          <StoryTileThree story={stories[14]}/>
-          <StoryTileThree story={stories[15]}/>
-          <StoryTileThree story={stories[16]}/>
+          {staffPicks.map((story) => (
+            <StoryTileThree key={story.id} story={story} />
+          ))}
         </div>
   
       

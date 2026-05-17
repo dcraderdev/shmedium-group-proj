@@ -81,4 +81,4 @@
   transition: color var(--transition);
 }
 
-.story-tile-style3:hover .style3-story-title { color: #444; }
+.story-tile-style3:hover .style3-story-title { color: var(--color-text-primary); }

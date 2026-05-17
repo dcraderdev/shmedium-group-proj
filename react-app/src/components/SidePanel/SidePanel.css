@@ -8,12 +8,7 @@
   padding: 24px 20px 0 24px;
 }
 
-.sidepanel-banner-cover {
-  height: 1px;
-  background: #fff;
-  width: 100%;
-  position: relative;
-}
+.sidepanel-banner-cover { display: none; }
 
 /* "See more" link */
 .see-more-topics {

@@ -135,7 +135,7 @@
 }
 
 .story-tile-style2:hover .style2-story-title {
-  color: #222;
+  color: var(--color-text-primary);
 }
 
 /* Featured card: bigger title */
@@ -255,7 +255,7 @@
 .style2-image-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e4e4e4 100%);
+  background: linear-gradient(135deg, var(--color-border-light) 0%, var(--color-tag-bg) 100%);
 }
 
 /* ── Responsive: ≥ 700px — slightly larger image ─────────────────────── */

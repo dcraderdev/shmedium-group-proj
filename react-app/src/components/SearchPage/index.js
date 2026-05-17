@@ -186,7 +186,9 @@ const SearchPage = () => {
                   : 'No results'
               : activeTotal === 0
                 ? 'No results'
-                : `${activeTotal.toLocaleString()} ${activeTotal === 1 ? (type === 'stories' ? 'story' : 'author') : type} found`}
+                : totalPages > 1
+                  ? `Showing ${((page - 1) * perPage + 1).toLocaleString()}–${Math.min(page * perPage, activeTotal).toLocaleString()} of ${activeTotal.toLocaleString()} ${type === 'stories' ? 'stories' : type}`
+                  : `${activeTotal.toLocaleString()} ${activeTotal === 1 ? (type === 'stories' ? 'story' : 'author') : type} found`}
         </p>
       </header>
 
