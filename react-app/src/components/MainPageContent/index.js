@@ -32,6 +32,7 @@ const MainPageContent = () => {
   const handleLogoClick = () => {
     if (user) {
       history.push('/home');
+      return;
     }
     history.push('/');
   };

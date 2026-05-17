@@ -33,7 +33,7 @@ function StoryOptionsModal() {
         //so we can enable background scrolling
         document.body.style.overflow = 'unset';
       };
-    });
+    }, [closeModal]);
   
     const deleteCurrentStory = (e) => {
         dispatch(storyActions.deleteStory(currentStory.id))
