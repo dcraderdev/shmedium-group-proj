@@ -64,6 +64,19 @@
   white-space: nowrap;
 }
 
+.csp-status-retry {
+  font-size: 0.78rem;
+  color: #e53935;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #e53935;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.csp-status-retry:hover { color: #c62828; border-color: #c62828; }
+
 .csp-toolbar-right {
   display: flex;
   align-items: center;

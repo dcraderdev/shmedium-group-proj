@@ -25,6 +25,7 @@ export default function DraftsPage() {
   const drafts   = useSelector((state) => state.story.drafts);
 
   const [loading,       setLoading]       = useState(true);
+  const [creating,      setCreating]      = useState(false); // new story in flight
   const [deleting,      setDeleting]      = useState(null);  // id being deleted
   const [confirmDelete, setConfirmDelete] = useState(null);  // id awaiting confirm
 
@@ -47,7 +48,10 @@ export default function DraftsPage() {
   };
 
   const handleNew = async () => {
+    if (creating) return;
+    setCreating(true);
     const result = await dispatch(storyActions.createDraft());
+    setCreating(false);
     if (result?.id) history.push(`/create/${result.id}/edit`);
   };
 
@@ -60,8 +64,8 @@ export default function DraftsPage() {
             <p className="drafts-subtitle">{drafts.length} unpublished {drafts.length === 1 ? 'story' : 'stories'}</p>
           )}
         </div>
-        <button className="drafts-new-btn" onClick={handleNew}>
-          + New story
+        <button className="drafts-new-btn" onClick={handleNew} disabled={creating}>
+          {creating ? 'Creating…' : '+ New story'}
         </button>
       </div>
 
@@ -76,8 +80,8 @@ export default function DraftsPage() {
           <p className="drafts-empty-sub">
             Stories you're working on will appear here. Start writing whenever inspiration strikes.
           </p>
-          <button className="drafts-start-btn" onClick={handleNew}>
-            Start writing
+          <button className="drafts-start-btn" onClick={handleNew} disabled={creating}>
+            {creating ? 'Creating…' : 'Start writing'}
           </button>
         </div>
       ) : (

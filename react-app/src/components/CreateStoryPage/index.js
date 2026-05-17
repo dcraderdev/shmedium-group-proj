@@ -197,12 +197,13 @@ const CreateStoryPage = () => {
     if (allTags.length === 0) dispatch(initialLoad());
   }, []);
 
-  // Load existing story when editing
+  // Load existing story when editing — redirect to /drafts on 404/403
   useEffect(() => {
-    if (isEditing && id) {
-      dispatch(storyActions.getStoryById(id));
-    }
-  }, [id]);
+    if (!isEditing || !id) return;
+    dispatch(storyActions.getStoryById(id)).then((result) => {
+      if (!result || Array.isArray(result)) history.push('/drafts');
+    });
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset on route change
   useEffect(() => {
@@ -358,7 +359,15 @@ const CreateStoryPage = () => {
       {/* Top toolbar */}
       <div className="csp-toolbar">
         <div className="csp-status-area">
-          {statusLabel && <span className="csp-status">{statusLabel}</span>}
+          {statusLabel && (
+            saveStatus === 'error' ? (
+              <button className="csp-status csp-status-retry" onClick={handleSaveDraft} title="Click to retry">
+                {statusLabel} — retry
+              </button>
+            ) : (
+              <span className="csp-status">{statusLabel}</span>
+            )
+          )}
           {wordCount > 0 && (
             <span className="csp-wordcount">
               {wordCount.toLocaleString()} {wordCount === 1 ? 'word' : 'words'}
