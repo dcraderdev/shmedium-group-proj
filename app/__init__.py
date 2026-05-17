@@ -111,29 +111,14 @@ def api_help():
 
 @app.route("/api/init")
 def initial_load():
-    """
-    Eager Load data upon initialization
-    """
-    stories = Story.query.options(
-        selectinload(Story.author).options(
-            selectinload(User.followers),
-            selectinload(User.following),
-        ),
-        selectinload(Story.tags).joinedload(StoryTag.tag),
-        selectinload(Story.images),
-        selectinload(Story.comments).options(
-            joinedload(Comment.user),
-            selectinload(Comment.claps),
-            selectinload(Comment.replies).options(
-                joinedload(Comment.user),
-                selectinload(Comment.claps),
-            ),
-        ),
-        selectinload(Story.claps),
-        selectinload(Story.bookmarks),
-        selectinload(Story.highlights),
-    ).all()
-    response = make_response({'stories': [story.to_dict() for story in stories]})
+    """Redirect to the story blueprint's cached initialize endpoint."""
+    from app.api.story_routes import _FEED_CACHE, _build_feed_payload, _FEED_CACHE_TTL
+    import time
+    import app.api.story_routes as sr
+    now = time.time()
+    if sr._FEED_CACHE['data'] is None or (now - sr._FEED_CACHE['ts']) > _FEED_CACHE_TTL:
+        sr._FEED_CACHE = {'data': _build_feed_payload(), 'ts': now}
+    response = make_response(sr._FEED_CACHE['data'])
     response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=30'
     return response
 

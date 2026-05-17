@@ -38,6 +38,36 @@ class Story(db.Model):
     highlights = db.relationship('StoryHighlight', back_populates='story', cascade="all, delete-orphan")
 
 
+    def to_dict_feed(self, clap_count=None, comment_count=None, bookmark_count=None):
+        """Lightweight dict for feed/init — no content, no comments, no per-object counts.
+
+        Counts must be injected from a pre-aggregated SQL query so we skip
+        the selectinload of claps/comments/bookmarks entirely.
+        """
+        return {
+            'id': self.id,
+            'authorId': self.author_id,
+            'authorInfo': {
+                'id': self.author.id,
+                'firstName': self.author.first_name,
+                'lastName': self.author.last_name,
+                'profileImage': self.author.profile_image,
+            },
+            'title': self.title,
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
+            'tags': [tag.tag.to_dict() for tag in self.tags],
+            'images': [image.to_dict() for image in self.images],
+            'commentCount': comment_count if comment_count is not None else 0,
+            'claps': clap_count if clap_count is not None else 0,
+            'timeToRead': self.time_to_read or 1,
+            'slicedIntro': self.sliced_intro,
+            'isPublished': self.is_published,
+            'bookmarkCount': bookmark_count if bookmark_count is not None else 0,
+            'wordCount': (self.time_to_read or 1) * 200,
+            'comments': [],
+        }
+
     def to_dict(self):
         top_level = [c for c in self.comments if c.parent_id is None]
         plain = _TAG_RE.sub(' ', self.content or '')
