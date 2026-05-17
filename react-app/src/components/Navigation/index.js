@@ -458,7 +458,7 @@ function Navigation() {
 
               {/* Mobile-only search icon (nav-search is hidden on mobile) */}
               <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
-                <img src={magnifyGlass} alt="search" />
+                <img src={magnifyGlassBlack} alt="search" />
               </button>
             </div>
 
