@@ -92,7 +92,9 @@ const AuthorTile = ({ author }) => {
         </div>
 
             <div className='authortile-style1-followers-container'>
-              <div className='authortile-style1-followers-header'>Member since: {author.createdAt.slice(0, 16)}</div>
+              <div className='authortile-style1-followers-header'>
+                Joined {new Date(author.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </div>
             </div>
 
             {userId !== author.id || !userId && (
