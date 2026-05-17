@@ -1,252 +1,344 @@
-/* ===================================================
-   StoryTile — Medium 2024 card design
-   =================================================== */
+/* ═══════════════════════════════════════════════════════════════════════
+   Story card – layout variant 2 (primary feed card)
+   Medium-2024 quality: serif title · 4:3 image · hover lift · tag pills
+   ═══════════════════════════════════════════════════════════════════════ */
 
-/* ── Base card ───────────────────────────────────── */
-.st2-card {
+/* ── Base card ────────────────────────────────────────────────────────── */
+
+.story-tile-style2 {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 20px;
-  padding: 24px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 24px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  background: transparent;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  border-radius: 0;
   position: relative;
 }
 
-.st2-card:hover {
+.story-tile-style2:last-child { border-bottom: none; }
+
+/* Hover lift */
+.story-tile-style2:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  background: var(--color-card);
+  border-radius: 8px;
+  /* Counteract the border-bottom disappearing on hover */
+  z-index: 1;
 }
 
-.st2-card:last-child {
-  border-bottom: none;
+/* ── Featured first card ──────────────────────────────────────────────── */
+
+.story-tile-style2.featured {
+  padding: 32px 20px 36px;
+  margin: 0 -20px 8px;
+  border-bottom: 2px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: 4px;
+  gap: 32px;
 }
 
-/* ── Body (left column) ──────────────────────────── */
-.st2-body {
+.story-tile-style2.featured:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+/* ── Content column (left) ────────────────────────────────────────────── */
+
+.style2-content {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
 }
 
-/* ── Byline row ─────────────────────────────────── */
-.st2-byline {
+/* ── Byline row ───────────────────────────────────────────────────────── */
+
+.style2-author-container {
   display: flex;
   align-items: center;
-  gap: 7px;
-  flex-wrap: nowrap;
-  overflow: hidden;
+  gap: 6px;
+  margin-bottom: 12px;
   cursor: pointer;
+  flex-wrap: wrap;
 }
 
-.st2-avatar {
+.style2-author-container:hover .style2-author-name {
+  text-decoration: underline;
+}
+
+.style2-profile-image {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden;
   flex-shrink: 0;
-  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--color-border-light);
+  border: none;
 }
 
-.st2-author-name {
+.style2-profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.style2-author-name {
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 160px;
 }
 
-.st2-dot {
-  color: #b0b0b0;
+.style2-byline-dot {
+  color: var(--color-text-tertiary);
   font-size: 12px;
   flex-shrink: 0;
 }
 
-.st2-meta {
-  font-size: 13px;
-  color: #6b6b6b;
+.style2-read-time,
+.style2-date {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--color-text-tertiary);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* ── Title ──────────────────────────────────────── */
-.st2-title {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: #1a1a1a;
-  letter-spacing: -0.01em;
-  word-break: break-word;
-}
+/* ── Title ────────────────────────────────────────────────────────────── */
 
-/* ── Excerpt ────────────────────────────────────── */
-.st2-excerpt {
+.style2-story-title-container { margin-bottom: 10px; }
+
+.style2-story-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.2px;
+  color: var(--color-text-primary);
   margin: 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #6b6b6b;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color 0.15s ease;
 }
 
-/* ── Tag pills ──────────────────────────────────── */
-.st2-tags {
+.story-tile-style2:hover .style2-story-title {
+  color: #222;
+}
+
+/* Featured card: bigger title */
+.story-tile-style2.featured .style2-story-title {
+  font-size: 28px;
+  -webkit-line-clamp: 3;
+  letter-spacing: -0.4px;
+}
+
+/* ── Excerpt ──────────────────────────────────────────────────────────── */
+
+.style2-header-content {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.story-tile-style2.featured .style2-header-content {
+  font-size: 16px;
+  -webkit-line-clamp: 3;
+}
+
+/* ── Tag pills ────────────────────────────────────────────────────────── */
+
+.style2-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
+  margin-bottom: 12px;
 }
 
-.st2-tag-pill {
+.style2-tag {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-tag-bg);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  line-height: 1.4;
+}
+
+.style2-tag:hover {
+  background: var(--color-text-primary);
+  color: #fff;
+}
+
+/* ── Footer meta row ──────────────────────────────────────────────────── */
+
+.style2-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.style2-comment-badge {
   display: inline-flex;
   align-items: center;
-  border: none;
-  background: #f2f2f2;
-  color: #6b6b6b;
+  gap: 4px;
+  font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 400;
-  padding: 4px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  white-space: nowrap;
-  font-family: inherit;
+  color: var(--color-text-secondary);
+  background: var(--color-tag-bg);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
 }
 
-.st2-tag-pill:hover {
-  background: #e6e6e6;
-  color: #1a1a1a;
-}
+/* ── Thumbnail column (right) ─────────────────────────────────────────── */
 
-/* ── Thumbnail (right column) ───────────────────── */
-.st2-thumb-wrap {
+.style2-story-image {
   flex-shrink: 0;
-  width: 112px;
+  width: 160px;
+  /* 4:3 aspect ratio — reserves exact space, prevents CLS */
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: #f5f5f5;
+  border-radius: 4px;
+  background: var(--color-border-light);
+  align-self: flex-start;
 }
 
-.st2-thumb-wrap img,
-.st2-thumb-wrap picture {
+/* Featured card gets a larger thumbnail */
+.story-tile-style2.featured .style2-story-image {
+  width: 240px;
+}
+
+/* Image fills container fully */
+.style2-story-image img,
+.style2-story-image picture,
+.style2-story-image picture img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.25s ease;
+  transition: transform 0.35s ease;
 }
 
-.st2-card:hover .st2-thumb-wrap img {
-  transform: scale(1.03);
+/* Image scale on card hover */
+.story-tile-style2:hover .style2-story-image img,
+.story-tile-style2:hover .style2-story-image picture img {
+  transform: scale(1.06);
 }
 
-/* ── Featured card ──────────────────────────────── */
-.st2-featured {
-  flex-direction: column;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding-bottom: 32px;
-  margin-bottom: 8px;
-}
-
-.st2-featured-image-wrap {
-  width: 100%;
-  aspect-ratio: 2 / 1;
-  overflow: hidden;
-  background: #f5f5f5;
-  margin-bottom: 4px;
-}
-
-.st2-featured-image-wrap img,
-.st2-featured-image-wrap picture {
-  display: block;
+/* Placeholder when no image URL is available */
+.style2-image-placeholder {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e4e4e4 100%);
 }
 
-.st2-featured:hover .st2-featured-image-wrap img {
-  transform: scale(1.02);
-}
+/* ── Responsive: ≥ 700px — slightly larger image ─────────────────────── */
 
-.st2-title-featured {
-  font-size: 26px;
-  line-height: 1.25;
-}
-
-/* ── Desktop enlargement ────────────────────────── */
 @media screen and (min-width: 700px) {
-  .st2-thumb-wrap {
-    width: 160px;
+  .style2-story-image { width: 200px; }
+  .story-tile-style2.featured .style2-story-image { width: 280px; }
+
+  .story-tile-style2:hover {
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-left: -16px;
+    margin-right: -16px;
   }
 
-  .st2-title {
-    font-size: 22px;
-  }
-
-  .st2-excerpt {
-    font-size: 15px;
-    -webkit-line-clamp: 3;
-  }
-
-  .st2-title-featured {
-    font-size: 30px;
+  .story-tile-style2.featured:hover {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
-@media screen and (min-width: 960px) {
-  .st2-thumb-wrap {
-    width: 200px;
-  }
+/* ── Mobile (≤ 640px): image stacks above content ────────────────────── */
 
-  .st2-title {
-    font-size: 24px;
-  }
-
-  .st2-title-featured {
-    font-size: 34px;
-  }
-}
-
-/* ── Mobile: stack vertically ───────────────────── */
-@media screen and (max-width: 500px) {
-  .st2-card {
-    flex-direction: column-reverse;
-    gap: 12px;
+@media screen and (max-width: 640px) {
+  .story-tile-style2 {
+    flex-direction: column;
+    gap: 14px;
     padding: 20px 16px;
-    box-sizing: border-box;
   }
 
-  .st2-thumb-wrap {
+  /* Image first on mobile (stacks above text) */
+  .style2-story-image {
+    order: -1;
+    width: 100%;
+    /* 16:9 on mobile so it fills the card width nicely */
+    aspect-ratio: 16 / 9;
+    border-radius: 6px;
+  }
+
+  .story-tile-style2.featured .style2-story-image {
     width: 100%;
     aspect-ratio: 16 / 9;
   }
 
-  .st2-title {
-    font-size: 19px;
+  .story-tile-style2.featured {
+    margin: 0;
+    padding: 20px 16px 24px;
   }
 
-  .st2-author-name {
-    max-width: 120px;
+  .style2-story-title {
+    font-size: 20px;
+  }
+
+  .story-tile-style2.featured .style2-story-title {
+    font-size: 24px;
+  }
+
+  .style2-header-content {
+    font-size: 14px;
+  }
+
+  .story-tile-style2:hover {
+    transform: none;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
-/* ── Fade-in animation (kept for compatibility) ─── */
+/* ── Fade-in entry animation ──────────────────────────────────────────── */
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {
-  animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.3s ease-out both;
 }

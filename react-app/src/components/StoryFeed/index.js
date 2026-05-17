@@ -13,6 +13,28 @@ import magnifyGlass from '../../public/magnify-glass.svg';
 
 
 
+const EMPTY_MESSAGES = {
+  following: {
+    title: 'No stories from people you follow yet',
+    body: "Follow authors you love and their latest stories will appear here.",
+    cta: 'Discover authors',
+    ctaFeed: 'for you',
+  },
+  'by you': {
+    title: "You haven't published anything yet",
+    body: "Every great writer starts somewhere. Write your first story — it's free.",
+    cta: 'Start writing',
+    ctaRoute: '/write',
+  },
+  default: {
+    title: 'Nothing here yet',
+    body: 'Try a different topic, or check back soon for new stories.',
+    cta: 'Browse all stories',
+    ctaFeed: 'for you',
+  },
+};
+
+
 const StoryFeed = () => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -76,28 +98,24 @@ const StoryFeed = () => {
     dispatch(sessionActions.removeSearch(searchQuery));
   };
 
-  const emptyState = (
-    <div className="sf-empty-state">
-      <div className="sf-empty-icon" aria-hidden="true">📭</div>
-      <p className="sf-empty-heading">Nothing here yet</p>
-      <p className="sf-empty-sub">
-        {currentFeed === 'by you'
-          ? 'You haven\'t published any stories yet.'
-          : currentFeed === 'following'
-          ? 'Follow some authors to see their stories here.'
-          : 'No stories match this feed.'}
-      </p>
-      {currentFeed === 'by you' && (
-        <button className="sf-empty-cta" onClick={() => history.push('/write')}>
-          Write your first story
-        </button>
-      )}
-    </div>
-  );
+  // Determine empty state messaging
+  const emptyMeta = EMPTY_MESSAGES[currentFeed] || EMPTY_MESSAGES.default;
+  const handleEmptyCta = () => {
+    if (emptyMeta.ctaRoute) {
+      history.push(emptyMeta.ctaRoute);
+    } else if (emptyMeta.ctaFeed) {
+      dispatch(sessionActions.setFeed(emptyMeta.ctaFeed));
+      dispatch(sessionActions.setSubFeed('stories'));
+    }
+  };
+
+  const isStoriesEmpty = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length === 0;
+  const hasStories = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length > 0;
 
   return (
     <div className="storyfeed-container">
 
+      {/* ── Primary nav tabs ── */}
       <nav className="feed-nav flexcenter">
         <div className="feed-select-container">
           <div
@@ -145,7 +163,7 @@ const StoryFeed = () => {
                 className={`feed-select dyna memo-text flexcenter ${currentFeed === searchQuery ? 'selected' : ''}`}
                 onClick={() => handleSelectFeed(searchQuery)}
               >
-                <div className="search-close-tab" onClick={(e) => handleRemoveSearch(e, searchQuery)}>x</div>
+                <div className="search-close-tab" onClick={(e) => handleRemoveSearch(e, searchQuery)}>×</div>
                 {searchQuery}
               </div>
             </div>
@@ -153,6 +171,7 @@ const StoryFeed = () => {
         </div>
       </nav>
 
+      {/* ── Sub-feed tabs (Stories / Authors / Tags) ── */}
       <div className={`feed-header ${showSubMenu ? 'extended' : 'hidden'}`}>
         <nav className="search-nav flexcenter">
           <div className="feed-select-container">
@@ -178,31 +197,55 @@ const StoryFeed = () => {
         </nav>
       </div>
 
+      {/* ── Loading skeletons ── */}
       {!loaded && (
         <div>
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <StoryTileFourSkeleton key={i} />
+          ))}
         </div>
       )}
 
-      {loaded && subFeed === 'authors' && currentFeed && feedContent && feedContent.length > 0 &&
+      {/* ── Authors tab ── */}
+      {loaded && subFeed === 'authors' && currentFeed && feedContent &&
         feedContent.map((author) => <AuthorTile key={author.id} author={author} />)
       }
 
-      {loaded && subFeed !== 'authors' && currentFeed && (
-        feedContent && feedContent.length > 0 ? (
-          <div className="sf-feed-list">
-            {feedContent.map((story, i) => (
-              <StoryTileTwo key={story.id || i} story={story} featured={i === 0} />
-            ))}
+      {/* ── Stories list ── */}
+      {hasStories && (
+        <div className="feed-stories-list">
+          {feedContent[0] && (
+            <>
+              <div className="feed-section-label">Featured</div>
+              <StoryTileTwo key={feedContent[0].id || 0} story={feedContent[0]} featured />
+              {feedContent.length > 1 && (
+                <div className="feed-section-label feed-section-label--more">
+                  More stories
+                </div>
+              )}
+            </>
+          )}
+          {feedContent.slice(1).map((story, i) => (
+            <StoryTileTwo key={story.id || i + 1} story={story} />
+          ))}
+        </div>
+      )}
+
+      {/* ── Empty state ── */}
+      {isStoriesEmpty && (
+        <div className="feed-empty-state">
+          <div className="feed-empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
           </div>
-        ) : emptyState
+          <h3 className="feed-empty-title">{emptyMeta.title}</h3>
+          <p className="feed-empty-body">{emptyMeta.body}</p>
+          <button className="feed-empty-cta" onClick={handleEmptyCta}>
+            {emptyMeta.cta}
+          </button>
+        </div>
       )}
 
     </div>
