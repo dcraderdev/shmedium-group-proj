@@ -49,7 +49,7 @@ export default function RichTextBlock({ initialContent, onChange, placeholder })
       const rect = range.getBoundingClientRect();
       const editorRect = editorRef.current.getBoundingClientRect();
       setToolbar({
-        top: rect.top - editorRect.top - 48,
+        top: Math.max(4, rect.top - editorRect.top - 48),
         left: rect.left - editorRect.left + rect.width / 2,
       });
     };
