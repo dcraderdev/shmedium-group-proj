@@ -62,16 +62,21 @@ function App() {
   const openSearch  = useCallback(() => setSearchOpen(true),  []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
 
-  // cmd-K / ctrl-K global shortcut
+  // cmd-K / ctrl-K global shortcut + custom event from nav
   useEffect(() => {
-    const handle = (e) => {
+    const handleKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen((prev) => !prev);
       }
     };
-    document.addEventListener('keydown', handle);
-    return () => document.removeEventListener('keydown', handle);
+    const handleEvent = () => setSearchOpen(true);
+    document.addEventListener('keydown', handleKey);
+    window.addEventListener('open-search-modal', handleEvent);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      window.removeEventListener('open-search-modal', handleEvent);
+    };
   }, []);
 
   return (

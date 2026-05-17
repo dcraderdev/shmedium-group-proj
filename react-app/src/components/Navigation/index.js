@@ -20,6 +20,7 @@ import bellIcon from '../../public/bell-icon.svg';
 // import blackBellIcon from '../../public/black-bell.svg';
 import magnifyGlass from '../../public/magnify-glass.svg';
 import magnifyGlassBlack from '../../public/magnify-glass-black.svg';
+import NotificationBell from './NotificationBell';
 
 const colorSchemes = {
   '/': ['nav-yellow', 'nav-white', 'button-black', 'button-green'],
@@ -145,7 +146,6 @@ function Navigation() {
       setIsHomePage(true);
     }
 
-  console.log(navColor);
 
 
     // Initialize with the default color scheme
@@ -321,6 +321,9 @@ function Navigation() {
     commitSearch(search);
   };
 
+  const openSearchModal = () =>
+    window.dispatchEvent(new CustomEvent('open-search-modal'));
+
   if (!isLoaded) {
     return null;
   }
@@ -383,11 +386,14 @@ function Navigation() {
                       onFocus={() => search.length >= 2 && setShowSuggestions(
                         suggestions.stories.length > 0 || suggestions.authors.length > 0 || suggestions.tags.length > 0
                       )}
-                      placeholder={'Search Medium'}
+                      placeholder={'Search Shmedium'}
                       autoComplete="off"
                     />
                   </label>
                 </form>
+
+                {/* ⌘K discoverability hint */}
+                {!search && <kbd className="nav-kbd-hint" onClick={openSearchModal}>⌘K</kbd>}
 
                 {showSuggestions && (
                   <div className="suggest-dropdown">
@@ -445,22 +451,24 @@ function Navigation() {
                   </div>
                 )}
               </div>
+
+              {/* Mobile-only search icon (nav-search is hidden on mobile) */}
+              <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
+                <img src={magnifyGlass} alt="search" />
+              </button>
             </div>
 
             {isWritePage ? (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
                 <div
-                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
-                    isWritePage ? 'black' : ''
-                  }`}
+                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} black`}
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}></div>
-
-                  <div className=" memo-text "></div>
+                  <div className="memo-text"></div>
                 </div>
-                <div className="bell-icon-container"></div>
+
+                <NotificationBell showBell={false} />
 
                 <div
                   className={`nav-user-profile-div`}
@@ -471,44 +479,26 @@ function Navigation() {
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
-
                   {user && !user.profileImage && (
                     <div className={`profile-div`} onClick={handleProfileClick}>
                       <img src={quill} alt="user profile icon" />
-                    </div>
-                  )}
-
-                  {!user && (
-                    <div className={`profile-div`} onClick={userOutline}>
-                      <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
                 </div>
               </div>
             ) : (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
                 <div
-                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
-                    isWritePage ? 'black' : ''
-                  }`}
+                  className={`nav-write ${!showWriteButton ? 'hidden' : ''}`}
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}>
-                    <img
-                      className={`write-icon`}
-                      src={writeIcon}
-                      alt="write symbol"
-                    ></img>
+                    <img className={`write-icon`} src={writeIcon} alt="write symbol" />
                   </div>
+                  <div className="memo-text">Write</div>
+                </div>
 
-                  <div className=" memo-text ">Write</div>
-                </div>
-                <div className="bell-icon-container">
-                  {showWriteButton && (
-                    <img src={bellIcon} alt="write symbol"></img>
-                  )}
-                </div>
+                <NotificationBell showBell={showWriteButton} />
 
                 <div
                   className={`nav-user-profile-div`}
@@ -519,16 +509,9 @@ function Navigation() {
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
-
                   {user && !user.profileImage && (
                     <div className={`profile-div`} onClick={handleProfileClick}>
                       <img src={quill} alt="user profile icon" />
-                    </div>
-                  )}
-
-                  {!user && (
-                    <div className={`profile-div`} onClick={userOutline}>
-                      <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
                 </div>
@@ -551,8 +534,8 @@ function Navigation() {
 
         {/* Mobile drawer — logged-in */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
           <div className="mobile-nav-item" onClick={(e) => { demoUser(e); setMenuOpen(false); }}>Sign in as Demo</div>
         </div>
@@ -618,11 +601,14 @@ function Navigation() {
                         onFocus={() => search.length >= 2 && setShowSuggestions(
                           suggestions.stories.length > 0 || suggestions.authors.length > 0 || suggestions.tags.length > 0
                         )}
-                        placeholder={'Search Medium'}
+                        placeholder={'Search Shmedium'}
                         autoComplete="off"
                       />
                     </label>
                   </form>
+
+                  {/* ⌘K discoverability hint */}
+                  {!search && <kbd className="nav-kbd-hint" onClick={openSearchModal}>⌘K</kbd>}
 
                   {showSuggestions && (
                     <div className="suggest-dropdown">
@@ -681,21 +667,21 @@ function Navigation() {
                   )}
                 </div>
               )}
+
+              {/* Mobile-only search icon (shown when nav-search is hidden on mobile) */}
+              <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
+                <img src={magnifyGlass} alt="search" />
+              </button>
             </div>
             {isWritePage ? (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
                 <div
-                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
-                    isWritePage ? 'black' : ''
-                  }`}
+                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} black`}
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}></div>
-
-                  <div className=" memo-text "></div>
+                  <div className="memo-text"></div>
                 </div>
-                <div className="bell-icon-container"></div>
 
                 <div
                   className={`nav-user-profile-div`}
@@ -708,27 +694,14 @@ function Navigation() {
               </div>
             ) : (
               <div className={`nav-user-buttons `}>
-                <div className={`nav-bell`} onClick={demoUser}></div>
                 <div
-                  className={`nav-write ${!showWriteButton ? 'hidden' : ''} ${
-                    isWritePage ? 'black' : ''
-                  }`}
+                  className={`nav-write ${!showWriteButton ? 'hidden' : ''}`}
                   onClick={handleWriteClick}
                 >
                   <div className={`write-icon-container`}>
-                    <img
-                      className={`write-icon`}
-                      src={writeIcon}
-                      alt="write symbol"
-                    ></img>
+                    <img className={`write-icon`} src={writeIcon} alt="write symbol" />
                   </div>
-
-                  <div className=" memo-text ">Write</div>
-                </div>
-                <div className="bell-icon-container">
-                  {showWriteButton && (
-                    <img src={bellIcon} alt="write symbol"></img>
-                  )}
+                  <div className="memo-text">Write</div>
                 </div>
 
                 <div
@@ -758,8 +731,8 @@ function Navigation() {
 
         {/* Mobile drawer — logged-out */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
           <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
         </div>
