@@ -135,7 +135,17 @@ const SearchPage = () => {
       <div className="search-page">
         <header className="search-header">
           <h1 className="search-query-title">Search Shmedium</h1>
-          <p className="search-count">Find stories, authors, and topics.</p>
+          <p className="search-count">
+            Find stories, authors, and topics.{' '}
+            <button
+              className="try-link"
+              style={{ fontSize: 13 }}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-search-modal'))}
+            >
+              Press ⌘K
+            </button>{' '}
+            for quick search.
+          </p>
         </header>
         {popular.length > 0 && (
           <section className="popular-section">
@@ -193,7 +203,7 @@ const SearchPage = () => {
             aria-pressed={type === key}
           >
             {label}
-            {results && (
+            {results && !loading && (
               <span className="pill-count">{count.toLocaleString()}</span>
             )}
           </button>
@@ -203,6 +213,7 @@ const SearchPage = () => {
       {/* Sort buttons — only on stories/tags tabs */}
       {(type === 'stories' || type === 'tags') && query && (
         <div className="sort-row" aria-label="Sort results">
+          <span className="sort-label">Sort by</span>
           {[
             { key: 'relevance', label: 'Relevance' },
             { key: 'recent',    label: 'Recent'    },

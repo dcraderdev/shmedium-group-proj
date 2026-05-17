@@ -108,6 +108,14 @@
   border-color: #1a8917;
 }
 
+.sort-label {
+  font-size: 12px;
+  color: #999;
+  font-family: 'Helvetica Neue', sans-serif;
+  align-self: center;
+  margin-right: 2px;
+}
+
 /* ── Skeleton loading ── */
 @keyframes skeleton-pulse {
   0%   { opacity: 1; }

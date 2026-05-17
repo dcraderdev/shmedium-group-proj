@@ -371,6 +371,11 @@ color: #878787;
   background: #e8e8e8;
 }
 
+.nav-search:focus-within .nav-kbd-hint {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Mobile-only search icon button */
 .nav-mobile-search-btn {
   display: none;
