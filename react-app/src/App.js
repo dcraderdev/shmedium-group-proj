@@ -52,7 +52,6 @@ function AnimatedRoutes() {
 
 function App() {
   const dispatch = useDispatch();
-  const [isLoaded, setIsLoaded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { modal } = useContext(ModalContext);
 
@@ -61,7 +60,7 @@ function App() {
     // Runs in parallel with authenticate so FeedPage has data ready by the
     // time the auth check resolves and isLoaded flips to true.
     dispatch(initialLoad());
-    dispatch(authenticate()).then(() => setIsLoaded(true));
+    dispatch(authenticate());
   }, [dispatch]);
 
   const openSearch  = useCallback(() => setSearchOpen(true),  []);
@@ -112,12 +111,10 @@ function App() {
         </div>
       )}
 
-      {isLoaded && <Navigation />}
-      {isLoaded && (
-        <Suspense fallback={null}>
-          <AnimatedRoutes />
-        </Suspense>
-      )}
+      <Navigation />
+      <Suspense fallback={null}>
+        <AnimatedRoutes />
+      </Suspense>
     </>
   );
 }

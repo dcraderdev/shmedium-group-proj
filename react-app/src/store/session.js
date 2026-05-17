@@ -2,6 +2,7 @@
 // constants
 import {SUBSCRIBED_STORIES, FOLLOW_AUTHOR, UNFOLLOW_AUTHOR} from './story'
 const SET_USER = "session/SET_USER";
+const AUTH_CHECKED = "session/AUTH_CHECKED";
 const REMOVE_USER = "session/REMOVE_USER";
 const PATCH_USER = "session/PATCH_USER";
 const NEW_SEARCH = "session/NEW_SEARCH";
@@ -55,7 +56,7 @@ const setSuggestionsAction = (data) => ({
 
 
 
-const initialState = { user: null, search: {}, currentFeed: 'for you', subFeed: null, subscribedStories: [], followedAuthorIds: [], suggestions: { stories: [], authors: [], tags: [] } };
+const initialState = { user: null, authChecked: false, search: {}, currentFeed: 'for you', subFeed: null, subscribedStories: [], followedAuthorIds: [], suggestions: { stories: [], authors: [], tags: [] } };
 
 export const authenticate = () => async (dispatch) => {
 	const response = await fetch("/api/auth/", {
@@ -65,12 +66,11 @@ export const authenticate = () => async (dispatch) => {
 	});
 	if (response.ok) {
 		const data = await response.json();
-		if (data.errors) {
-			return;
+		if (!data.errors) {
+			dispatch(setUser(data));
 		}
-
-		dispatch(setUser(data));
 	}
+	dispatch({ type: AUTH_CHECKED });
 };
 
 export const signin = (credentials) => async (dispatch) => {
@@ -198,8 +198,10 @@ export default function reducer(state = initialState, action) {
 		
 			case PATCH_USER:
 			return { ...newState, user: newState.user ? { ...newState.user, ...action.payload } : newState.user };
+		case AUTH_CHECKED:
+			return { ...newState, authChecked: true };
 		case REMOVE_USER:
-			return initialState;
+			return { ...initialState, authChecked: true };
 		case NEW_SEARCH:
 			const newSearch = {...newState.search}
 			newSearch[action.payload.search] = action.payload

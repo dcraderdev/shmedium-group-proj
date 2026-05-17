@@ -35,18 +35,20 @@ function notificationText(n) {
 function NotificationsPage() {
   const dispatch = useDispatch();
   const history = useHistory();
-  const user = useSelector((s) => s.session.user);
+  const user        = useSelector((s) => s.session.user);
+  const authChecked = useSelector((s) => s.session.authChecked);
   const { notifications, unreadCount } = useSelector((s) => s.notifications);
   const [digestFreq, setDigestFreq] = useState(user?.digestFrequency || 'none');
   const [digestSaved, setDigestSaved] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && authChecked) {
       history.push('/');
       return;
     }
+    if (!user) return;
     dispatch(fetchAllNotifications());
-  }, [dispatch, user, history]);
+  }, [dispatch, user, authChecked, history]);
 
   useEffect(() => {
     if (user) setDigestFreq(user.digestFrequency || 'none');

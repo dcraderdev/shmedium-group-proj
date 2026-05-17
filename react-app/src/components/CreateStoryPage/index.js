@@ -148,7 +148,8 @@ const CreateStoryPage = () => {
   const { id } = useParams();
   const fileInputRef = useRef(null);
 
-  const user = useSelector((state) => state.session.user);
+  const user        = useSelector((state) => state.session.user);
+  const authChecked = useSelector((state) => state.session.authChecked);
   const allTags = useSelector((state) => state.story.tags);
   const currentStory = useSelector((state) => state.story.currentStory);
 
@@ -187,10 +188,10 @@ const CreateStoryPage = () => {
     return () => window.removeEventListener('beforeunload', handle);
   }, [isDirty]);
 
-  // Redirect if not logged in
+  // Redirect if not logged in (only after auth check completes)
   useEffect(() => {
-    if (!user) history.push('/home');
-  }, [user]);
+    if (!user && authChecked) history.push('/home');
+  }, [user, authChecked]);
 
   // Ensure tags are loaded for the publish modal
   useEffect(() => {

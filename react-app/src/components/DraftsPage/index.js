@@ -21,8 +21,9 @@ function fmtDate(iso) {
 export default function DraftsPage() {
   const dispatch = useDispatch();
   const history  = useHistory();
-  const user     = useSelector((state) => state.session.user);
-  const drafts   = useSelector((state) => state.story.drafts);
+  const user        = useSelector((state) => state.session.user);
+  const authChecked = useSelector((state) => state.session.authChecked);
+  const drafts      = useSelector((state) => state.story.drafts);
 
   const [loading,       setLoading]       = useState(true);
   const [creating,      setCreating]      = useState(false); // new story in flight
@@ -30,7 +31,8 @@ export default function DraftsPage() {
   const [confirmDelete, setConfirmDelete] = useState(null);  // id awaiting confirm
 
   useEffect(() => {
-    if (!user) { history.push('/home'); return; }
+    if (!user && authChecked) { history.push('/home'); return; }
+    if (!user) return;
     (async () => {
       setLoading(true);
       await dispatch(storyActions.getDrafts());
