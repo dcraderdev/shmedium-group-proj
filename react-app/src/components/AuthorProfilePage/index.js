@@ -326,7 +326,6 @@ export default function AuthorProfilePage() {
     return (
       <div className="apc-root">
         <div className="apc-skeleton-hero" />
-        <div className="apc-skeleton-stats" />
         <div className="apc-skeleton-body" />
       </div>
     );
@@ -379,32 +378,6 @@ export default function AuthorProfilePage() {
               </button>
             ) : null}
           </div>
-        </div>
-      </div>
-
-      {/* ── Stat row ── */}
-      <div className="apc-stats">
-        <div className="apc-stat">
-          <span className="apc-stat-value">{profile.totalStories ?? '—'}</span>
-          <span className="apc-stat-label">Stories</span>
-        </div>
-        <div className="apc-stat">
-          <span className="apc-stat-value">
-            {profile.totalWords != null
-              ? profile.totalWords >= 1000
-                ? `${(profile.totalWords / 1000).toFixed(1)}k`
-                : profile.totalWords
-              : '—'}
-          </span>
-          <span className="apc-stat-label">Words written</span>
-        </div>
-        <div className="apc-stat">
-          <span className="apc-stat-value">{profile.totalClaps ?? '—'}</span>
-          <span className="apc-stat-label">Claps received</span>
-        </div>
-        <div className="apc-stat">
-          <span className="apc-stat-value">{profile.numFollowers ?? 0}</span>
-          <span className="apc-stat-label">Followers</span>
         </div>
       </div>
 

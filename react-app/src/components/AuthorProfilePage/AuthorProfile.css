@@ -112,34 +112,6 @@
 
 .apc-btn-follow:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ── Stats bar ─────────────────────────────────────────────────────── */
-
-.apc-stats {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  padding: 24px 40px;
-  background: var(--color-card);
-  border-bottom: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.apc-stat { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-
-.apc-stat-value {
-  font-size: 1.65rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.apc-stat-label {
-  font-size: 0.73rem;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 /* ── Tabs bar ──────────────────────────────────────────────────────── */
 
 .apc-tabs-sticky {
@@ -352,13 +324,6 @@
 
 .apc-skeleton-hero {
   height: 340px;
-  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
-  background-size: 200% 100%;
-  animation: apc-shimmer 1.4s infinite;
-}
-
-.apc-skeleton-stats {
-  height: 80px;
   background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: apc-shimmer 1.4s infinite;
@@ -667,7 +632,6 @@
   .apc-hero { height: 280px; }
   .apc-hero-content { padding: 0 20px 24px; }
   .apc-name { font-size: 1.6rem; }
-  .apc-stats { gap: 32px; padding: 18px 20px; }
   .apc-tabs-bar { padding: 0 16px; }
   .apc-tab { padding: 12px 12px; font-size: 0.85rem; }
   .apc-tab-content { padding: 24px 16px 48px; }
