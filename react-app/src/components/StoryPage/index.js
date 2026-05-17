@@ -30,10 +30,35 @@ const nodeText = (node) => {
   return '';
 };
 
-// Add stable slug IDs to h2/h3; preserve inner HTML via domToReact
+// Downsize known CDN image URLs so the browser doesn't fetch 3000px originals
+const resizeCdnUrl = (src) => {
+  if (!src) return src;
+  if (src.includes('images.pexels.com')) {
+    return src
+      .replace(/([?&])w=\d+/, '$1w=1200')
+      .replace(/[?&]h=\d+/, '')
+      .replace(/[?&]dpr=\d+/, '');
+  }
+  return src;
+};
+
+// Add stable slug IDs to h2/h3; lazy-load + resize embedded content images
 const parseOpts = {
   replace(domNode) {
     if (domNode.type !== 'tag') return;
+    if (domNode.name === 'img') {
+      const { src, alt, style, ...rest } = domNode.attribs || {};
+      return (
+        <img
+          {...rest}
+          src={resizeCdnUrl(src)}
+          alt={alt || ''}
+          style={style ? { maxWidth: '100%', ...style } : { maxWidth: '100%' }}
+          loading="lazy"
+          decoding="async"
+        />
+      );
+    }
     if (!['h2', 'h3'].includes(domNode.name)) return;
     const id = slugify(nodeText(domNode));
     const Tag = domNode.name;
