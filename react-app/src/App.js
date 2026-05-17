@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback, lazy, Suspense } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { authenticate } from './store/session';
 import Navigation from './components/Navigation';
@@ -25,6 +25,29 @@ const SigninModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './co
 const SignupModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SignupModal'));
 const ProfileButtonModal = lazy(() => import(/* webpackChunkName: "modal-profile" */ './components/ProfileButtonModal'));
 const StoryOptionsModal = lazy(() => import(/* webpackChunkName: "modal-options" */ './components/StoryOptionsModal'));
+
+// Wraps routes in a keyed div so CSS page-enter animation fires on every navigation
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-enter">
+      <Switch location={location}>
+        <Route path="/home" exact><FeedPage /></Route>
+        <Route path="/about" exact><OurStoryPage /></Route>
+        <Route path="/write" exact><WritePage /></Route>
+        <Route path="/story/:id" exact><StoryPage /></Route>
+        <Route path="/author/:id" exact><AuthorProfilePage /></Route>
+        <Route path="/drafts" exact><DraftsPage /></Route>
+        <Route path="/create" exact><CreateStoryPage /></Route>
+        <Route path="/create/:id/edit" exact><CreateStoryPage /></Route>
+        <Route path="/search" exact><SearchPage /></Route>
+        <Route path="/notifications" exact><NotificationsPage /></Route>
+        <Route path="/" exact><HomePage /></Route>
+        <Route><NotFound /></Route>
+      </Switch>
+    </div>
+  );
+}
 
 function App() {
   const dispatch = useDispatch();
@@ -82,55 +105,7 @@ function App() {
       {isLoaded && <Navigation />}
       {isLoaded && (
         <Suspense fallback={null}>
-          <Switch>
-            <Route path="/home" exact>
-              <FeedPage />
-            </Route>
-
-            <Route path="/about" exact>
-              <OurStoryPage />
-            </Route>
-
-            <Route path="/write" exact>
-              <WritePage />
-            </Route>
-
-            <Route path="/story/:id" exact>
-              <StoryPage />
-            </Route>
-
-            <Route path="/author/:id" exact>
-              <AuthorProfilePage />
-            </Route>
-
-            <Route path="/drafts" exact>
-              <DraftsPage />
-            </Route>
-
-            <Route path="/create" exact>
-              <CreateStoryPage />
-            </Route>
-
-            <Route path="/create/:id/edit" exact>
-              <CreateStoryPage />
-            </Route>
-
-            <Route path="/search" exact>
-              <SearchPage />
-            </Route>
-
-            <Route path="/notifications" exact>
-              <NotificationsPage />
-            </Route>
-
-            <Route path="/" exact>
-              <HomePage />
-            </Route>
-
-            <Route>
-              <NotFound />
-            </Route>
-          </Switch>
+          <AnimatedRoutes />
         </Suspense>
       )}
     </>

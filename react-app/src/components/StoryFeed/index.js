@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -9,9 +9,10 @@ import * as storyActions from '../../store/story';
 import StoryTileTwo from '../StoryTileTwo';
 import AuthorTile from '../AuthorTile';
 import StoryTileFourSkeleton from '../StoryTileFourSkeleton';
+import StoryTileTwoSkeleton from '../StoryTileTwoSkeleton';
 import magnifyGlass from '../../public/magnify-glass.svg';
 
-
+const BATCH = 10;
 
 const EMPTY_MESSAGES = {
   following: {
@@ -34,7 +35,6 @@ const EMPTY_MESSAGES = {
   },
 };
 
-
 const StoryFeed = () => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -50,8 +50,17 @@ const StoryFeed = () => {
 
   const [feedContent, setFeedContent] = useState(null);
   const [showSubMenu, setShowSubMenu] = useState(false);
+  const [displayCount, setDisplayCount] = useState(BATCH);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  const sentinelRef = useRef(null);
 
+  // Reset display count when feed changes
+  useEffect(() => {
+    setDisplayCount(BATCH);
+  }, [currentFeed, subFeed]);
+
+  // Build feedContent from redux state
   useEffect(() => {
     const updateFeedContent = () => {
       if (currentFeed === 'for you') {
@@ -79,6 +88,26 @@ const StoryFeed = () => {
     updateFeedContent();
   }, [currentFeed, subFeed, searchResults, stories, userStories, subscribedStories, dispatch]);
 
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !feedContent || displayCount >= feedContent.length || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setDisplayCount(c => c + BATCH);
+            setIsLoadingMore(false);
+          }, 450);
+        }
+      },
+      { rootMargin: '200px', threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [feedContent, displayCount, isLoadingMore]);
 
   const handleSelectFeed = (feed) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -98,7 +127,6 @@ const StoryFeed = () => {
     dispatch(sessionActions.removeSearch(searchQuery));
   };
 
-  // Determine empty state messaging
   const emptyMeta = EMPTY_MESSAGES[currentFeed] || EMPTY_MESSAGES.default;
   const handleEmptyCta = () => {
     if (emptyMeta.ctaRoute) {
@@ -111,11 +139,13 @@ const StoryFeed = () => {
 
   const isStoriesEmpty = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length === 0;
   const hasStories = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length > 0;
+  const visibleContent = feedContent ? feedContent.slice(0, displayCount) : null;
+  const hasMore = feedContent && displayCount < feedContent.length;
 
   return (
     <div className="storyfeed-container">
 
-      {/* ── Primary nav tabs ── */}
+
       <nav className="feed-nav flexcenter">
         <div className="feed-select-container">
           <div
@@ -168,10 +198,13 @@ const StoryFeed = () => {
               </div>
             </div>
           ))}
+              </div>
+            </div>
+          ))}
         </div>
       </nav>
 
-      {/* ── Sub-feed tabs (Stories / Authors / Tags) ── */}
+
       <div className={`feed-header ${showSubMenu ? 'extended' : 'hidden'}`}>
         <nav className="search-nav flexcenter">
           <div className="feed-select-container">
@@ -197,7 +230,7 @@ const StoryFeed = () => {
         </nav>
       </div>
 
-      {/* ── Loading skeletons ── */}
+      {/* Loading skeletons */}
       {!loaded && (
         <div>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -206,32 +239,32 @@ const StoryFeed = () => {
         </div>
       )}
 
-      {/* ── Authors tab ── */}
-      {loaded && subFeed === 'authors' && currentFeed && feedContent &&
-        feedContent.map((author) => <AuthorTile key={author.id} author={author} />)
+      {/* Authors tab */}
+      {loaded && subFeed === 'authors' && currentFeed && visibleContent &&
+        visibleContent.map((author) => <AuthorTile key={author.id} author={author} />)
       }
 
-      {/* ── Stories list ── */}
+      {/* Stories list with featured first card */}
       {hasStories && (
         <div className="feed-stories-list">
-          {feedContent[0] && (
+          {visibleContent[0] && (
             <>
               <div className="feed-section-label">Featured</div>
-              <StoryTileTwo key={feedContent[0].id || 0} story={feedContent[0]} featured />
-              {feedContent.length > 1 && (
+              <StoryTileTwo key={visibleContent[0].id || 0} story={visibleContent[0]} featured />
+              {visibleContent.length > 1 && (
                 <div className="feed-section-label feed-section-label--more">
                   More stories
                 </div>
               )}
             </>
           )}
-          {feedContent.slice(1).map((story, i) => (
+          {visibleContent.slice(1).map((story, i) => (
             <StoryTileTwo key={story.id || i + 1} story={story} />
           ))}
         </div>
       )}
 
-      {/* ── Empty state ── */}
+      {/* Empty state */}
       {isStoriesEmpty && (
         <div className="feed-empty-state">
           <div className="feed-empty-icon">
@@ -246,6 +279,19 @@ const StoryFeed = () => {
             {emptyMeta.cta}
           </button>
         </div>
+      )}
+
+      {/* Infinite scroll: loading skeletons */}
+      {isLoadingMore && (
+        <>
+          <StoryTileTwoSkeleton />
+          <StoryTileTwoSkeleton />
+        </>
+      )}
+
+      {/* Sentinel triggers next batch */}
+      {loaded && hasMore && !isLoadingMore && (
+        <div ref={sentinelRef} style={{ height: 1, marginBottom: 40 }} />
       )}
 
     </div>

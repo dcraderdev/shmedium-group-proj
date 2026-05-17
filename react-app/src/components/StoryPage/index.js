@@ -59,10 +59,34 @@ const StoryPage = () => {
 
   const contentRef = useRef(null);
   const commentsRef = useRef(null);
+  const topOptionsRef = useRef(null);
 
   const readingTime = story ? Math.max(1, Math.round((story.wordCount || 0) / 200)) : null;
 
+  const [clapFloats, setClapFloats] = useState([]);
+  const [clapBouncing, setClapBouncing] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const el = topOptionsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [story]);
+
   const handleClapClick = async () => {
+    // Bounce animation
+    setClapBouncing(true);
+    setTimeout(() => setClapBouncing(false), 500);
+    // Float label
+    const floatId = Date.now();
+    setClapFloats(prev => [...prev, floatId]);
+    setTimeout(() => setClapFloats(prev => prev.filter(f => f !== floatId)), 800);
+
     const response = await dispatch(storyActions.clapStory(id));
     if (response?.error) alert('Sorry, you cannot clap your own stories.');
   };
@@ -221,17 +245,23 @@ const StoryPage = () => {
               </div>
 
               {/* Top options bar */}
-              <div className="options-bar">
+              <div className="options-bar" ref={topOptionsRef}>
                 <div className="clap-container">
                   {user?.id !== story.authorInfo?.id && (
-                    <button className="unclap-button" onClick={handleUnclapClick}>-</button>
+                    <button className="unclap-button" onClick={handleUnclapClick}>−</button>
                   )}
-                  <div className="clap-content">
+                  <div className="clap-content" style={{ position: 'relative' }}>
                     <img src={claps} alt="claps" className="claps-icon" />
                     <div className="claps-count">{story.claps}</div>
+                    {clapFloats.map(id => (
+                      <span key={id} className="clap-float-label">+1</span>
+                    ))}
                   </div>
                   {user?.id !== story.authorInfo?.id && (
-                    <button className="clap-button" onClick={handleClapClick}>+</button>
+                    <button
+                      className={`clap-button${clapBouncing ? ' bouncing' : ''}`}
+                      onClick={handleClapClick}
+                    >+</button>
                   )}
                 </div>
 
@@ -306,14 +336,20 @@ const StoryPage = () => {
               <div className="options-bar">
                 <div className="clap-container">
                   {user?.id !== story.authorInfo?.id && (
-                    <button className="unclap-button" onClick={handleUnclapClick}>-</button>
+                    <button className="unclap-button" onClick={handleUnclapClick}>−</button>
                   )}
-                  <div className="clap-content">
+                  <div className="clap-content" style={{ position: 'relative' }}>
                     <img src={claps} alt="claps" className="claps-icon" />
                     <div className="claps-count">{story.claps}</div>
+                    {clapFloats.map(id => (
+                      <span key={`b-${id}`} className="clap-float-label">+1</span>
+                    ))}
                   </div>
                   {user?.id !== story.authorInfo?.id && (
-                    <button className="clap-button" onClick={handleClapClick}>+</button>
+                    <button
+                      className={`clap-button${clapBouncing ? ' bouncing' : ''}`}
+                      onClick={handleClapClick}
+                    >+</button>
                   )}
                 </div>
 
@@ -410,7 +446,7 @@ const StoryPage = () => {
         />
       )}
 
-      {/* Sticky author mini-bar (top, after scroll) */}
+      {/* Sticky author mini-bar (desktop, after scroll) */}
       {story && (
         <StickyAuthorBar
           author={author}
@@ -420,6 +456,20 @@ const StoryPage = () => {
           claps={story.claps}
           onClap={handleClapClick}
         />
+      )}
+
+      {/* Sticky mobile claps bar — mobile only, slides up after scrolling past top options */}
+      {story && showStickyBar && user?.id !== story.authorInfo?.id && (
+        <div className="sticky-claps-bar">
+          <div className="sticky-claps-content">
+            <img src={claps} alt="claps" className="sticky-claps-icon" />
+            <span>{story.claps}</span>
+          </div>
+          <div className="sticky-clap-actions">
+            <button className="sticky-unclap-btn" onClick={handleUnclapClick}>−</button>
+            <button className="sticky-clap-btn" onClick={handleClapClick}>+</button>
+          </div>
+        </div>
       )}
     </>
   );

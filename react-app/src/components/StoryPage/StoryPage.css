@@ -396,6 +396,79 @@
   border-top: 1px solid var(--color-border);
 }
 
+/* ── Sticky mobile claps bar ──────────────────────────────────────────── */
+
+@keyframes stickyBarSlide {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.sticky-claps-bar {
+  display: none;
+}
+
+@media screen and (max-width: 640px) {
+  .sticky-claps-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #fff;
+    border-top: 1px solid #e8e8e8;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+    padding: 0 20px;
+    z-index: 50;
+    animation: stickyBarSlide 0.22s ease-out both;
+  }
+
+  .sticky-claps-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #292929;
+  }
+
+  .sticky-claps-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sticky-clap-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sticky-clap-btn,
+  .sticky-unclap-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid #d0d0d0;
+    background: #fff;
+    font-size: 22px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .sticky-clap-btn:hover { border-color: #1a8917; color: #1a8917; }
+  .sticky-unclap-btn:hover { border-color: #c0392b; color: #c0392b; }
+
+  .story-layout {
+    padding-bottom: 64px;
+  }
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 640px) {
