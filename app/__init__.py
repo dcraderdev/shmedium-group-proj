@@ -124,22 +124,20 @@ def initial_load():
     return response
 
 
+VERCEL_FRONTEND = 'https://shmedium-frontend.vercel.app'
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def react_root(path):
-    """
-    This route will direct to the public directory in our
-    react builds in the production environment for favicon
-    or index.html requests
-    """
     if path == 'medium-logo-circles-white.jpeg':
         return app.send_from_directory('public', 'medium-logo-circles-white.jpeg')
-    return app.send_static_file('index.html')
+    dest = f"{VERCEL_FRONTEND}/{path}" if path else VERCEL_FRONTEND
+    return redirect(dest, code=301)
 
 
 @app.errorhandler(404)
 def not_found(e):
-    return app.send_static_file('index.html')
+    return redirect(VERCEL_FRONTEND, code=301)
 
 
 def _warmup_cache():
