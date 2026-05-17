@@ -7,6 +7,7 @@ import Navigation from './components/Navigation';
 import { ModalContext } from './context/ModalContext';
 
 // Route-level chunks — each becomes its own JS file, loaded only when visited
+const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './components/NotFound'));
 const HomePage = lazy(() => import(/* webpackChunkName: "home" */ './components/HomePage'));
 const FeedPage = lazy(() => import(/* webpackChunkName: "feed", webpackPrefetch: true */ './components/FeedPage'));
 const OurStoryPage = lazy(() => import(/* webpackChunkName: "about" */ './components/OurStoryPage'));
@@ -96,6 +97,10 @@ function App() {
 
             <Route path="/" exact>
               <HomePage />
+            </Route>
+
+            <Route>
+              <NotFound />
             </Route>
           </Switch>
         </Suspense>
