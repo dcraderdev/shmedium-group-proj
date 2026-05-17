@@ -161,3 +161,15 @@
   color: #888;
   line-height: 1.5;
 }
+
+@media screen and (max-width: 640px) {
+  .notif-page-inner { padding: 24px 16px; }
+  .notif-page-header h1 { font-size: 22px; }
+  .notif-item:hover {
+    margin: 0;
+    padding: 16px 0;
+    border-radius: 0;
+  }
+  .notif-mark-all-btn { min-height: 44px; padding: 6px 14px; }
+  .notif-digest-controls { flex-direction: column; align-items: flex-start; }
+}

@@ -648,3 +648,37 @@
 
 .apc-btn-save:hover { background: #333; }
 .apc-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Mobile (≤ 640px) ─────────────────────────────────────────────────── */
+
+@media screen and (max-width: 640px) {
+  .apc-hero { height: 240px; }
+
+  .apc-hero-content {
+    padding: 0 16px 20px;
+    gap: 6px;
+  }
+
+  .apc-avatar { width: 56px; height: 56px; }
+
+  .apc-name { font-size: 22px; }
+
+  .apc-bio { font-size: 14px; }
+
+  .apc-stats { padding: 14px 16px; gap: 16px; }
+
+  .apc-tabs-bar {
+    padding: 0 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .apc-tabs-bar::-webkit-scrollbar { display: none; }
+
+  .apc-tab-content { padding: 20px 16px 48px; }
+
+  .apc-tab-content > * { max-width: 100%; }
+
+  .apc-people-list { max-width: 100%; }
+
+  .apc-sort-bar { flex-wrap: wrap; gap: 6px; }
+}

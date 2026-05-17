@@ -203,6 +203,24 @@
 @media screen and (max-width: 600px) {
   .drafts-root { padding: 72px 16px 48px; }
   .drafts-title { font-size: 1.4rem; }
+  .drafts-new-btn { min-height: 44px; padding: 10px 18px; }
+
+  .draft-card { flex-direction: column; align-items: flex-start; gap: 12px; }
   .draft-card-title { font-size: 0.95rem; }
-  .draft-card-actions { flex-direction: column; gap: 6px; margin-left: 12px; }
+
+  .draft-card-actions {
+    flex-direction: row;
+    gap: 8px;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .draft-action-btn {
+    flex: 1;
+    text-align: center;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .drafts-start-btn { min-height: 44px; }
 }
