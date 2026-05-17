@@ -1,179 +1,75 @@
+/* ── Profile dropdown menu ───────────────────────────────────────────── */
+
 .profile-menu {
   position: fixed;
   top: 60px;
   right: 16px;
-  transform: scale(1);
-  border: 1px solid rgb(0, 0, 0, 0.1);
-  border-radius: 5px;
-  box-shadow: rgba(127, 127, 127, 0.9) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-  width: 160px;
+  width: 200px;
   height: fit-content;
-  min-height: 140px;
-  display: flex;
-  flex-direction: column;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   z-index: 411;
-  background-color: white;
-  justify-content: center;
-}
-
-.greeting {
-  font-family: sans-serif;
-  margin-bottom: 10px;
-}
-
-.my-stories,
-.profile-menu-logout-button {
-  margin-bottom: 10px;
-  background-color: #f0f0f0;
-  border-radius: 20px;
-  border: none;
-  padding: 10px 16px;
-  min-height: 44px;
-  cursor: pointer;
-  font-family: sans-serif;
-}
-
-.my-stories:hover,
-.profile-menu-logout-button:hover {
-  transition: all 0.2s;
-  /* background-color: #f2f2f2; */
-  background-color: #e6e6e6
+  overflow: hidden;
 }
 
 .profile-dropdown {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  /* margin: 30px; */
 }
 
-/* .profile-menu-logout-button{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  width: 80%;
-  height: 30%;
-  bottom: 10%;
-  left: 0%;
-  background-color: rgb(74, 113, 186);
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: .1s background-color;
-  font-size: 12px;
-  bottom: 1px;
-} */
-
-/* .profile-menu-logout-button:hover {
-  background-color: red;
-} */
-
-.ghost-button{
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  border-radius: 15px;
-  cursor: pointer;
-  top: 22px;
-  height: 40px;
-  font-size: 13px;
-  right: 32px;
-  width: 80px;
-}
-
-.ghost-button:hover{
-  cursor: pointer;
-}
-
-.div-link {
-  position: relative;
-  transition: background-color 0.2s ease;
-  padding: 5px;
-  left: -40px;
-  width: 230px;
-  border-bottom-left-radius: 1px;
-  border-bottom-right-radius: 1px;
-}
-
-.div-link:hover {
-  background-color: rgba(228, 228, 228, 0.2508);
-}
-
-.div-link:active {
-  background-color: rgb(226, 226, 226);
-}
-
+/* User info header */
 .profile-user-welcome {
-  position: relative;
   display: flex;
-  align-items: center;
-  padding: 20px;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #dcdcdc;
-  padding: 15px;
-  left: -40px;
-  width: 230px;
-  height: 30px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
-.profile-icon {
-  position: relative;
-  left: 160px;
-  top: 0px;
-  transform: scale(2.7);
-}
-
-.profile-hello {
-  width: fit-content;
-  position: absolute;
-  margin-bottom: 4px;
-  left: 3px;
-  font-size: 20px;
+.greeting {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
 }
 
 .profile-email {
-  position: absolute;
-  width: fit-content;
-  left: 5px;
-  top: 45px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Menu items */
+.my-stories,
+.profile-menu-logout-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-family: var(--font-sans);
   font-size: 14px;
-  color: rgb(119, 119, 119);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-.profile-favorites,
-.profile-messages,
-.profile-reservations {
-  position: relative;
-  transition: background-color 0.2s ease;
-  padding: 5px;
-  left: -40px;
-  width: 230px;
-  border-bottom-left-radius: 1px;
-  border-bottom-right-radius: 1px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition);
 }
 
+.my-stories:hover { background: var(--color-bg); }
 
-.profile-messages:hover,
-.profile-reservations:hover {
-  background-color: rgba(228, 228, 228, 0.2508);
+.profile-menu-logout-button {
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-light);
 }
 
-.profile-menu-logout-button:active {
-  transform: scale(.95);
-  background-color: rgb(74, 113, 186);
-
-}
-
-
-.profile-user-welcome:hover{
-  background-color: rgba(228, 228, 228, 0.2508);
-
-}
-
+.profile-menu-logout-button:hover { background: var(--color-bg); }

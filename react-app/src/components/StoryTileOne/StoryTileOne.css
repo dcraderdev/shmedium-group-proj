@@ -21,7 +21,7 @@
   font-family: var(--font-sans);
   font-size: 30px;
   font-weight: 700;
-  color: var(--color-border);
+  color: var(--color-text-tertiary);
   line-height: 1;
   min-width: 36px;
   text-align: right;
@@ -94,7 +94,7 @@
   transition: color var(--transition);
 }
 
-.story-tile-style1:hover .style1-story-title { color: #444; }
+.story-tile-style1:hover .style1-story-title { color: var(--color-text-primary); }
 
 /* Meta row */
 .style1-date-read-time-container {

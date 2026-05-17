@@ -2,22 +2,21 @@
   position: fixed;
   display: flex;
   justify-content: space-between;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   height: 55px;
   width: 100%;
   z-index: 10;
-  border-bottom: black solid 1px ;
-  transition: all .75s;
-  background-color: #fec016;
-} 
-
-
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease;
+  background-color: var(--color-yellow);
+}
 
 .nav-bar.logged {
-  box-shadow: 2px 0  0 2px rgba(73, 73, 73, 1) solid 1px ;
+  background-color: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
   height: 55px;
-} 
+}
 
 
 .get-started{
@@ -175,11 +174,11 @@
 
 
 
-.profile-div{
+.profile-div {
   height: 40px;
   width: 40px;
   border-radius: 50%;
-  border: black solid 1px;
+  border: 1px solid var(--color-border);
   overflow: hidden;
 }
 
@@ -290,13 +289,13 @@ color: #878787;
   }
 
 
-.signup-button{
-  background-color: #a57d00 ;
-  color: white;
+.signup-button {
+  background-color: var(--color-text-primary);
+  color: #fff;
 }
-.signup-button:hover{
-  background-color: #8c6900 ;
-  color: white;
+.signup-button:hover {
+  background-color: #333;
+  color: #fff;
 }
 
 
