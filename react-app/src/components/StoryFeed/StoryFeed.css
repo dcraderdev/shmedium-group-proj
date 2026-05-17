@@ -139,6 +139,60 @@
   height: 55px;
 }
 
+/* ── Feed list wrapper ────────────────────────────── */
+.sf-feed-list {
+  padding: 0 4px;
+}
+
+/* ── Empty state ──────────────────────────────────── */
+.sf-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 12px;
+  text-align: center;
+}
+
+.sf-empty-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.sf-empty-heading {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.sf-empty-sub {
+  margin: 0;
+  font-size: 15px;
+  color: #6b6b6b;
+  max-width: 320px;
+}
+
+.sf-empty-cta {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-family: inherit;
+}
+
+.sf-empty-cta:hover {
+  background: #333;
+}
+
 /* ===== STORY FEED MOBILE ===== */
 
 @media screen and (max-width: 640px) {

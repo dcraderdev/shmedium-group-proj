@@ -5,6 +5,13 @@
   left: 0%;
   position: relative;
   display: flex;
+  padding: 6px 0;
+  transition: transform 0.15s ease;
+  cursor: pointer;
+}
+
+.story-tile-style1:hover {
+  transform: translateY(-1px);
 }
 
 .story-tile-style1:last-child {
@@ -14,10 +21,13 @@
 
 .style1-number{
   width: 50px;
-  font-size: 35px;
-  color: #e6e6e6;
+  font-size: 32px;
+  font-weight: 700;
+  color: #e8e8e8;
+  font-family: Georgia, 'Times New Roman', serif;
   position: relative;
-  top: -5px;
+  top: -4px;
+  flex-shrink: 0;
 }
 
 .style1-content{
@@ -80,8 +90,12 @@
 
 
 
-.style1-story-title{
-  font-weight: bold;
+.style1-story-title {
+  font-weight: 700;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.35;
+  color: #1a1a1a;
 }
 
 .style1-date-read-time-container{
