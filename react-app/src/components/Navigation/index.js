@@ -392,8 +392,12 @@ function Navigation() {
                   </label>
                 </form>
 
-                {/* ⌘K discoverability hint */}
-                {!search && <kbd className="nav-kbd-hint" onClick={openSearchModal}>⌘K</kbd>}
+                {/* ⌘K / Ctrl+K discoverability hint */}
+                {!search && (
+                  <kbd className="nav-kbd-hint" onClick={openSearchModal}>
+                    {/mac/i.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}
+                  </kbd>
+                )}
 
                 {showSuggestions && (
                   <div className="suggest-dropdown">
