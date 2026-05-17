@@ -53,6 +53,8 @@ const StoryPage = () => {
   const [showComments, setShowComments] = useState(false);
   const [following, setFollowing] = useState(false);
   const [tocItems, setTocItems] = useState([]);
+  const [toast, setToast] = useState('');
+  const toastTimer = useRef(null);
 
   const story = useSelector((state) => state.story.currentStory);
   const user = useSelector((state) => state.session.user);
@@ -61,18 +63,24 @@ const StoryPage = () => {
 
   const contentRef = useRef(null);
 
+  const showToast = (msg) => {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(''), 2500);
+  };
+
   // --- Reading time ---
   const readingTime = story ? Math.max(1, Math.round((story.wordCount || 0) / 200)) : null;
 
   // --- Claps ---
   const handleClapClick = async () => {
     const response = await dispatch(storyActions.clapStory(id));
-    if (response?.error) alert('Sorry, you cannot clap your own stories.');
+    if (response?.error) showToast('You can’t clap your own stories.');
   };
 
   const handleUnclapClick = async () => {
     const response = await dispatch(storyActions.unclapStory(id));
-    if (response?.message) alert('Sorry, you do not have any claps to remove.');
+    if (response?.message) showToast('No claps left to remove.');
   };
 
   // --- Follow state ---
@@ -410,6 +418,8 @@ const StoryPage = () => {
           followedCount={followedCount}
         />
       )}
+
+      {toast && <div className="story-toast">{toast}</div>}
     </>
   );
 };

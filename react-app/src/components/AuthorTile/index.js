@@ -100,7 +100,7 @@ const AuthorTile = ({ author }) => {
               </div>
             </div>
 
-            {userId !== author.id || !userId && (
+            {userId && userId !== author.id && (
               <div className='authortile-style1-followers-container'>
                 <div className='authortile-style1-follow-button' onClick={handleFollow}>{following ? 'Unfollow' : 'Follow'}</div>
               </div>
