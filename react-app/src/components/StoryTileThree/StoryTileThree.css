@@ -1,80 +1,84 @@
-.story-tile-style3 {
-  background-color: #fff;
+/* ── Compact card – variant 3 ─────────────────────────────────────────── */
 
-  height: fit-content;
-  width: 99%;
-  left: 0%;
+.story-tile-style3 {
+  width: 100%;
   position: relative;
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 5px;
-  margin-top: 10px;
+  gap: 14px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-card);
+  cursor: pointer;
+  transition: background var(--transition);
 }
 
+.story-tile-style3:last-child { border-bottom: none; }
+.story-tile-style3:hover { background: var(--color-bg); }
 
-
-.style3-content{
-  height: fit-content;
-  margin-left: 20px;
+/* Content */
+.style3-content {
   display: flex;
   flex-direction: column;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
 
-.style3-author-container{
+/* Author row */
+.style3-author-container {
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 240px;
-  height: 30px;
-  margin-bottom: 4px;
+  gap: 8px;
+  height: auto;
 }
 
-.style3-profile-image{
-  width: 30px;
-  height: 30px;
+.style3-profile-image {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid black;
+  border: none;
+  flex-shrink: 0;
+  background: var(--color-border-light);
   cursor: pointer;
 }
-
 
 .style3-profile-image img {
   object-fit: cover;
-  position: relative;
   width: 100%;
   height: 100%;
-  max-height: 300px;
+  display: block;
 }
 
-.style3-author-name{
-  font-size: 14px;
-  position: relative;
-  margin-left: 10px;
-}
-
-
-.style3-story-title:hover,
-.style3-author-name:hover{
+.style3-author-name {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
-.style3-story-title-container{
-  margin-top: 5px;
-  margin-bottom: 5px;
-  height: fit-content;
-  width: 80%;
-  word-break:keep-all;
-  text-overflow: ellipsis;
-  font-weight: bold;
+.style3-author-name:hover { text-decoration: underline; }
+
+/* Title */
+.style3-story-title-container {
+  width: 100%;
 }
-.style3-story-title{
-  width:100%;
+
+.style3-story-title {
+  font-family: var(--font-sans);
   font-size: 15px;
-
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+  transition: color var(--transition);
 }
 
-
-
+.story-tile-style3:hover .style3-story-title { color: #444; }

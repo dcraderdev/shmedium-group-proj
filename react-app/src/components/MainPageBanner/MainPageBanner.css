@@ -1,214 +1,104 @@
-.main-page-banner-container{
+/* ── Homepage hero banner ─────────────────────────────────────────────── */
+
+.main-page-banner-container {
   position: relative;
-  border-bottom: black solid 1px;
-  background-color: #fec016;
+  border-bottom: 1px solid #000;
+  background-color: var(--color-yellow);
   width: 100%;
-  left: 0%;
-  margin-top: 0px;
+  left: 0;
+  margin-top: 0;
   overflow: hidden;
   display: block;
-
 }
 
 .content-container {
-  max-width: 1000px; 
+  max-width: 1000px;
   margin: 0 auto;
 }
 
+/* Heights by breakpoint */
+@media screen and (max-width: 549px)  { .main-page-banner-container { height: 445px; } }
+@media screen and (min-width: 550px)  { .main-page-banner-container { height: 458px; } }
+@media screen and (min-width: 600px)  { .main-page-banner-container { height: 450px; } }
 
-
-@media screen and (max-width: 549px) {
-  .main-page-banner-container{
-    height: 445px;
-  }
-}
-@media screen and (min-width: 550px) {
-  .main-page-banner-container{
-    height: 458px;
-  }
-}
-@media screen and (min-width: 600px) {
-  .main-page-banner-container{
-    height: 450px;
-  }
-}
-
-/* Hide Mmm effects on small screen */
 @media screen and (max-width: 750px) {
-  .mmm-container-container {
-    display: none;
-  }
+  .mmm-container-container { display: none; }
 }
 
+/* ── Headline ─────────────────────────────────────────────────────────── */
 
-
-.stay-curious{
+.stay-curious {
+  font-family: var(--font-serif);
+  font-size: 70px;
+  font-weight: 300;
+  letter-spacing: -4px;
+  line-height: 0.95;
   position: relative;
   width: fit-content;
-  height: fit-content;
-  left: 0%;
+  left: 5%;
   top: 90px;
-  letter-spacing: -4px;
-  font-weight: 300;
-  font-size: 70px;
+  color: var(--color-text-primary);
 }
 
-.discover-stories{
+.discover-stories {
+  font-family: var(--font-sans);
+  font-size: 25px;
   font-weight: 300;
   position: relative;
   width: 90%;
-  height: fit-content;
-  top: 110px;
-  font-size: 25px;
   max-width: 400px;
+  left: 5%;
+  top: 110px;
+  color: var(--color-text-primary);
+  line-height: 1.4;
 }
 
-.start-reading{
+.start-reading {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 500;
   position: relative;
-  border-radius: 20px;
-  background-color: rgba(0, 0, 0, 0.858);
-  color: white;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 200px;
-  height: 44px;
-  left: 0%;
+  height: 46px;
+  left: 5%;
   top: 150px;
   z-index: 1;
-  font-size: 20px;
   cursor: pointer;
+  transition: background var(--transition);
+  letter-spacing: 0.01em;
 }
 
-.start-reading:hover{
-  background-color: black;
-}
+.start-reading:hover { background: #000; }
 
-.stay-curious,
-.discover-stories,
-.start-reading{
-  left: 5%;
-}
+/* ── Breakpoints ─────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 500px) {
-  .stay-curious {
-    font-size: 44px;
-    letter-spacing: -2px;
-    top: 60px;
-  }
-
-  .discover-stories {
-    font-size: 18px;
-    top: 80px;
-    width: 85%;
-  }
-
-  .start-reading {
-    top: 110px;
-    width: 170px;
-    height: 44px;
-    font-size: 18px;
-  }
-
-  .main-page-banner-container {
-    height: 340px !important;
-  }
+  .stay-curious      { font-size: 44px; letter-spacing: -2px; top: 60px; }
+  .discover-stories  { font-size: 18px; top: 80px; width: 85%; }
+  .start-reading     { top: 110px; width: 170px; height: 44px; font-size: 17px; }
+  .main-page-banner-container { height: 340px !important; }
 }
 
 @media screen and (min-width: 501px) and (max-width: 768px) {
-  .stay-curious {
-    font-size: 56px;
-    top: 70px;
-  }
-
-  .discover-stories {
-    top: 100px;
-  }
-
-  .start-reading {
-    top: 130px;
-  }
+  .stay-curious     { font-size: 56px; top: 70px; }
+  .discover-stories { top: 100px; }
+  .start-reading    { top: 130px; }
 }
 
-
-
-
 @media screen and (min-width: 550px) {
-  .stay-curious{
-    font-size: 80px;
-  }
-  .discover-stories{
-    font-size: 25px;
-    width: 400px;
-
-  }
-  .start-reading{
-    font-size: 20px;
-    top: 125px;
-  }
+  .stay-curious     { font-size: 80px; }
+  .discover-stories { font-size: 25px; width: 400px; }
+  .start-reading    { font-size: 19px; top: 125px; }
 }
 
 @media screen and (min-width: 850px) {
-  .stay-curious{
-    font-size: 100px;
-  }
-  .discover-stories{
-    font-size: 25px;
-    width: 400px;
-
-
-  }
-  .start-reading{
-    font-size: 20px;
-    top: 150px;
-
-  }
-}
-
-
-
-/*
-width: fit-content;
-text-align: center;
-font-size: 8vw;
-line-height: 0.9; */
-
-@media screen and (max-width: 500px) {
-  .stay-curious {
-    font-size: 44px;
-    letter-spacing: -2px;
-    top: 60px;
-  }
-
-  .discover-stories {
-    font-size: 18px;
-    top: 80px;
-    width: 85%;
-  }
-
-  .start-reading {
-    top: 110px;
-    width: 170px;
-    height: 44px;
-    font-size: 18px;
-  }
-
-  .main-page-banner-container {
-    height: 340px !important;
-  }
-}
-
-@media screen and (min-width: 501px) and (max-width: 768px) {
-  .stay-curious {
-    font-size: 56px;
-    top: 70px;
-  }
-
-  .discover-stories {
-    top: 100px;
-  }
-
-  .start-reading {
-    top: 130px;
-  }
+  .stay-curious     { font-size: 100px; }
+  .discover-stories { font-size: 25px; width: 400px; }
+  .start-reading    { top: 150px; }
 }
