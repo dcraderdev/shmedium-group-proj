@@ -36,13 +36,9 @@ def upgrade():
     if bind.dialect.name == 'postgresql':
         table = f"{prefix}stories"
         op.execute(
-            f"""
-            CREATE INDEX IF NOT EXISTS ix_stories_fts ON {table}
-            USING gin(
-                setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-                setweight(to_tsvector('english', coalesce(content, '')), 'B')
-            )
-            """
+            f"CREATE INDEX IF NOT EXISTS ix_stories_fts ON {table} USING gin("
+            f"(setweight(to_tsvector('english', coalesce(title, '')), 'A') || "
+            f"setweight(to_tsvector('english', coalesce(content, '')), 'B')))"
         )
 
 
