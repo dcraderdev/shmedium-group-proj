@@ -1,79 +1,79 @@
+/* ── Slide-over comment panel ─────────────────────────────────────────── */
+
 .comment-panel {
-    transform: translateX(100%);
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 380px;
-    transition: transform 0.45s cubic-bezier(0.32, 0, 0.67, 0);
-    background-color: #fff;
-    box-shadow: -4px 0 24px rgba(0,0,0,0.12);
-    z-index: 100;
-    overflow-y: auto;
-    padding: 28px 28px 48px;
-    box-sizing: border-box;
+  transform: translateX(100%);
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 380px;
+  transition: transform 0.45s cubic-bezier(0.32, 0, 0.67, 0);
+  background: var(--color-card);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 28px 28px 48px;
+  box-sizing: border-box;
 }
 
 @media screen and (max-width: 640px) {
-  .comment-panel {
-    width: 100%;
-  }
-}
-
-.comment-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #757575;
-    transition: color 0.15s;
-}
-
-.comment-button:hover { color: #1a1a1a; }
-
-.comment-icon {
-    margin-right: 3px;
+  .comment-panel { width: 100%; }
 }
 
 .comment-panel-open {
-    transform: translateX(0);
-    transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
+  transform: translateX(0);
+  transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .comment-panel-closed {
-    transform: translateX(100%);
-    transition: transform 0.45s cubic-bezier(0.32, 0, 0.67, 0);
+  transform: translateX(100%);
+  transition: transform 0.45s cubic-bezier(0.32, 0, 0.67, 0);
 }
 
-/* for some reason, in the jsx for this one, it has to be "class" and not "className" */
+.comment-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  transition: color var(--transition);
+  font-family: var(--font-sans);
+}
+
+.comment-button:hover { color: var(--color-text-primary); }
+
+.comment-icon { margin-right: 3px; }
+
 .responses {
-    /* font-weight: lighter; */
-    margin: 20px;
-    font-size: 20px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: var(--color-text-primary);
 }
 
-.new-comment {
-    margin: 30px;
-}
+.new-comment { margin: 0 0 20px; }
 
 .most-relevant {
-    margin-bottom: 20px;
-    font-weight: bold;
-    font-size: 14px;
+  margin-bottom: 16px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.posted-comments {
-    /* margin-top: 30px */
-    margin: 20px;
-}
+.posted-comments { margin: 0; }
 
 .signed-out {
-    margin: 20px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    font-size: 16px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 20px;
 }
