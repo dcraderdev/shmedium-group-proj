@@ -13,10 +13,10 @@ import CreatorTile from '../CreatorTile';
 
 const creators = [
   {
-    id:1, name: 'Donovan Crader', username:'Dcraderdev', imageUrl: 'https://avatars.githubusercontent.com/u/90993510?v=4', url:'https://github.com/dcraderdev'
+    id:1, name: 'Donovan Crader', username:'Dcraderdev', imageUrl: 'https://avatars.githubusercontent.com/u/90993510?v=4'
   },
-  { 
-    id:2, name: 'Isaiah Sinnathamby', username:'isaiahxs', imageUrl: 'https://avatars.githubusercontent.com/u/107521578?v=4',url:'https://github.com/isaiahxs'
+  {
+    id:2, name: 'Isaiah Sinnathamby', username:'isaiahxs', imageUrl: 'https://avatars.githubusercontent.com/u/107521578?v=4'
   }
 ]
 

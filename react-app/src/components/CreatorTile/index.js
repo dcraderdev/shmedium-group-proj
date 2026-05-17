@@ -13,18 +13,11 @@ const CreatorTile = ({ creator }) => {
 
   
 
-  const navToGitHub = () => {
-
-    window.location.href = creator.url;
-
-  }
-
-
   return (
     <>
 
 
-    <div className="creatortile-wrapper" onClick={navToGitHub}>
+    <div className="creatortile-wrapper">
       <div className="creatortile-container flex">
         <div className="creatortile-author-container">
         <div className="creatortile-profile-image">
