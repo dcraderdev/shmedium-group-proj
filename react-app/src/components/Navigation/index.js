@@ -92,6 +92,7 @@ function Navigation() {
   const [isWritePage, setIsWritePage] = useState(false);
   const [isHomePage, setIsHomePage] = useState(false);
   const [showWriteButton, setShowWriteButton] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const colors = colorScheme.current;
@@ -131,6 +132,7 @@ function Navigation() {
     setIsLandingPage(false);
     setIsWritePage(false);
     setIsHomePage(false);
+    setMenuOpen(false);
 
 
     if (location.pathname === '/') {
@@ -260,7 +262,7 @@ function Navigation() {
         );
         setHighlightedIdx(-1);
       }
-    }, 300);
+    }, 250);
   }, []);
 
   // Close dropdown when clicking outside
@@ -327,6 +329,7 @@ function Navigation() {
     <>
       {/* // For user logged in */}
       {user && (
+        <>
         <nav
           className={`nav-bar ${isHomePage ? 'logged' : ''} flexcenter ${navColor}`}
         >
@@ -529,10 +532,31 @@ function Navigation() {
                     </div>
                   )}
                 </div>
+
+                {/* Mobile hamburger — logged-in */}
+                <button
+                  className="hamburger-btn"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Open menu"
+                  aria-expanded={menuOpen}
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
               </div>
             )}
           </div>
         </nav>
+
+        {/* Mobile drawer — logged-in */}
+        <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
+          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
+          <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
+          <div className="mobile-nav-item" onClick={(e) => { demoUser(e); setMenuOpen(false); }}>Sign in as Demo</div>
+        </div>
+        </>
       )}
 
 
@@ -545,6 +569,7 @@ function Navigation() {
       {/* // For no user and on any page other than landing */}
 
       {!user && !isLandingPage && (
+        <>
         <nav className={`nav-bar logged flexcenter ${navColor}`}>
           <div className={`nav-buttons memo-text ${buttonStylings}`}>
             <div className="flexcenter">
@@ -714,54 +739,98 @@ function Navigation() {
                     <img src={userOutline} alt="user profile icon" />
                   </div>
                 </div>
+
+                {/* Mobile hamburger — logged-out */}
+                <button
+                  className="hamburger-btn"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Open menu"
+                  aria-expanded={menuOpen}
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
               </div>
             )}
           </div>
         </nav>
+
+        {/* Mobile drawer — logged-out */}
+        <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
+          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
+          <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
+          <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
+        </div>
+        </>
       )}
 
       {/* // For no user and at landing page */}
       {!user && isLandingPage && (
-        <nav className={`nav-bar flexcenter ${navColor}`}>
-          <div className={`nav-buttons memo-text ${buttonStylings}`}>
-            <div className="logo large" onClick={handleLogoClick}>
-              <img src={mediumLogoLarge} alt="medium cirlce logo"></img>
-            </div>
+        <>
+          <nav className={`nav-bar flexcenter ${navColor}`}>
+            <div className={`nav-buttons memo-text ${buttonStylings}`}>
+              <div className="logo large" onClick={handleLogoClick}>
+                <img src={mediumLogoLarge} alt="medium cirlce logo"></img>
+              </div>
 
-            <div className={`nav-link-buttons ${buttonStylings}`}>
-              <div
-                className={`nav-button ${buttonStylings}`}
-                onClick={handleStoryClick}
-              >
-                Our Story
+              <div className={`nav-link-buttons ${buttonStylings}`}>
+                <div
+                  className={`nav-button ${buttonStylings}`}
+                  onClick={handleStoryClick}
+                >
+                  Our Story
+                </div>
+                <div
+                  className={`nav-button ${buttonStylings}`}
+                  onClick={demoUser}
+                >
+                  Demo User
+                </div>
+                <div
+                  className={`nav-button ${buttonStylings}`}
+                  onClick={handleWriteClick}
+                >
+                  Write
+                </div>
+                <div
+                  className={`sign-in-nav-button nav-button2 ${buttonStylings}`}
+                  onClick={handleSigninClick}
+                >
+                  Sign In
+                </div>
+                <div
+                  className={`get-started button ${buttonStyle}`}
+                  onClick={handleSignupClick}
+                >
+                  Get started
+                </div>
               </div>
-              <div
-                className={`nav-button ${buttonStylings}`}
-                onClick={demoUser}
+
+              {/* Mobile hamburger button */}
+              <button
+                className="hamburger-btn"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Open menu"
+                aria-expanded={menuOpen}
               >
-                Demo User
-              </div>
-              <div
-                className={`nav-button ${buttonStylings}`}
-                onClick={handleWriteClick}
-              >
-                Write
-              </div>
-              <div
-                className={`sign-in-nav-button nav-button2 ${buttonStylings}`}
-                onClick={handleSigninClick}
-              >
-                Sign In
-              </div>
-              <div
-                className={`get-started button ${buttonStyle}`}
-                onClick={handleSignupClick}
-              >
-                Get started
-              </div>
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
             </div>
+          </nav>
+
+          {/* Mobile drawer */}
+          <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+            <div className="mobile-nav-item" onClick={() => { handleStoryClick(); setMenuOpen(false); }}>Our Story</div>
+            <div className="mobile-nav-item" onClick={demoUser}>Demo User</div>
+            <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
+            <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
+            <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
           </div>
-        </nav>
+        </>
       )}
     </>
   );

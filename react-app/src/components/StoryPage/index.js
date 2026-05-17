@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 import './StoryPage.css';
 import parse, { domToReact } from 'html-react-parser';
-import CommentPanel from '../CommentPanel';
+import Comments from '../Comments';
 import * as sessionActions from '../../store/session';
 import * as storyActions from '../../store/story';
 import { ModalContext } from '../../context/ModalContext';
@@ -18,11 +18,11 @@ import HighlightClipper from '../HighlightClipper';
 import RelatedStories from '../RelatedStories';
 import AuthorFollowCTA from '../AuthorFollowCTA';
 import BookmarkButton from '../BookmarkButton';
+import StickyAuthorBar from '../StickyAuthorBar';
 
 const slugify = (text) =>
   text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').slice(0, 60);
 
-// Recursively extract plain text from a domhandler node tree
 const nodeText = (node) => {
   if (!node) return '';
   if (node.type === 'text') return node.data || '';
@@ -30,7 +30,6 @@ const nodeText = (node) => {
   return '';
 };
 
-// Add stable slug IDs to h2/h3; preserve inner HTML via domToReact
 const parseOpts = {
   replace(domNode) {
     if (domNode.type !== 'tag') return;
@@ -50,7 +49,6 @@ const StoryPage = () => {
   const [date, setDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [sortedContent, setSortedContent] = useState([]);
-  const [showComments, setShowComments] = useState(false);
   const [following, setFollowing] = useState(false);
   const [tocItems, setTocItems] = useState([]);
 
@@ -60,11 +58,10 @@ const StoryPage = () => {
   const author = useSelector((state) => state.story.currentStory?.authorInfo);
 
   const contentRef = useRef(null);
+  const commentsRef = useRef(null);
 
-  // --- Reading time ---
   const readingTime = story ? Math.max(1, Math.round((story.wordCount || 0) / 200)) : null;
 
-  // --- Claps ---
   const handleClapClick = async () => {
     const response = await dispatch(storyActions.clapStory(id));
     if (response?.error) alert('Sorry, you cannot clap your own stories.');
@@ -75,7 +72,6 @@ const StoryPage = () => {
     if (response?.message) alert('Sorry, you do not have any claps to remove.');
   };
 
-  // --- Follow state ---
   useEffect(() => {
     setFollowing(followedAuthorIds.includes(author?.id));
   }, [author, followedAuthorIds]);
@@ -90,7 +86,10 @@ const StoryPage = () => {
     setFollowing(!following);
   };
 
-  // --- Load story ---
+  const scrollToComments = () => {
+    commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   useEffect(() => {
     const loadStory = async () => {
       setIsLoading(true);
@@ -100,7 +99,6 @@ const StoryPage = () => {
     loadStory();
   }, [id, dispatch]);
 
-  // --- Format date ---
   useEffect(() => {
     if (story?.createdAt) {
       const d = new Date(story.createdAt);
@@ -108,7 +106,6 @@ const StoryPage = () => {
     }
   }, [story]);
 
-  // --- Sort content segments (text + images with optional variants) ---
   useEffect(() => {
     if (!story) return;
     const segments = [];
@@ -127,7 +124,6 @@ const StoryPage = () => {
     setSortedContent(segments);
   }, [story]);
 
-  // --- Extract ToC from rendered headings ---
   useEffect(() => {
     if (!story || isLoading) return;
     const timer = setTimeout(() => {
@@ -143,12 +139,10 @@ const StoryPage = () => {
     return () => clearTimeout(timer);
   }, [story, isLoading, sortedContent]);
 
-  // --- Cleanup on unmount ---
   useEffect(() => {
     return () => { dispatch(storyActions.removeCurrentStory()); };
   }, []);
 
-  // --- Navigation helpers ---
   const navToFeed = (search, subFeed) => {
     dispatch(sessionActions.search(search));
     dispatch(sessionActions.setFeed(search));
@@ -193,27 +187,27 @@ const StoryPage = () => {
           {story && (
             <>
               <h4 className="member-only">
-                <img src={shining_star} alt="shining-star" className="shining-star" />
+                <img src={shining_star} alt="" className="shining-star" />
                 Member-only story
               </h4>
 
               <h1 className="story-title">{story.title}</h1>
 
               {/* Author header */}
-              <div className="author-section flex">
+              <div className="author-section">
                 <img
                   src={story.authorInfo?.profileImage}
-                  alt="author profile icon"
+                  alt="author"
                   className="author-image"
                   loading="lazy"
                   decoding="async"
                   onClick={() => navToAuthorProfile(story.authorInfo?.id)}
                 />
-                <div className="author-information memo-text">
+                <div className="author-information">
                   <div className="author-name-and-follow">
-                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
+                    <span style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
-                    </div>
+                    </span>
                     {user && user.id !== story.authorInfo?.id && (
                       <button className="follow-unfollow-button" onClick={handleFollow}>
                         {following ? ' · Unfollow' : ' · Follow'}
@@ -241,7 +235,9 @@ const StoryPage = () => {
                   )}
                 </div>
 
-                <CommentPanel showComments={showComments} setShowComments={setShowComments} story={story} />
+                <button className="comment-button" onClick={scrollToComments}>
+                  💬 {story.commentCount ?? 0}
+                </button>
 
                 <BookmarkButton
                   storyId={story.id}
@@ -253,16 +249,11 @@ const StoryPage = () => {
                 {user?.id === story.authorInfo?.id && (
                   <img
                     src={triple_dots_icon}
-                    alt="triple-dots-icon"
+                    alt="options"
                     className="triple-dots-icon"
                     onClick={() => openModal('storyOptionsModal')}
                   />
                 )}
-
-                <div
-                  className={`overlay ${showComments ? 'active' : ''}`}
-                  onClick={() => setShowComments(false)}
-                />
               </div>
 
               {/* Mobile share strip */}
@@ -326,7 +317,9 @@ const StoryPage = () => {
                   )}
                 </div>
 
-                <CommentPanel showComments={showComments} setShowComments={setShowComments} story={story} />
+                <button className="comment-button" onClick={scrollToComments}>
+                  💬 {story.commentCount ?? 0}
+                </button>
 
                 <BookmarkButton
                   storyId={story.id}
@@ -338,32 +331,28 @@ const StoryPage = () => {
                 {user?.id === story.authorInfo?.id && (
                   <img
                     src={triple_dots_icon}
-                    alt="triple-dots-icon"
+                    alt="options"
                     className="triple-dots-icon"
                     onClick={() => openModal('storyOptionsModal')}
                   />
                 )}
-                <div
-                  className={`overlay ${showComments ? 'active' : ''}`}
-                  onClick={() => setShowComments(false)}
-                />
               </div>
 
               {/* Bottom author section */}
-              <div className="author-section flex">
+              <div className="author-section">
                 <img
                   src={story.authorInfo?.profileImage}
-                  alt="author profile icon"
+                  alt="author"
                   className="author-image"
                   loading="lazy"
                   decoding="async"
                   onClick={() => navToAuthorProfile(story.authorInfo?.id)}
                 />
-                <div className="author-information memo-text">
+                <div className="author-information">
                   <div className="author-name-and-follow">
-                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
+                    <span style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
-                    </div>
+                    </span>
                     {user && user.id !== story.authorInfo?.id && (
                       <button className="follow-unfollow-button" onClick={handleFollow}>
                         {following ? ' · Unfollow' : ' · Follow'}
@@ -376,13 +365,23 @@ const StoryPage = () => {
                 </div>
               </div>
 
-              {/* Related stories rails */}
+              {/* Related stories rail */}
               <RelatedStories storyId={story.id} authorName={authorName} />
+
+              {/* Inline comments */}
+              <div className="story-comments-section" ref={commentsRef}>
+                <Comments
+                  storyId={story.id}
+                  authorInfo={story.authorInfo}
+                  userId={user?.id}
+                  setShowComments={() => {}}
+                />
+              </div>
             </>
           )}
         </div>
 
-        {/* Right rail — ToC (desktop sticky, mobile collapsible drawer) */}
+        {/* Right rail — ToC */}
         {story && (
           <div className="story-toc-wrapper">
             <TableOfContents items={tocItems} />
@@ -400,7 +399,7 @@ const StoryPage = () => {
         />
       )}
 
-      {/* Sticky author follow CTA */}
+      {/* Sticky author follow CTA (bottom-right popup) */}
       {story && (
         <AuthorFollowCTA
           author={author}
@@ -408,6 +407,18 @@ const StoryPage = () => {
           following={following}
           onFollow={handleFollow}
           followedCount={followedCount}
+        />
+      )}
+
+      {/* Sticky author mini-bar (top, after scroll) */}
+      {story && (
+        <StickyAuthorBar
+          author={author}
+          user={user}
+          following={following}
+          onFollow={handleFollow}
+          claps={story.claps}
+          onClap={handleClapClick}
         />
       )}
     </>

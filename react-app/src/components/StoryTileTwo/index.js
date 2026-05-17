@@ -1,168 +1,182 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './StoryTileTwo.css';
-import { WindowContext } from '../../context/WindowContext';
-import * as sessionActions from '../../store/session'
+import * as sessionActions from '../../store/session';
 
-const StoryTileTwo = ({story, titleHtml, hideIntro}) => {
+const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const [date, setDate] = useState('Dec 25, 2560')
-  const {windowSize} = useContext(WindowContext)
-  const [thumbnail, setThumbnail] = useState('')
-  const [thumbnailVariants, setThumbnailVariants] = useState(null)
-  const [name, setName] = useState('')
+  const [date, setDate] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
+  const [thumbnailVariants, setThumbnailVariants] = useState(null);
+  const [name, setName] = useState('');
 
-  const [fadeTrigger, setFadeTrigger] = useState(false);
+  useEffect(() => {
+    if (!story) return;
 
-
-
-
-// console.log(fadeTrigger);
-
-  useEffect(()=>{
-
-    setFadeTrigger(false)
-    
-    if(story){
-
-      let month = story?.createdAt.slice(8,11)
-      let day = story?.createdAt.slice(5,7)
-      setDate(`${month} ${day}`)
-
-
+    // Format date properly from ISO string
+    if (story.createdAt) {
+      try {
+        const d = new Date(story.createdAt);
+        setDate(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      } catch {
+        setDate('');
+      }
     }
 
-
-    if(story.images && !story.images.length){
-      setThumbnail('https://miro.medium.com/v2/resize:fit:1200/1*jfdwtvU6V6g99q3G7gq7dQ.png')
-      setThumbnailVariants(null)
+    if (story.images && !story.images.length) {
+      setThumbnail('https://miro.medium.com/v2/resize:fit:1200/1*jfdwtvU6V6g99q3G7gq7dQ.png');
+      setThumbnailVariants(null);
     }
-    if(story.images && story.images.length){
-      setThumbnail(story.images[0].url)
-      setThumbnailVariants(story.images[0].variants || null)
-    }
-
-
-    if(story.authorInfo){
-      setName(`${story.authorInfo.firstName} ${story.authorInfo.lastName}`)
+    if (story.images && story.images.length) {
+      setThumbnail(story.images[0].url);
+      setThumbnailVariants(story.images[0].variants || null);
     }
 
-    if(story.author){
-      setName(`${story.authorInfo.firstName} ${story.authorInfo.lastName}`)
+    if (story.authorInfo) {
+      setName(`${story.authorInfo.firstName} ${story.authorInfo.lastName}`);
     }
-
-    setTimeout(() => {
-      setFadeTrigger(true);
-    }, 100);
-
-
-  },[story])
+  }, [story]);
 
   const navToFeed = (search, subFeed) => {
-    dispatch(sessionActions.search(search))
-    dispatch(sessionActions.setFeed(search))
-    dispatch(sessionActions.setSubFeed(subFeed))
+    dispatch(sessionActions.search(search));
+    dispatch(sessionActions.setFeed(search));
+    dispatch(sessionActions.setSubFeed(subFeed));
     history.push('/home');
-    return
-  }
-  
-  
+  };
 
+  const navToStory = () => history.push(`/story/${story.id}`);
+  const navToAuthor = () => navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors');
+  const navToTag = (tag) => navToFeed(tag, 'taggedStories');
 
+  const tags = story?.tags?.slice(0, 3) || [];
 
   return (
+    <article className={`story-tile-style2 fade-in${featured ? ' featured' : ''}`}>
 
-    <div className="story-tile-style2 fade-in">
+      {/* ── Content column ── */}
       <div className="style2-content">
-        <div className="style2-author-container">
-          <div 
-          className="style2-profile-image"
-          onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
-          >
-          {story?.authorInfo?.profileImage && (
-                <img
-                  src={story?.authorInfo.profileImage}
-                  alt="author profile picture"
-                  loading="lazy"
-                  decoding="async"
-                  onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
-                ></img>
-              )}
-          </div>
 
-          <div 
-          className="style2-author-name memo-text"
-          onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}
-          >
-            {name}
+        {/* Byline row */}
+        <div className="style2-author-container" onClick={navToAuthor}>
+          <div className="style2-profile-image">
+            {story?.authorInfo?.profileImage && (
+              <img
+                src={story.authorInfo.profileImage}
+                alt={`${name} profile`}
+                loading="lazy"
+                decoding="async"
+              />
+            )}
           </div>
+          <span className="style2-author-name">{name}</span>
+          {story?.timeToRead && (
+            <>
+              <span className="style2-byline-dot">·</span>
+              <span className="style2-read-time">{story.timeToRead} min read</span>
+            </>
+          )}
+          {date && (
+            <>
+              <span className="style2-byline-dot">·</span>
+              <span className="style2-date">{date}</span>
+            </>
+          )}
+          <span className="st2-author-name">{name}</span>
+          <span className="st2-dot" aria-hidden="true">·</span>
+          <span className="st2-meta">{story.timeToRead} min read</span>
+          <span className="st2-dot" aria-hidden="true">·</span>
+          <span className="st2-meta">{date}</span>
         </div>
 
-        <div className="style2-story-title-container">
+        {/* Title */}
+        <div className="style2-story-title-container" onClick={navToStory}>
           {titleHtml ? (
-            <div
-              className=" style2-story-title memo-text"
-              onClick={() => history.push(`/story/${story.id}`)}
+            <h2
+              className="style2-story-title"
               dangerouslySetInnerHTML={{ __html: titleHtml }}
             />
           ) : (
-            <div
-              className=" style2-story-title memo-text"
-              onClick={() => history.push(`/story/${story.id}`)}
-            >{story?.title}</div>
+            <h2 className="style2-story-title">{story?.title}</h2>
           )}
         </div>
 
-        {!hideIntro && windowSize > 699 && (<div className="style2-header-container flexbetween memo-text">
-          <div
-            className="style2-header-content" onClick={() => history.push(`/story/${story.id}`)}>{story.slicedIntro}
-          </div>
-        </div>)}
+        {/* Excerpt — always visible */}
+        {!hideIntro && story?.slicedIntro && (
+          <p className="style2-header-content" onClick={navToStory}>
+            {story.slicedIntro}
+          </p>
+        )}
 
-        <div className="style2-date-read-time-container flexbetween memo-text">
-          <div className="style2-date-content">{date}</div>
-          <i className="style2 fa-solid fa-circle"></i>
-          <div className="style2-date-read-time-content">
-            {story?.timeToRead} min read
+        {/* Tag pills */}
+        {tags.length > 0 && (
+          <div className="style2-tags">
+            {tags.map((t) => (
+              <button
+                key={t.id}
+                className="style2-tag"
+                onClick={(e) => { e.stopPropagation(); navToTag(t.tag); }}
+              >
+                {t.tag}
+              </button>
+            ))}
           </div>
+        )}
+
+        {/* Footer meta row */}
+        <div className="style2-meta-row">
           {story?.commentCount > 0 && (
-            <div className="style2-comment-badge">💬 {story.commentCount}</div>
+            <span className="style2-comment-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {story.commentCount}
+            </span>
           )}
         </div>
 
+        {tags.length > 0 && (
+          <div className="st2-tags" onClick={(e) => e.stopPropagation()}>
+            {tags.map((t) => (
+              <button key={t.id} className="st2-tag-pill" onClick={() => navToTag(t.tag)}>
+                {t.tag}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className={`style2-story-image`}>
+      {/* ── Thumbnail column ── */}
+      <div className="style2-story-image" onClick={navToStory} aria-hidden="true">
         {thumbnailVariants ? (
           <picture>
             <source
               type="image/webp"
               srcSet={`${thumbnailVariants.thumbnail.webp} 400w, ${thumbnailVariants.card.webp} 800w`}
-              sizes="(max-width: 500px) 400px, 800px"
+              sizes="(max-width: 640px) 100vw, (max-width: 700px) 140px, 200px"
             />
             <img
               src={thumbnailVariants.card.jpeg}
               srcSet={`${thumbnailVariants.thumbnail.jpeg} 400w, ${thumbnailVariants.card.jpeg} 800w`}
-              sizes="(max-width: 500px) 400px, 800px"
-              alt="story thumbnail"
+              sizes="(max-width: 640px) 100vw, (max-width: 700px) 140px, 200px"
+              alt={story?.title || 'Story thumbnail'}
               loading="lazy"
               decoding="async"
-              onClick={() => history.push(`/story/${story.id}`)}
             />
           </picture>
-        ) : (
+        ) : thumbnail ? (
           <img
             src={thumbnail}
-            alt="story thumbnail"
+            alt={story?.title || 'Story thumbnail'}
             loading="lazy"
             decoding="async"
-            onClick={() => history.push(`/story/${story.id}`)}
           />
+        ) : (
+          <div className="style2-image-placeholder" />
         )}
       </div>
-    </div>
+
+    </article>
   );
 };
+
 export default StoryTileTwo;

@@ -1,0 +1,27 @@
+# fly.toml app configuration file generated for shmedium-api on 2026-05-16T20:44:20-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'shmedium-api'
+primary_region = 'sjc'
+
+[build]
+
+[env]
+  FLASK_APP = 'app'
+  FLASK_ENV = 'production'
+  SCHEMA = 'shmedium_schema'
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = 'stop'
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256

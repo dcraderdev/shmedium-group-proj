@@ -1,0 +1,109 @@
+.sticky-author-bar {
+  position: fixed;
+  top: 56px; /* sits just below the 56px navbar */
+  left: 0;
+  right: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: rgba(250, 249, 247, 0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border-light);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(-100%);
+  transition: transform 0.25s cubic-bezier(0.32, 0, 0.67, 0);
+  pointer-events: none;
+}
+
+.sticky-author-bar--visible {
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.sticky-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+.sticky-author-name {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.sticky-author-follow {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  background: none;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.sticky-author-follow:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.sticky-author-follow--following {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.sticky-author-follow--following:hover {
+  background: #fee;
+  color: #c62828;
+  border-color: #ef9a9a;
+}
+
+.sticky-author-claps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.sticky-clap-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  transition: all var(--transition);
+}
+
+.sticky-clap-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+@media (max-width: 640px) {
+  .sticky-author-bar { padding: 10px 16px; gap: 8px; }
+  .sticky-author-name { max-width: 120px; }
+}

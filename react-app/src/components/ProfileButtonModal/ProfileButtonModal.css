@@ -1,22 +1,19 @@
 .profile-menu {
-  /* cursor: pointer; */
   position: fixed;
   top: 60px;
-  right: 25px;
+  right: 16px;
   transform: scale(1);
-  border: 1px solid rgb(0, 0, 0,0.1);
-  /* background-color: rgb(183, 130, 130); */
+  border: 1px solid rgb(0, 0, 0, 0.1);
   border-radius: 5px;
   box-shadow: rgba(127, 127, 127, 0.9) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-  width: 140px;
-  height: 140px;
+  width: 160px;
+  height: fit-content;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   z-index: 411;
   background-color: white;
-  display: flex;
   justify-content: center;
-  /* align-items: center; */
 }
 
 .greeting {
@@ -28,10 +25,10 @@
 .profile-menu-logout-button {
   margin-bottom: 10px;
   background-color: #f0f0f0;
-  /* background-color: #f2f2f2; */
   border-radius: 20px;
   border: none;
-  padding: 5px 10px;
+  padding: 10px 16px;
+  min-height: 44px;
   cursor: pointer;
   font-family: sans-serif;
 }

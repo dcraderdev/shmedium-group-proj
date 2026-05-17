@@ -1,145 +1,209 @@
-.storyfeed-container{
+/* ── Story feed container ─────────────────────────────────────────────── */
+
+.storyfeed-container {
   width: 100%;
   position: relative;
   box-sizing: border-box;
 }
 
-.hidden{
-  visibility: hidden;
-}
+.hidden { visibility: hidden; }
+
+/* ── Category / filter nav bar ───────────────────────────────────────── */
 
 .feed-nav {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  border-bottom: rgba(73, 73, 73, 0.2) solid 1px ;
-  box-shadow: 2px 0  0 2px rgba(73, 73, 73, 1) solid 1px ;
-  height: 55px;
-} 
+  height: 52px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  position: sticky;
+  top: 55px;
+  z-index: 5;
+}
 
-.feed-select-container{
+.feed-select-container {
   display: flex;
   width: 100%;
   height: 100%;
   overflow-x: scroll;
-  scrollbar-width: none; /* For Firefox */
-  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.feed-select-container::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari and Opera */
-}
+.feed-select-container::-webkit-scrollbar { display: none; }
 
-.feed-select{
+.feed-select {
   height: 100%;
   min-width: fit-content;
-  padding-left: 10px;
-  padding-right: 10px;
-  width: 70px;
-  color: #646464;
+  padding: 0 14px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 100;
+  font-weight: 400;
   cursor: pointer;
-  margin-right: 4px;
-  margin-left: 4px;
+  border-bottom: 2px solid transparent;
   box-sizing: border-box;
-  border-bottom: #ffffff solid 1px;
-
+  transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
 }
 
-.feed-select.small{
-  padding-left: 10px;
-  padding-right: 10px;
-  width: 20px;
-  margin-right: 4px;
-  margin-left: 4px;
+.feed-select:hover:not(.selected) { color: var(--color-text-primary); }
+
+.feed-select.selected {
+  color: var(--color-text-primary);
+  font-weight: 500;
+  border-bottom-color: var(--color-text-primary);
 }
 
-.feed-select.med{
-  padding-left: 10px;
-  padding-right: 10px;
-  width: 20px;
-  margin-right: 4px;
-  margin-left: 4px;
-}
-
-.feed-select.dyna{
-  padding-left: 10px;
-  padding-right: 10px;
+.feed-select.small,
+.feed-select.med,
+.feed-select.dyna {
+  padding: 0 12px;
   width: fit-content;
-  margin-right: 4px;
-  margin-left: 4px;
-  overflow: hidden;
 }
 
-
-
-
-
-.feed-select.selected{
-  color: black;
-  font-weight: 300;
-  border-bottom: #000000 solid 1px;
-}
-
-.add-container{
+.add-container {
   border-radius: 50%;
-  height: 25px;
-  width: 25px;
-}
-.add-container:hover{
-  background-color: #ededed;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.search-close-tab{
+.add-container:hover { background: var(--color-tag-bg); }
+
+.add-container img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+.search-close-tab {
   position: relative;
-  top: -5px;
-  left: -5px;
-  font-size: 10px;
+  top: -3px;
+  left: -3px;
+  font-size: 12px;
   user-select: none;
   cursor: pointer;
+  color: var(--color-text-tertiary);
+  padding: 2px 4px;
 }
 
+/* ── Sub-nav header (search result tabs) ─────────────────────────────── */
 
 .feed-header {
-  height: 0px;
-  padding: 6px;
+  height: 0;
+  padding: 0 6px;
   overflow: hidden;
-  transition: height 0.5s ease;
+  transition: height 0.4s ease;
 }
-
 
 .feed-header.extended {
   height: 50px;
-  transition: height 0.5s ease;
+  padding: 6px;
   display: flex;
   justify-content: space-between;
-  top: 50px;
-  z-index: 1;
 }
 
-.header-title{
-  font-size: 40px;
-  margin-left: 20px;
-  margin-top: 20px;
-  height: fit-content;
-  width: fit-content;
+.header-title {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  margin-left: 24px;
+  margin-top: 16px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
 }
 
+/* ── Search nav ──────────────────────────────────────────────────────── */
 
 .search-nav {
   position: relative;
   display: flex;
   justify-content: space-between;
-  top: 0px;
-  left: 0px;
   width: 100%;
-  border-bottom: rgba(73, 73, 73, 0.2) solid 1px;
-  box-shadow: 2px 0 0 2px rgba(73, 73, 73, 1) solid 1px;
-  height: 55px;
+  height: 52px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
 }
 
-/* ===== STORY FEED MOBILE ===== */
+/* ── Stories list wrapper ─────────────────────────────────────────────── */
+
+.feed-stories-list {
+  padding: 0 24px;
+}
+
+/* ── Section divider labels ───────────────────────────────────────────── */
+
+.feed-section-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-tertiary);
+  padding: 20px 0 6px;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 0;
+}
+
+.feed-section-label--more {
+  padding-top: 8px;
+  margin-top: 16px;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────── */
+
+.feed-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px 60px;
+  text-align: center;
+}
+
+.feed-empty-icon {
+  color: var(--color-border);
+  margin-bottom: 20px;
+}
+
+.feed-empty-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 10px;
+  letter-spacing: -0.2px;
+}
+
+.feed-empty-body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  max-width: 320px;
+  margin: 0 0 28px;
+}
+
+.feed-empty-cta {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 28px;
+  background: var(--color-text-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.feed-empty-cta:hover { background: #333; }
+
+/* ── Mobile ──────────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 640px) {
   .feed-nav {
@@ -149,12 +213,19 @@
 
   .feed-select {
     font-size: 13px;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding: 0 10px;
+  }
+
+  .feed-stories-list {
+    padding: 0;
+  }
+
+  .feed-section-label {
+    padding: 16px 16px 6px;
   }
 
   .header-title {
-    font-size: 28px;
+    font-size: 26px;
+    margin-left: 16px;
   }
 }
-

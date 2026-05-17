@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useContext, useCallback, lazy, Suspense } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
@@ -7,6 +7,7 @@ import Navigation from './components/Navigation';
 import { ModalContext } from './context/ModalContext';
 
 // Route-level chunks — each becomes its own JS file, loaded only when visited
+const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './components/NotFound'));
 const HomePage = lazy(() => import(/* webpackChunkName: "home" */ './components/HomePage'));
 const FeedPage = lazy(() => import(/* webpackChunkName: "feed", webpackPrefetch: true */ './components/FeedPage'));
 const OurStoryPage = lazy(() => import(/* webpackChunkName: "about" */ './components/OurStoryPage'));
@@ -19,6 +20,7 @@ const AuthorProfilePage = lazy(() => import(/* webpackChunkName: "author-profile
 const DraftsPage = lazy(() => import(/* webpackChunkName: "drafts" */ './components/DraftsPage'));
 
 // Modal chunks — only fetched when the user triggers one
+const SearchModal = lazy(() => import(/* webpackChunkName: "modal-search" */ './components/SearchModal'));
 const SigninModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SigninModal'));
 const SignupModal = lazy(() => import(/* webpackChunkName: "modal-auth" */ './components/SignupModal'));
 const ProfileButtonModal = lazy(() => import(/* webpackChunkName: "modal-profile" */ './components/ProfileButtonModal'));
@@ -27,14 +29,36 @@ const StoryOptionsModal = lazy(() => import(/* webpackChunkName: "modal-options"
 function App() {
   const dispatch = useDispatch();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { modal } = useContext(ModalContext);
 
   useEffect(() => {
     dispatch(authenticate()).then(() => setIsLoaded(true));
   }, [dispatch]);
 
+  const openSearch  = useCallback(() => setSearchOpen(true),  []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+
+  // cmd-K / ctrl-K global shortcut
+  useEffect(() => {
+    const handle = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener('keydown', handle);
+    return () => document.removeEventListener('keydown', handle);
+  }, []);
+
   return (
     <>
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <SearchModal onClose={closeSearch} />
+        </Suspense>
+      )}
+
       {(modal === 'signin' ||
         modal === 'signup' ||
         modal === 'profileModal' ||
@@ -101,6 +125,10 @@ function App() {
 
             <Route path="/" exact>
               <HomePage />
+            </Route>
+
+            <Route>
+              <NotFound />
             </Route>
           </Switch>
         </Suspense>

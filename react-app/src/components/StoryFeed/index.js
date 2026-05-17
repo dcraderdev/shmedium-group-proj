@@ -1,10 +1,9 @@
 import React, { useEffect, useContext, useState } from 'react';
-// import { useHistory, useLocation, NavLink } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
 import './StoryFeed.css';
 import { WindowContext } from '../../context/WindowContext';
-// import { ModalContext } from '../../context/ModalContext';
 import * as sessionActions from '../../store/session';
 import * as storyActions from '../../store/story';
 import StoryTileTwo from '../StoryTileTwo';
@@ -14,10 +13,31 @@ import magnifyGlass from '../../public/magnify-glass.svg';
 
 
 
+const EMPTY_MESSAGES = {
+  following: {
+    title: 'No stories from people you follow yet',
+    body: "Follow authors you love and their latest stories will appear here.",
+    cta: 'Discover authors',
+    ctaFeed: 'for you',
+  },
+  'by you': {
+    title: "You haven't published anything yet",
+    body: "Every great writer starts somewhere. Write your first story — it's free.",
+    cta: 'Start writing',
+    ctaRoute: '/write',
+  },
+  default: {
+    title: 'Nothing here yet',
+    body: 'Try a different topic, or check back soon for new stories.',
+    cta: 'Browse all stories',
+    ctaFeed: 'for you',
+  },
+};
 
 
 const StoryFeed = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const stories = useSelector((state) => state.story.stories);
   const userStories = useSelector((state) => state.session.userStories);
   const loaded = useSelector((state) => state.story.loaded);
@@ -25,7 +45,6 @@ const StoryFeed = () => {
   const searchResults = useSelector((state) => state.session.search);
   const currentFeed = useSelector((state) => state.session.currentFeed);
   const subFeed = useSelector((state) => state.session.subFeed);
-  // const user = useSelector(state=>state.session.user)
 
   const { searchInputRef } = useContext(WindowContext);
 
@@ -33,35 +52,32 @@ const StoryFeed = () => {
   const [showSubMenu, setShowSubMenu] = useState(false);
 
 
-  //handles showing subquery
   useEffect(() => {
-      const updateFeedContent = () => {
-          if (currentFeed === 'for you') {
-              dispatch(sessionActions.setSubFeed(null));
-              setFeedContent(stories);
-          } else if (currentFeed === 'by you') {
-              dispatch(sessionActions.setSubFeed(null));
-              setFeedContent(userStories);
-          } else if (currentFeed === 'following') {
-              dispatch(sessionActions.setSubFeed(null));
-              setFeedContent(subscribedStories);
-          } else if (searchResults[currentFeed] && subFeed) {
-              setFeedContent(searchResults[currentFeed][subFeed]);
-          }
-      };
-
-      if (currentFeed && searchResults[currentFeed]) {
-          setShowSubMenu(true);
+    const updateFeedContent = () => {
+      if (currentFeed === 'for you') {
+        dispatch(sessionActions.setSubFeed(null));
+        setFeedContent(stories);
+      } else if (currentFeed === 'by you') {
+        dispatch(sessionActions.setSubFeed(null));
+        setFeedContent(userStories);
+      } else if (currentFeed === 'following') {
+        dispatch(sessionActions.setSubFeed(null));
+        setFeedContent(subscribedStories);
+      } else if (searchResults[currentFeed] && subFeed) {
+        setFeedContent(searchResults[currentFeed][subFeed]);
       }
+    };
 
-      if (currentFeed === 'for you' || currentFeed === 'by you' || currentFeed === 'following') {
-          setShowSubMenu(false);
-      }
+    if (currentFeed && searchResults[currentFeed]) {
+      setShowSubMenu(true);
+    }
 
+    if (currentFeed === 'for you' || currentFeed === 'by you' || currentFeed === 'following') {
+      setShowSubMenu(false);
+    }
 
-      updateFeedContent();
+    updateFeedContent();
   }, [currentFeed, subFeed, searchResults, stories, userStories, subscribedStories, dispatch]);
-
 
 
   const handleSelectFeed = (feed) => {
@@ -70,12 +86,10 @@ const StoryFeed = () => {
     dispatch(sessionActions.setSubFeed('stories'));
   };
 
-
-  const handleSelectSubFeed = (subFeed) => {
+  const handleSelectSubFeed = (sf) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(sessionActions.setSubFeed(subFeed));
+    dispatch(sessionActions.setSubFeed(sf));
   };
-
 
   const handleRemoveSearch = (e, searchQuery) => {
     e.preventDefault();
@@ -84,115 +98,98 @@ const StoryFeed = () => {
     dispatch(sessionActions.removeSearch(searchQuery));
   };
 
+  // Determine empty state messaging
+  const emptyMeta = EMPTY_MESSAGES[currentFeed] || EMPTY_MESSAGES.default;
+  const handleEmptyCta = () => {
+    if (emptyMeta.ctaRoute) {
+      history.push(emptyMeta.ctaRoute);
+    } else if (emptyMeta.ctaFeed) {
+      dispatch(sessionActions.setFeed(emptyMeta.ctaFeed));
+      dispatch(sessionActions.setSubFeed('stories'));
+    }
+  };
 
+  const isStoriesEmpty = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length === 0;
+  const hasStories = loaded && subFeed !== 'authors' && currentFeed && feedContent && feedContent.length > 0;
 
   return (
     <div className="storyfeed-container">
 
-      <nav className={`feed-nav flexcenter`}>
+      {/* ── Primary nav tabs ── */}
+      <nav className="feed-nav flexcenter">
         <div className="feed-select-container">
           <div
-            className={`feed-select small memo-text flexcenter`}
+            className="feed-select small memo-text flexcenter"
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
               searchInputRef.current.focus();
             }}
           >
             <div className="add-container flexcenter">
-              <img src={magnifyGlass} alt="medium cirlce logo" />
-
+              <img src={magnifyGlass} alt="search" />
             </div>
           </div>
+
           <div
-            className={`feed-select med memo-text flexcenter ${
-              currentFeed === 'for you' ? 'selected' : ''
-            }`}
+            className={`feed-select med memo-text flexcenter ${currentFeed === 'for you' ? 'selected' : ''}`}
             onClick={() => handleSelectFeed('for you')}
           >
             For you
           </div>
 
-
           <div
-            className={`feed-select med memo-text flexcenter ${
-              currentFeed === 'by you' ? 'selected' : ''
-            }`}
+            className={`feed-select med memo-text flexcenter ${currentFeed === 'by you' ? 'selected' : ''}`}
             onClick={() => {
-              handleSelectFeed('by you')
-              dispatch(storyActions.getUserStories())
-
-          
-          }}
+              handleSelectFeed('by you');
+              dispatch(storyActions.getUserStories());
+            }}
           >
             By you
-            
           </div>
 
           <div
-            className={`feed-select large memo-text flexcenter ${
-              currentFeed === 'following' ? 'selected' : ''
-            }`}
+            className={`feed-select large memo-text flexcenter ${currentFeed === 'following' ? 'selected' : ''}`}
             onClick={() => {
-              handleSelectFeed('following')
-              dispatch(storyActions.getSubscribedStories())
+              handleSelectFeed('following');
+              dispatch(storyActions.getSubscribedStories());
             }}
           >
             Following
           </div>
 
-          {searchResults &&
-            Object.keys(searchResults).map((searchQuery, i) => (
-              <div key={i}>
-                <div
-                  className={`feed-select dyna memo-text flexcenter ${
-                    currentFeed === searchQuery ? 'selected' : ''
-                  }`}
-                  onClick={() => handleSelectFeed(searchQuery)}
-                >
-                  <div
-                    className="search-close-tab"
-                    onClick={(e) => handleRemoveSearch(e, searchQuery)}
-                  >
-                    x
-                  </div>
-                  {searchQuery}
-                </div>
+          {searchResults && Object.keys(searchResults).map((searchQuery, i) => (
+            <div key={i}>
+              <div
+                className={`feed-select dyna memo-text flexcenter ${currentFeed === searchQuery ? 'selected' : ''}`}
+                onClick={() => handleSelectFeed(searchQuery)}
+              >
+                <div className="search-close-tab" onClick={(e) => handleRemoveSearch(e, searchQuery)}>×</div>
+                {searchQuery}
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       </nav>
+
+      {/* ── Sub-feed tabs (Stories / Authors / Tags) ── */}
       <div className={`feed-header ${showSubMenu ? 'extended' : 'hidden'}`}>
-        <nav className={`search-nav flexcenter`}>
+        <nav className="search-nav flexcenter">
           <div className="feed-select-container">
             <div
-              className={`feed-select med memo-text flexcenter ${
-                subFeed === 'stories' ? 'selected' : ''
-              }`}
-              onClick={() => {
-                handleSelectSubFeed('stories')
-                // setFadeTrigger(prevState => !prevState); 
-
-              }}
+              className={`feed-select med memo-text flexcenter ${subFeed === 'stories' ? 'selected' : ''}`}
+              onClick={() => handleSelectSubFeed('stories')}
             >
               Stories
             </div>
             <div
-              className={`feed-select large memo-text flexcenter ${
-                subFeed === 'authors' ? 'selected' : ''
-              }`}
+              className={`feed-select large memo-text flexcenter ${subFeed === 'authors' ? 'selected' : ''}`}
               onClick={() => handleSelectSubFeed('authors')}
             >
               Authors
             </div>
             <div
-              className={`feed-select large memo-text flexcenter ${
-                subFeed === 'taggedStories' ? 'selected' : ''
-              }`}
-              onClick={() => {
-                handleSelectSubFeed('taggedStories')
-                // setFadeTrigger(prevState => !prevState); 
-
-            }}
+              className={`feed-select large memo-text flexcenter ${subFeed === 'taggedStories' ? 'selected' : ''}`}
+              onClick={() => handleSelectSubFeed('taggedStories')}
             >
               Tags
             </div>
@@ -200,37 +197,59 @@ const StoryFeed = () => {
         </nav>
       </div>
 
+      {/* ── Loading skeletons ── */}
       {!loaded && (
         <div>
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
-          <StoryTileFourSkeleton />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <StoryTileFourSkeleton key={i} />
+          ))}
         </div>
       )}
 
-      {loaded && subFeed === 'authors' &&
-        currentFeed &&
-        feedContent &&
-        feedContent.map((author) => <AuthorTile key={author.id} author={author} />
+      {/* ── Authors tab ── */}
+      {loaded && subFeed === 'authors' && currentFeed && feedContent &&
+        feedContent.map((author) => <AuthorTile key={author.id} author={author} />)
+      }
+
+      {/* ── Stories list ── */}
+      {hasStories && (
+        <div className="feed-stories-list">
+          {feedContent[0] && (
+            <>
+              <div className="feed-section-label">Featured</div>
+              <StoryTileTwo key={feedContent[0].id || 0} story={feedContent[0]} featured />
+              {feedContent.length > 1 && (
+                <div className="feed-section-label feed-section-label--more">
+                  More stories
+                </div>
+              )}
+            </>
+          )}
+          {feedContent.slice(1).map((story, i) => (
+            <StoryTileTwo key={story.id || i + 1} story={story} />
+          ))}
+        </div>
       )}
 
-      {loaded && subFeed !== 'authors' &&
-        currentFeed &&
-        feedContent &&
-        feedContent.map((story, i) => <StoryTileTwo key={i} story={story} />
-
-
-
+      {/* ── Empty state ── */}
+      {isStoriesEmpty && (
+        <div className="feed-empty-state">
+          <div className="feed-empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <h3 className="feed-empty-title">{emptyMeta.title}</h3>
+          <p className="feed-empty-body">{emptyMeta.body}</p>
+          <button className="feed-empty-cta" onClick={handleEmptyCta}>
+            {emptyMeta.cta}
+          </button>
+        </div>
       )}
-
-
 
     </div>
   );
 };
+
 export default StoryFeed;

@@ -160,22 +160,38 @@ def _count_tagged_stories(tag_ids):
 
 # ── Fetch helpers (with eager loading + pagination) ───────────────────────────
 
-def _fetch_stories(query, terms, page, per_page, eager):
+def _clap_subq():
+    return (
+        db.session.query(Clap.story_id, func.count(Clap.id).label('cc'))
+        .group_by(Clap.story_id).subquery()
+    )
+
+
+def _fetch_stories(query, terms, page, per_page, eager, sort='relevance'):
+    csq = _clap_subq()
     if _is_postgres():
         ts_q = func.websearch_to_tsquery('english', query)
         tsv = _build_tsv()
-        base = (
-            Story.query.options(*eager)
-            .filter(tsv.op('@@')(ts_q))
-            .order_by(func.ts_rank_cd(tsv, ts_q).desc(), Story.created_at.desc())
-        )
+        base = Story.query.options(*eager).filter(tsv.op('@@')(ts_q))
+        if sort == 'top':
+            base = (
+                base.outerjoin(csq, csq.c.story_id == Story.id)
+                .order_by(func.coalesce(csq.c.cc, 0).desc(), Story.created_at.desc())
+            )
+        elif sort == 'recent':
+            base = base.order_by(Story.created_at.desc())
+        else:
+            base = base.order_by(func.ts_rank_cd(tsv, ts_q).desc(), Story.created_at.desc())
     else:
         conds = [Story.title.ilike(f'%{t}%') | Story.content.ilike(f'%{t}%') for t in terms]
-        base = (
-            Story.query.options(*eager)
-            .filter(or_(*conds))
-            .order_by(Story.created_at.desc())
-        )
+        base = Story.query.options(*eager).filter(or_(*conds))
+        if sort == 'top':
+            base = (
+                base.outerjoin(csq, csq.c.story_id == Story.id)
+                .order_by(func.coalesce(csq.c.cc, 0).desc(), Story.created_at.desc())
+            )
+        else:
+            base = base.order_by(Story.created_at.desc())
     return base.offset((page - 1) * per_page).limit(per_page).all()
 
 
@@ -196,17 +212,19 @@ def _fetch_authors(terms, page, per_page):
     )
 
 
-def _fetch_tagged_stories(tag_ids, page, per_page, eager):
+def _fetch_tagged_stories(tag_ids, page, per_page, eager, sort='relevance'):
     """Use a subquery for distinct story IDs to avoid DISTINCT+ORDER BY conflicts."""
     subq = _tagged_story_ids_subq(tag_ids)
-    return (
-        Story.query.options(*eager)
-        .filter(Story.id.in_(subq))
-        .order_by(Story.created_at.desc())
-        .offset((page - 1) * per_page)
-        .limit(per_page)
-        .all()
-    )
+    csq = _clap_subq()
+    base = Story.query.options(*eager).filter(Story.id.in_(subq))
+    if sort == 'top':
+        base = (
+            base.outerjoin(csq, csq.c.story_id == Story.id)
+            .order_by(func.coalesce(csq.c.cc, 0).desc(), Story.created_at.desc())
+        )
+    else:
+        base = base.order_by(Story.created_at.desc())
+    return base.offset((page - 1) * per_page).limit(per_page).all()
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -215,6 +233,7 @@ def _fetch_tagged_stories(tag_ids, page, per_page, eager):
 def search():
     query = request.args.get('q', '').strip()
     type_filter = request.args.get('type', '')  # stories | authors | tags
+    sort = request.args.get('sort', 'relevance')  # relevance | recent | top
     page = max(1, int(request.args.get('page', 1)))
     per_page = min(50, max(1, int(request.args.get('per_page', 20))))
 
@@ -243,12 +262,12 @@ def search():
     stories, authors, tagged_stories = [], [], []
 
     if not type_filter or type_filter == 'stories':
-        stories = _fetch_stories(query, terms, page, per_page, eager)
+        stories = _fetch_stories(query, terms, page, per_page, eager, sort)
     if not type_filter or type_filter == 'authors':
         authors = _fetch_authors(terms, page, per_page)
     if not type_filter or type_filter == 'tags':
         if tag_ids:
-            tagged_stories = _fetch_tagged_stories(tag_ids, page, per_page, eager)
+            tagged_stories = _fetch_tagged_stories(tag_ids, page, per_page, eager, sort)
 
     return jsonify({
         'search': query,

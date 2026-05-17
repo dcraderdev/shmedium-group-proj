@@ -77,6 +77,37 @@
   color: #fff;
 }
 
+/* ── Sort row ── */
+.sort-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.sort-btn {
+  padding: 5px 14px;
+  border-radius: 14px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  font-size: 13px;
+  font-family: 'Helvetica Neue', sans-serif;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+}
+
+.sort-btn:hover {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.sort-btn.active {
+  background: #1a8917;
+  color: #fff;
+  border-color: #1a8917;
+}
+
 /* ── Skeleton loading ── */
 @keyframes skeleton-pulse {
   0%   { opacity: 1; }
