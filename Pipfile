@@ -28,6 +28,7 @@ wtforms = "==3.0.1"
 boto3 = "*"
 Pillow = "==10.3.0"
 sendgrid = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
