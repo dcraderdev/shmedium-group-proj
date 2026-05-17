@@ -2,6 +2,10 @@
 
 A Medium clone built as an App Academy capstone (May–Jun 2023). Flask + Postgres backend, React 17 + Redux frontend, AWS S3 for story images.
 
+**Live:** https://shmedium-frontend.vercel.app — Lighthouse 99 (desktop) / 73 (mobile)
+
+**Architecture:** React SPA on Vercel CDN (static, global edge) → API calls proxied to Flask on Fly.io → Postgres on Supabase, images on S3.
+
 ## Local development (Node 18+, Python 3.11)
 
 1. Clone and install backend deps:
@@ -42,12 +46,30 @@ A Medium clone built as an App Academy capstone (May–Jun 2023). Flask + Postgr
 See [`react-app/README.md`](./react-app/README.md) for more frontend-specific notes.
 
 
-## Deployment (Fly.io)
+## Deployment
+
+### Frontend — Vercel CDN
+
+The React SPA is deployed to Vercel from the `react-app/` subdirectory.
+The `react-app/vercel.json` configures the build and proxies `/api/*` requests
+to the Fly backend transparently (cookies pass through; no CORS issues).
+
+Live URL: **https://shmedium-frontend.vercel.app**
+
+```bash
+cd react-app
+vercel --prod --yes
+```
+
+The old Fly URL (`https://shmedium-api.fly.dev`) issues 301 redirects to Vercel
+for all non-API paths, so existing bookmarks continue to work.
+
+### Backend — Fly.io
 
 The production backend runs on [Fly.io](https://fly.io) as a Dockerized
 Flask + gunicorn service. Postgres lives on Supabase. Images live on AWS S3.
 
-Live URL: **https://shmedium-api.fly.dev**
+API base URL: **https://shmedium-api.fly.dev/api**
 
 ### Prerequisites
 
