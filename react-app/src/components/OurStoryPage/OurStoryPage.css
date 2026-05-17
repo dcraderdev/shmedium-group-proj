@@ -242,8 +242,8 @@
   border-radius: 20px;
   height: 40px;
   width: 220px;
-  border: 1px solid #33a245;
-  color: #33a245;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
   font-size: 22px;
   margin-top: 30px;
 
@@ -251,7 +251,7 @@
 
 .ourstorypage-create-content-button:hover {
   color: #ffffff;
-  background-color: #33a245;
+  background-color: var(--color-accent);
   font-size: 22px;
   transition: color 0.5s;
   cursor: pointer;
@@ -261,7 +261,7 @@
 
 .ourstorypage-membership-container {
   height: 500px;
-  background-color: #33a245;
+  background-color: var(--color-accent);
   height: fit-content;
   flex-direction: column;
   font-size: 22px;
@@ -310,7 +310,7 @@
 /* DIV 8 Stylings */
 .ourstorypage-read-reward-container {
   height: fit-content;
-  background-color: #33a245;
+  background-color: var(--color-accent);
   display: flex;
   position: relative;
 }
@@ -416,7 +416,7 @@
 }
 
 .ourstorypage-take-medium-memo {
-  font-family: serif;
+  font-family: var(--font-serif);
   position: relative;
   display: flex;
   width: 90%;
@@ -544,8 +544,8 @@
 .ourstorypage-blog-button {
   height: 40px;
   border-radius: 20px;
-  border: 1px solid #33a245;
-  color: #33a245;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
   font-size: 22px;
   width: 200px;
   position: relative;
@@ -559,7 +559,7 @@
 .ourstorypage-work-button:hover,
 .ourstorypage-blog-button:hover {
   color: #ffffff;
-  background-color: #33a245;
+  background-color: var(--color-accent);
   font-size: 22px;
   transition: color 0.5s;
   cursor: pointer;
@@ -613,7 +613,7 @@
   height: 40px;
   border-radius: 20px;
   border: 1px solid #33a245;
-  background-color: #33a245;
+  background-color: var(--color-accent);
   color: #ffffff;
   font-size: 22px;
   align-self: left;
@@ -627,7 +627,7 @@
 }
 
 .ourstorypage-started-button:hover {
-  background-color: #1f672b;
+  background-color: var(--color-accent-hover);
   transition: all 0.5s;
   cursor: pointer;
 }

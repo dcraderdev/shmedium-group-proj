@@ -1,114 +1,72 @@
-/* .story-options-menu {
-    background-color: black;
-} */
-
-/* .story-options-button {
-    background-color: black;
-    color: white;
-} */
-
-/* .additional-options {
-    position: relative;
-} */
-
-/* .options-bar {
-    position: relative;
-} */
-
 .options-button-container {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 .story-options-menu {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    /* position: fixed; */
-    /* top: 50%; */
-    /* left: 50%; */
-    /* top: 400px; */
-    position: absolute;
-    /* top: 100%; */
-    /* transform: translate(-50%, -50%); */
-    z-index: 100;
-    width: 100px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
-    padding: 20px;
-    height: 100px;
-    width: 200px;
-    border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  z-index: 100;
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  height: 100px;
+  width: 200px;
+  border: 1px solid var(--color-border);
 }
 
 .story-options-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
-
-/* .story-options-buttons button {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4caf50;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-} */
 
 .edit-story-button {
-    padding: 10px 16px;
-    min-height: 44px;
-    border: 1px solid black;
-    border-radius: 4px;
-    background-color: #4caf50;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-card);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background-color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.edit-story-button:hover {
-    background-color: #328e37;
-    transition: all 0.3s ease;
-    /* color: #248a34; */
-}
-
-.edit-story-button:active {
-    background-color: #248a34;
-}
+.edit-story-button:hover  { background-color: var(--color-accent-hover); }
+.edit-story-button:active { background-color: var(--color-accent-hover); }
 
 .delete-story-button {
-    padding: 10px 16px;
-    min-height: 44px;
-    border: 1px solid black;
-    border-radius: 4px;
-    background-color: #f44336;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: #f44336;
+  color: var(--color-card);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background-color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.delete-story-button:hover {
-    background-color: #d32f2f;
-    transition: all 0.3s ease;
-}
+.delete-story-button:hover { background-color: #d32f2f; }
 
 .backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 50;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
 }

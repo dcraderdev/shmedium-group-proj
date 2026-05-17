@@ -18,12 +18,12 @@
 }
 
 .share-label {
-  font-family: sans-serif;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #9e9e9e;
+  color: var(--color-text-tertiary);
   margin: 0 0 2px;
 }
 
@@ -35,24 +35,24 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
   cursor: pointer;
-  color: #757575;
-  transition: color 0.15s, border-color 0.15s;
+  color: var(--color-text-secondary);
+  transition: color var(--transition), border-color var(--transition);
   padding: 0;
 }
 
 .share-btn:hover {
-  color: #292929;
-  border-color: #292929;
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
 }
 
-.share-btn--twitter:hover   { color: #000;      border-color: #000; }
-.share-btn--linkedin:hover  { color: #0a66c2;   border-color: #0a66c2; }
-.share-btn--copy:hover      { color: #479275;   border-color: #479275; }
-.share-btn--copy.share-btn--copied { color: #1a8917; border-color: #1a8917; }
-.share-btn--email:hover     { color: #292929;   border-color: #292929; }
+.share-btn--twitter:hover   { color: #000;    border-color: #000; }
+.share-btn--linkedin:hover  { color: #0a66c2; border-color: #0a66c2; }
+.share-btn--copy:hover      { color: #479275; border-color: #479275; }
+.share-btn--copy.share-btn--copied { color: var(--color-accent); border-color: var(--color-accent); }
+.share-btn--email:hover     { color: var(--color-text-primary); border-color: var(--color-text-primary); }
 
 /* ── Mobile inline strip ── */
 .share-inline {
@@ -61,24 +61,24 @@
   gap: 8px;
   flex-wrap: wrap;
   margin: 20px 0 8px;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
 }
 
 .share-inline .share-label {
   font-size: 13px;
-  color: #9e9e9e;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
 .share-btn--inline {
   width: auto;
   height: auto;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   padding: 6px 12px;
   font-size: 13px;
   gap: 6px;
-  border: 1px solid #e0e0e0;
-  color: #292929;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .share-btn--inline span {

@@ -87,7 +87,7 @@
 }
 
 .signin-divider span {
-  background-color: white;
+  background-color: var(--color-card);
   padding: 0 12px;
   position: relative;
   z-index: 1;
@@ -100,7 +100,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background-color: #e6e6e6;
+  background-color: var(--color-border);
   z-index: 0;
 }
 

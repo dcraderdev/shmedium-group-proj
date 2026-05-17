@@ -5,18 +5,18 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #757575;
+  color: var(--color-text-secondary);
   padding: 4px 6px;
-  border-radius: 4px;
-  transition: color 0.15s;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
 }
 
 .bookmark-btn:hover:not(.bookmark-btn--saving) {
-  color: #292929;
+  color: var(--color-text-primary);
 }
 
 .bookmark-btn--active {
-  color: #292929;
+  color: var(--color-text-primary);
 }
 
 .bookmark-btn--active svg {
@@ -36,6 +36,6 @@
 
 .bookmark-count {
   font-size: 13px;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
   color: inherit;
 }
