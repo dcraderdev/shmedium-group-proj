@@ -306,14 +306,14 @@ export default function AuthorProfilePage() {
 
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || !hasMore) return;
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMore(); },
       { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [loadMore]);
+  }, [loadMore, hasMore]);
 
   /* ─ edit profile ─ */
   const handleProfileSave = (updated) => {

@@ -107,3 +107,19 @@
 .rtb-toolbar button:hover {
   background: rgba(255, 255, 255, 0.18);
 }
+
+/* ── Mobile: clamp toolbar width, reduce padding ───────────────── */
+@media screen and (max-width: 640px) {
+  .rtb-toolbar {
+    padding: 4px 4px;
+    gap: 1px;
+  }
+  .rtb-toolbar button {
+    padding: 4px 6px;
+    font-size: 12px;
+    min-width: 24px;
+  }
+  .rtb-editor {
+    font-size: 18px;
+  }
+}

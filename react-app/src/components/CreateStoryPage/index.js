@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import './CreateStoryPage.css';
@@ -8,10 +8,12 @@ import RichTextBlock from '../RichTextBlock';
 
 /* ─── PublishModal ─────────────────────────────────────────────── */
 
-function PublishModal({ draftId, title, content, allTags, onClose, onPublished }) {
+function PublishModal({ draftId, title, content, allTags, existingTags, existingSummary, isUpdate, onClose, onPublished }) {
   const dispatch = useDispatch();
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [summary, setSummary] = useState(content.replace(/<[^>]+>/g, '').slice(0, 140));
+  const [selectedTags, setSelectedTags] = useState(existingTags || []);
+  const [summary, setSummary] = useState(
+    existingSummary || content.replace(/<[^>]+>/g, '').slice(0, 140)
+  );
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const [publishing, setPublishing] = useState(false);
@@ -59,19 +61,22 @@ function PublishModal({ draftId, title, content, allTags, onClose, onPublished }
     <div className="pub-overlay" onClick={onClose}>
       <div className="pub-modal" onClick={(e) => e.stopPropagation()}>
         <div className="pub-modal-header">
-          <span className="pub-modal-title">Ready to publish?</span>
-          <button className="pub-modal-close" onClick={onClose}>✕</button>
+          <span className="pub-modal-title">{isUpdate ? 'Story settings' : 'Ready to publish?'}</span>
+          <button className="pub-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="pub-two-col">
-          {/* Left: cover preview */}
+          {/* Left: cover + summary */}
           <div className="pub-cover-col">
             <label className="pub-section-label">Story preview</label>
-            <div className="pub-cover-zone" style={coverPreview ? { backgroundImage: `url(${coverPreview})` } : {}}>
-              {!coverPreview && <span className="pub-cover-placeholder">No cover image</span>}
-            </div>
-            <label className="pub-cover-btn">
-              {coverPreview ? 'Change image' : 'Add cover image'}
+            <label className="pub-cover-zone" style={coverPreview ? { backgroundImage: `url(${coverPreview})` } : {}}>
+              {!coverPreview && (
+                <span className="pub-cover-placeholder">
+                  <span className="pub-cover-placeholder-icon">＋</span>
+                  Add cover image
+                </span>
+              )}
+              {coverPreview && <span className="pub-cover-change-badge">Change</span>}
               <input type="file" accept="image/*" onChange={handleCover} style={{ display: 'none' }} />
             </label>
 
@@ -83,22 +88,31 @@ function PublishModal({ draftId, title, content, allTags, onClose, onPublished }
               placeholder="Write a brief description of your story…"
               rows={3}
             />
-            <span className="pub-char-count">{summary.length}/140</span>
+            <span className={`pub-char-count ${summary.length > 120 ? 'pub-char-count-warn' : ''}`}>
+              {140 - summary.length} remaining
+            </span>
           </div>
 
           {/* Right: tags */}
           <div className="pub-tags-col">
-            <label className="pub-section-label">Add topics (up to 5)</label>
+            <div className="pub-tags-header">
+              <label className="pub-section-label">Topics</label>
+              {selectedTags.length > 0 && (
+                <span className="pub-tags-count">{selectedTags.length}/5</span>
+              )}
+            </div>
             <p className="pub-tags-hint">Let readers know what your story is about</p>
             <div className="pub-tags-grid">
               {allTags.map((tagStr) => {
                 const active = selectedTags.includes(tagStr);
+                const maxed  = selectedTags.length >= 5 && !active;
                 return (
                   <button
                     key={tagStr}
                     type="button"
-                    className={`pub-tag ${active ? 'pub-tag-active' : ''}`}
-                    onClick={() => (selectedTags.length < 5 || active) ? toggleTag(tagStr) : null}
+                    className={`pub-tag ${active ? 'pub-tag-active' : ''} ${maxed ? 'pub-tag-maxed' : ''}`}
+                    onClick={() => !maxed && toggleTag(tagStr)}
+                    title={maxed ? 'Remove a topic first' : tagStr}
                   >
                     {tagStr}
                   </button>
@@ -113,7 +127,9 @@ function PublishModal({ draftId, title, content, allTags, onClose, onPublished }
         <div className="pub-footer">
           <button className="pub-cancel-btn" onClick={onClose} disabled={publishing}>Cancel</button>
           <button className="pub-submit-btn" onClick={handlePublish} disabled={publishing}>
-            {publishing ? 'Publishing…' : 'Publish now'}
+            {publishing
+              ? (isUpdate ? 'Updating…' : 'Publishing…')
+              : (isUpdate ? 'Update story' : 'Publish now')}
           </button>
         </div>
       </div>
@@ -145,6 +161,31 @@ const CreateStoryPage = () => {
   const [showPublishModal, setShowPublishModal] = useState(false);
 
   const isEditing = location.pathname === `/create/${id}/edit`;
+
+  /* ── Derived stats ── */
+
+  const wordCount = useMemo(() => {
+    const text = blocks
+      .filter((b) => b.type === 'text')
+      .map((b) => (b.content || '').replace(/<[^>]+>/g, ' '))
+      .join(' ');
+    return text.split(/\s+/).filter(Boolean).length;
+  }, [blocks]);
+
+  const charCount = useMemo(
+    () => blocks.filter((b) => b.type === 'text').reduce((s, b) => s + (b.content || '').length, 0),
+    [blocks]
+  );
+
+  /* ── Warn before leaving unsaved changes ── */
+
+  const isDirty = !!(titleText || blocks.some((b) => b.type === 'text' && b.content));
+  useEffect(() => {
+    if (!isDirty) return;
+    const handle = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handle);
+    return () => window.removeEventListener('beforeunload', handle);
+  }, [isDirty]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -316,7 +357,19 @@ const CreateStoryPage = () => {
     <div className="createstory-container">
       {/* Top toolbar */}
       <div className="csp-toolbar">
-        <div className="csp-status">{statusLabel}</div>
+        <div className="csp-status-area">
+          {statusLabel && <span className="csp-status">{statusLabel}</span>}
+          {wordCount > 0 && (
+            <span className="csp-wordcount">
+              {wordCount.toLocaleString()} {wordCount === 1 ? 'word' : 'words'}
+            </span>
+          )}
+          {charCount > 5500 && (
+            <span className="csp-charlimit-warn">
+              {charCount >= 6000 ? 'Content limit reached' : `${6000 - charCount} chars left`}
+            </span>
+          )}
+        </div>
         <div className="csp-toolbar-right">
           <button className="csp-save-btn" onClick={handleSaveDraft} title="Save draft">
             Save draft
@@ -326,7 +379,7 @@ const CreateStoryPage = () => {
             onClick={handlePublishClick}
             disabled={!hasContent}
           >
-            Publish
+            {isEditing ? 'Update' : 'Publish'}
           </button>
         </div>
       </div>
@@ -432,6 +485,9 @@ const CreateStoryPage = () => {
           title={titleText}
           content={buildContent()}
           allTags={allTags}
+          existingTags={isEditing && currentStory ? currentStory.tags.map((t) => t.tag) : []}
+          existingSummary={isEditing && currentStory ? currentStory.slicedIntro : ''}
+          isUpdate={isEditing}
           onClose={() => setShowPublishModal(false)}
           onPublished={handlePublished}
         />

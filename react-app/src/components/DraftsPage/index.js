@@ -8,43 +8,40 @@ function fmtDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   const now = new Date();
-  const diffMs = now - d;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffMins  = Math.floor((now - d) / 60000);
+  const diffHours = Math.floor((now - d) / 3600000);
+  const diffDays  = Math.floor((now - d) / 86400000);
+  if (diffMins  <  1) return 'Just now';
+  if (diffMins  < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays  <  7) return `${diffDays}d ago`;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export default function DraftsPage() {
   const dispatch = useDispatch();
-  const history = useHistory();
-  const user = useSelector((state) => state.session.user);
-  const drafts = useSelector((state) => state.story.drafts);
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(null);
+  const history  = useHistory();
+  const user     = useSelector((state) => state.session.user);
+  const drafts   = useSelector((state) => state.story.drafts);
+
+  const [loading,       setLoading]       = useState(true);
+  const [deleting,      setDeleting]      = useState(null);  // id being deleted
+  const [confirmDelete, setConfirmDelete] = useState(null);  // id awaiting confirm
 
   useEffect(() => {
     if (!user) { history.push('/home'); return; }
-    const load = async () => {
+    (async () => {
       setLoading(true);
       await dispatch(storyActions.getDrafts());
       setLoading(false);
-    };
-    load();
-  }, [user]);
+    })();
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleEdit = (draft) => {
-    history.push(`/create/${draft.id}/edit`);
-  };
+  const handleEdit = (draft) => history.push(`/create/${draft.id}/edit`);
 
-  const handleDelete = async (draft) => {
-    if (!window.confirm(`Delete "${draft.title || 'Untitled'}"? This cannot be undone.`)) return;
+  const handleDeleteConfirm = async (draft) => {
     setDeleting(draft.id);
+    setConfirmDelete(null);
     await dispatch(storyActions.deleteDraft(draft.id));
     setDeleting(null);
   };
@@ -57,7 +54,12 @@ export default function DraftsPage() {
   return (
     <div className="drafts-root">
       <div className="drafts-header">
-        <h1 className="drafts-title">Your drafts</h1>
+        <div>
+          <h1 className="drafts-title">Your drafts</h1>
+          {!loading && drafts.length > 0 && (
+            <p className="drafts-subtitle">{drafts.length} unpublished {drafts.length === 1 ? 'story' : 'stories'}</p>
+          )}
+        </div>
         <button className="drafts-new-btn" onClick={handleNew}>
           + New story
         </button>
@@ -65,9 +67,7 @@ export default function DraftsPage() {
 
       {loading ? (
         <div className="drafts-loading">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="draft-skeleton" />
-          ))}
+          {[1, 2, 3].map((i) => <div key={i} className="draft-skeleton" />)}
         </div>
       ) : drafts.length === 0 ? (
         <div className="drafts-empty">
@@ -83,8 +83,14 @@ export default function DraftsPage() {
       ) : (
         <ul className="drafts-list">
           {drafts.map((draft) => (
-            <li key={draft.id} className="draft-card">
-              <div className="draft-card-body" onClick={() => handleEdit(draft)}>
+            <li
+              key={draft.id}
+              className={`draft-card ${confirmDelete === draft.id ? 'confirming' : ''}`}
+            >
+              <div className="draft-card-body" onClick={() => {
+                if (confirmDelete === draft.id) return;
+                handleEdit(draft);
+              }}>
                 <div className="draft-card-left">
                   <h2 className="draft-card-title">
                     {draft.title || <span className="draft-untitled">Untitled</span>}
@@ -109,16 +115,39 @@ export default function DraftsPage() {
               </div>
 
               <div className="draft-card-actions">
-                <button className="draft-action-btn draft-edit-btn" onClick={() => handleEdit(draft)}>
-                  Edit
-                </button>
-                <button
-                  className="draft-action-btn draft-delete-btn"
-                  onClick={() => handleDelete(draft)}
-                  disabled={deleting === draft.id}
-                >
-                  {deleting === draft.id ? '…' : 'Delete'}
-                </button>
+                {confirmDelete === draft.id ? (
+                  <div className="draft-confirm-row">
+                    <span className="draft-confirm-text">Delete this draft?</span>
+                    <button
+                      className="draft-action-btn draft-confirm-yes"
+                      onClick={() => handleDeleteConfirm(draft)}
+                      disabled={deleting === draft.id}
+                    >
+                      {deleting === draft.id ? '…' : 'Delete'}
+                    </button>
+                    <button
+                      className="draft-action-btn draft-confirm-no"
+                      onClick={() => setConfirmDelete(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      className="draft-action-btn draft-edit-btn"
+                      onClick={() => handleEdit(draft)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="draft-action-btn draft-delete-btn"
+                      onClick={() => setConfirmDelete(draft.id)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           ))}

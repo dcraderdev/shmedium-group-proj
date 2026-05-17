@@ -19,6 +19,12 @@
   font-weight: 700;
   color: #1a1a1a;
   font-family: 'Georgia', serif;
+  margin: 0 0 4px;
+}
+
+.drafts-subtitle {
+  font-size: 0.82rem;
+  color: #999;
   margin: 0;
 }
 
@@ -123,9 +129,10 @@
 .draft-action-btn {
   padding: 6px 14px;
   font-size: 0.8rem;
+  font-family: inherit;
   border-radius: 16px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
 
@@ -141,8 +148,38 @@
   border: 1px solid #e0e0e0;
   color: #aaa;
 }
-.draft-delete-btn:hover:not(:disabled) { border-color: #e53935; color: #e53935; }
-.draft-delete-btn:disabled { opacity: 0.4; cursor: default; }
+.draft-delete-btn:hover { border-color: #e53935; color: #e53935; }
+
+/* ── Inline delete confirmation ── */
+.draft-card.confirming { background: #fff9f9; }
+
+.draft-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.draft-confirm-text {
+  font-size: 0.8rem;
+  color: #555;
+  white-space: nowrap;
+}
+
+.draft-confirm-yes {
+  background: #e53935;
+  border: none;
+  color: #fff;
+}
+.draft-confirm-yes:hover:not(:disabled) { background: #c62828; }
+.draft-confirm-yes:disabled { opacity: 0.5; cursor: default; }
+
+.draft-confirm-no {
+  background: none;
+  border: 1px solid #d9d9d9;
+  color: #555;
+}
+.draft-confirm-no:hover { background: #f0f0f0; }
 
 /* ── Empty state ── */
 .drafts-empty {
