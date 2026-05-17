@@ -262,7 +262,7 @@ function Navigation() {
         );
         setHighlightedIdx(-1);
       }
-    }, 300);
+    }, 250);
   }, []);
 
   // Close dropdown when clicking outside
@@ -329,6 +329,7 @@ function Navigation() {
     <>
       {/* // For user logged in */}
       {user && (
+        <>
         <nav
           className={`nav-bar ${isHomePage ? 'logged' : ''} flexcenter ${navColor}`}
         >
@@ -531,10 +532,31 @@ function Navigation() {
                     </div>
                   )}
                 </div>
+
+                {/* Mobile hamburger — logged-in */}
+                <button
+                  className="hamburger-btn"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Open menu"
+                  aria-expanded={menuOpen}
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
               </div>
             )}
           </div>
         </nav>
+
+        {/* Mobile drawer — logged-in */}
+        <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
+          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
+          <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
+          <div className="mobile-nav-item" onClick={(e) => { demoUser(e); setMenuOpen(false); }}>Sign in as Demo</div>
+        </div>
+        </>
       )}
 
 
@@ -547,6 +569,7 @@ function Navigation() {
       {/* // For no user and on any page other than landing */}
 
       {!user && !isLandingPage && (
+        <>
         <nav className={`nav-bar logged flexcenter ${navColor}`}>
           <div className={`nav-buttons memo-text ${buttonStylings}`}>
             <div className="flexcenter">
@@ -716,10 +739,31 @@ function Navigation() {
                     <img src={userOutline} alt="user profile icon" />
                   </div>
                 </div>
+
+                {/* Mobile hamburger — logged-out */}
+                <button
+                  className="hamburger-btn"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="Open menu"
+                  aria-expanded={menuOpen}
+                >
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </button>
               </div>
             )}
           </div>
         </nav>
+
+        {/* Mobile drawer — logged-out */}
+        <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
+          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
+          <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
+          <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
+        </div>
+        </>
       )}
 
       {/* // For no user and at landing page */}

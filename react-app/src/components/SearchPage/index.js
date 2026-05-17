@@ -39,8 +39,9 @@ const SearchPage = () => {
   const history = useHistory();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
-  const type = params.get('type') || 'stories';
-  const page = Math.max(1, parseInt(params.get('page') || '1', 10));
+  const type  = params.get('type')  || 'stories';
+  const sort  = params.get('sort')  || 'relevance';
+  const page  = Math.max(1, parseInt(params.get('page') || '1', 10));
 
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,14 +61,14 @@ const SearchPage = () => {
     if (!query) { setResults(null); setLoading(false); return; }
     const controller = new AbortController();
     setLoading(true);
-    const url = `/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`;
+    const url = `/api/search?q=${encodeURIComponent(query)}&type=${type}&sort=${sort}&page=${page}`;
     fetch(url, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => setResults(data))
       .catch((err) => { if (err.name !== 'AbortError') console.error(err); })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [query, type, page]);
+  }, [query, type, sort, page]);
 
   // Keyboard navigation in the result list
   useEffect(() => {
@@ -90,10 +91,13 @@ const SearchPage = () => {
   }, [results, type]);
 
   const setType = (t) =>
-    history.push(`/search?q=${encodeURIComponent(query)}&type=${t}&page=1`);
+    history.push(`/search?q=${encodeURIComponent(query)}&type=${t}&sort=${sort}&page=1`);
+
+  const setSort = (s) =>
+    history.push(`/search?q=${encodeURIComponent(query)}&type=${type}&sort=${s}&page=1`);
 
   const setPage = (p) => {
-    history.push(`/search?q=${encodeURIComponent(query)}&type=${type}&page=${p}`);
+    history.push(`/search?q=${encodeURIComponent(query)}&type=${type}&sort=${sort}&page=${p}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -195,6 +199,26 @@ const SearchPage = () => {
           </button>
         ))}
       </nav>
+
+      {/* Sort buttons — only on stories/tags tabs */}
+      {(type === 'stories' || type === 'tags') && query && (
+        <div className="sort-row" aria-label="Sort results">
+          {[
+            { key: 'relevance', label: 'Relevance' },
+            { key: 'recent',    label: 'Recent'    },
+            { key: 'top',       label: 'Top'       },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              className={`sort-btn${sort === key ? ' active' : ''}`}
+              onClick={() => setSort(key)}
+              aria-pressed={sort === key}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Loading skeleton */}
       {loading && (
