@@ -116,6 +116,13 @@ export default function SearchModal({ onClose }) {
       ]
     : [];
 
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIdx < 0 || !listRef.current) return;
+    const el = listRef.current.querySelector('[data-highlighted="true"]');
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIdx]);
+
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -220,6 +227,7 @@ export default function SearchModal({ onClose }) {
                       <div
                         key={s.id}
                         className={`sm-item${idx === highlightedIdx ? ' sm-highlighted' : ''}`}
+                        data-highlighted={idx === highlightedIdx ? 'true' : undefined}
                         onMouseDown={() => commitSearch(s.title)}
                       >
                         <span className="sm-item-title" dangerouslySetInnerHTML={{ __html: hlText(s.title, query) }} />
@@ -239,6 +247,7 @@ export default function SearchModal({ onClose }) {
                       <div
                         key={a.id}
                         className={`sm-item${idx === highlightedIdx ? ' sm-highlighted' : ''}`}
+                        data-highlighted={idx === highlightedIdx ? 'true' : undefined}
                         onMouseDown={() => commitSearch(a.name)}
                       >
                         <span className="sm-item-title" dangerouslySetInnerHTML={{ __html: hlText(a.name, query) }} />
@@ -259,6 +268,7 @@ export default function SearchModal({ onClose }) {
                         <span
                           key={t.id}
                           className={`sm-tag${idx === highlightedIdx ? ' sm-highlighted' : ''}`}
+                          data-highlighted={idx === highlightedIdx ? 'true' : undefined}
                           onMouseDown={() => commitSearch(t.tag)}
                           dangerouslySetInnerHTML={{ __html: hlText(t.tag, query) }}
                         />

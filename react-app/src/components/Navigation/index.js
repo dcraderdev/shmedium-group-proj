@@ -265,7 +265,7 @@ function Navigation() {
     }, 250);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close suggestion dropdown when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
@@ -275,6 +275,18 @@ function Navigation() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Close mobile drawer when clicking outside the nav
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (!e.target.closest('.nav-bar') && !e.target.closest('.mobile-nav-drawer')) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
@@ -674,7 +686,7 @@ function Navigation() {
 
               {/* Mobile-only search icon (shown when nav-search is hidden on mobile) */}
               <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
-                <img src={magnifyGlass} alt="search" />
+                <img src={magnifyGlassBlack} alt="search" />
               </button>
             </div>
             {isWritePage ? (

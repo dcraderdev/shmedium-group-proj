@@ -83,11 +83,6 @@ const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
               <span className="style2-date">{date}</span>
             </>
           )}
-          <span className="st2-author-name">{name}</span>
-          <span className="st2-dot" aria-hidden="true">·</span>
-          <span className="st2-meta">{story.timeToRead} min read</span>
-          <span className="st2-dot" aria-hidden="true">·</span>
-          <span className="st2-meta">{date}</span>
         </div>
 
         {/* Title */}
@@ -134,15 +129,6 @@ const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
           )}
         </div>
 
-        {tags.length > 0 && (
-          <div className="st2-tags" onClick={(e) => e.stopPropagation()}>
-            {tags.map((t) => (
-              <button key={t.id} className="st2-tag-pill" onClick={() => navToTag(t.tag)}>
-                {t.tag}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ── Thumbnail column ── */}
