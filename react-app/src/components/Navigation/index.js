@@ -321,6 +321,9 @@ function Navigation() {
     commitSearch(search);
   };
 
+  const openSearchModal = () =>
+    window.dispatchEvent(new CustomEvent('open-search-modal'));
+
   if (!isLoaded) {
     return null;
   }
@@ -389,6 +392,9 @@ function Navigation() {
                   </label>
                 </form>
 
+                {/* ⌘K discoverability hint */}
+                {!search && <kbd className="nav-kbd-hint" onClick={openSearchModal}>⌘K</kbd>}
+
                 {showSuggestions && (
                   <div className="suggest-dropdown">
                     {suggestions.stories.length > 0 && (
@@ -445,6 +451,11 @@ function Navigation() {
                   </div>
                 )}
               </div>
+
+              {/* Mobile-only search icon (nav-search is hidden on mobile) */}
+              <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
+                <img src={magnifyGlass} alt="search" />
+              </button>
             </div>
 
             {isWritePage ? (
@@ -551,8 +562,8 @@ function Navigation() {
 
         {/* Mobile drawer — logged-in */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
           <div className="mobile-nav-item" onClick={(e) => { demoUser(e); setMenuOpen(false); }}>Sign in as Demo</div>
         </div>
@@ -624,6 +635,9 @@ function Navigation() {
                     </label>
                   </form>
 
+                  {/* ⌘K discoverability hint */}
+                  {!search && <kbd className="nav-kbd-hint" onClick={openSearchModal}>⌘K</kbd>}
+
                   {showSuggestions && (
                     <div className="suggest-dropdown">
                       {suggestions.stories.length > 0 && (
@@ -681,6 +695,11 @@ function Navigation() {
                   )}
                 </div>
               )}
+
+              {/* Mobile-only search icon (shown when nav-search is hidden on mobile) */}
+              <button className="nav-mobile-search-btn" onClick={openSearchModal} aria-label="Search">
+                <img src={magnifyGlass} alt="search" />
+              </button>
             </div>
             {isWritePage ? (
               <div className={`nav-user-buttons `}>
@@ -758,8 +777,8 @@ function Navigation() {
 
         {/* Mobile drawer — logged-out */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { history.push('/search'); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
           <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
         </div>

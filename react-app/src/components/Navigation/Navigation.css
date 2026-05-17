@@ -347,6 +347,55 @@ color: #878787;
   }
 }
 
+/* ⌘K hint inside the nav search bar */
+.nav-kbd-hint {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  color: #bbb;
+  background: #f2f2f2;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 2px 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+
+.nav-kbd-hint:hover {
+  color: #666;
+  background: #e8e8e8;
+}
+
+/* Mobile-only search icon button */
+.nav-mobile-search-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.nav-mobile-search-btn img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 640px) {
+  .nav-mobile-search-btn {
+    display: flex;
+  }
+}
+
 /* ── Search suggestion dropdown ── */
 .suggest-dropdown {
   position: absolute;

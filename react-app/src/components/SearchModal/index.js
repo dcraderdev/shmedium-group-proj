@@ -48,10 +48,16 @@ export default function SearchModal({ onClose }) {
   const [suggestions, setSuggestions] = useState({ stories: [], authors: [], tags: [] });
   const [loading, setLoading]       = useState(false);
   const [recent, setRecent]         = useState(loadRecent);
+  const [trending, setTrending]     = useState([]);
   const [highlightedIdx, setHighlightedIdx] = useState(-1);
 
-  // Auto-focus on mount
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  // Auto-focus on mount + fetch trending
+  useEffect(() => {
+    inputRef.current?.focus();
+    fetch('/api/search/popular')
+      .then((r) => r.ok ? r.json() : { queries: [] })
+      .then((d) => setTrending((d.queries || []).map((q) => q.query).slice(0, 6)));
+  }, []);
 
   // Escape to close
   useEffect(() => {
@@ -181,6 +187,24 @@ export default function SearchModal({ onClose }) {
                   <span className="sm-item-title">{r}</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Trending searches (shown when blank + no recents) */}
+          {!query && recent.length === 0 && trending.length > 0 && (
+            <div className="sm-section">
+              <div className="sm-section-label">Trending</div>
+              <div className="sm-tags-row" style={{ padding: '6px 20px 12px' }}>
+                {trending.map((t) => (
+                  <span
+                    key={t}
+                    className="sm-tag"
+                    onMouseDown={() => commitSearch(t)}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
