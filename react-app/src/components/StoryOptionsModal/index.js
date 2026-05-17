@@ -24,14 +24,11 @@ function StoryOptionsModal() {
       };
       document.addEventListener('mousedown', handleClickOutside);
 
-      //so we can disable background scrolling
-      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
 
       return () => {
         document.removeEventListener('mousedown', handleClickOutside);
-
-        //so we can enable background scrolling
-        document.body.style.overflow = 'unset';
+        document.documentElement.style.overflow = '';
       };
     }, [closeModal]);
   
