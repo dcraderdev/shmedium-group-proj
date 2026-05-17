@@ -35,7 +35,7 @@
 
 .story-tile-style2.featured {
   padding: 32px 20px 36px;
-  margin: 0 -20px 8px;
+  margin: 0 0 8px;
   border-bottom: 2px solid var(--color-border);
   background: var(--color-card);
   border-radius: 4px;
@@ -263,18 +263,6 @@
 @media screen and (min-width: 700px) {
   .style2-story-image { width: 200px; }
   .story-tile-style2.featured .style2-story-image { width: 280px; }
-
-  .story-tile-style2:hover {
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-left: -16px;
-    margin-right: -16px;
-  }
-
-  .story-tile-style2.featured:hover {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
 }
 
 /* ── Mobile (≤ 640px): image stacks above content ────────────────────── */
