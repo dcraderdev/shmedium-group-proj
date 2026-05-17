@@ -67,7 +67,7 @@
   align-items: center;
 }
 
-.notfound-btn-primary:hover { background: #333; }
+.notfound-btn-primary:hover { background: var(--color-text-secondary); }
 
 .notfound-btn-secondary {
   font-family: var(--font-sans);

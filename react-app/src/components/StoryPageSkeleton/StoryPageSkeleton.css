@@ -4,8 +4,8 @@
 .storypageskeleton-story-title {
   font-size: 30px;
   font-weight: bold;
-  color: #292929;
-  font-family: sans-serif;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   width: 100%;
   max-width: 480px;
   height: 40px;
@@ -17,8 +17,8 @@
 }
 
 .storypageskeleton-time {
-  color: #757575;
-  font-family: sans-serif;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
   font-weight: lighter;
   font-size: 14px;
   margin-top: 3px;

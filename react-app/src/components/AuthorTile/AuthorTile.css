@@ -1,7 +1,7 @@
 .authortile-style1-wrapper {
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid var(--color-border);
   padding: 16px 0;
-  font-family: 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
 }
 
@@ -25,8 +25,8 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: #f0f0f0;
-  border: 1px solid #e0e0e0;
+  background: var(--color-border-light);
+  border: 1px solid var(--color-border);
 }
 
 .style1-profile-image img,
@@ -39,16 +39,15 @@
 .style1-author-name {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--transition);
 }
 
-.style1-author-name:hover {
-  color: #1a8917;
-}
+.style1-author-name:hover { color: var(--color-accent); }
 
 .authortile-style1-followers-container {
   display: flex;
@@ -58,21 +57,23 @@
 
 .authortile-style1-followers-header {
   font-size: 12px;
-  color: #aaa;
+  color: var(--color-text-tertiary);
 }
 
 .authortile-style1-follow-button {
   padding: 6px 16px;
-  border-radius: 20px;
-  border: 1px solid #1a8917;
-  color: #1a8917;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
   font-size: 13px;
+  font-family: var(--font-sans);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition);
   white-space: nowrap;
+  background: none;
 }
 
 .authortile-style1-follow-button:hover {
-  background: #1a8917;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-card);
 }

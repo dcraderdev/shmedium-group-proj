@@ -2,8 +2,8 @@
   position: fixed;
   transform: translateX(-50%);
   z-index: 500;
-  background: #292929;
-  border-radius: 4px;
+  background: var(--color-text-primary);
+  border-radius: var(--radius-sm);
   padding: 6px 12px;
   white-space: nowrap;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
@@ -17,7 +17,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: #292929;
+  border-top-color: var(--color-text-primary);
 }
 
 .clip-tooltip-btn {
@@ -26,30 +26,26 @@
   gap: 6px;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--color-card);
   font-size: 13px;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 
-.clip-tooltip-btn:hover {
-  color: #93d7b8;
-}
+.clip-tooltip-btn:hover { color: #93d7b8; }
 
-.clip-tooltip--clipped {
-  background: #1a8917;
-}
+.clip-tooltip--clipped { background: var(--color-accent); }
+.clip-tooltip--clipped::after { border-top-color: var(--color-accent); }
 
-.clip-tooltip--already {
-  background: #555;
-}
+.clip-tooltip--already { background: var(--color-text-secondary); }
+.clip-tooltip--already::after { border-top-color: var(--color-text-secondary); }
 
 .clip-tooltip-fb {
-  color: #fff;
+  color: var(--color-card);
   font-size: 13px;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Highlighted passage in body text */
@@ -66,10 +62,10 @@ mark.clip-mark::after {
   position: absolute;
   top: -9px;
   right: -7px;
-  background: #1a8917;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-card);
   font-size: 9px;
-  font-family: sans-serif;
+  font-family: var(--font-sans);
   font-weight: 700;
   min-width: 14px;
   height: 14px;
@@ -83,6 +79,4 @@ mark.clip-mark::after {
   box-sizing: border-box;
 }
 
-mark.clip-mark[data-count="1"]::after {
-  display: none;
-}
+mark.clip-mark[data-count="1"]::after { display: none; }
