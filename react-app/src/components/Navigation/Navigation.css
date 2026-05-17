@@ -84,16 +84,28 @@
 
 .logo.large {
   height: 30px;
-  width: 170px;
+  width: auto;
   right: 15px;
   position: relative;
   z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .logo.large img {
   object-fit: contain;
-  width: 200px;
   height: 100%;
+  width: auto;
+}
+
+.nav-shmedium-wordmark {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+  white-space: nowrap;
 }
 
 .logo.small {

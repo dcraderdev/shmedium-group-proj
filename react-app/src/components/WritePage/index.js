@@ -187,11 +187,11 @@ const WritePage = () => {
         {/* DIV 12 Stylings */}
         <div className="ourstorypage-footer-container flexcenter">
           <div className="ourstorypage-footer-logo" onClick={handleLogoClick}>
-            <b>Medium</b>
+            <b>Shmedium</b>
           </div>
           <div className="ourstorypage-footer">
             <div className="ourstorypage-footer-note memo-text">
-              Every idea needs a Medium
+              Every idea needs a Shmedium
             </div>
           </div>
         </div>

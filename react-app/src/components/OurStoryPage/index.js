@@ -45,7 +45,7 @@ const navToWrite = () => {
 
       <div className="ourstorypage-banner-container">
         <div className="ourstorypage-banner-content header-text">
-          Every idea needs a <b className="medium-bold">Medium</b>.
+          Every idea needs a <b className="medium-bold">Shmedium</b>.
         </div>
       </div>
 
@@ -55,7 +55,7 @@ const navToWrite = () => {
       <div className="ourstorypage-story-container flexcenter">
         <div className="ourstorypage-story-section flexcenter">
           <div className="ourstorypage-story-content memo-text">
-            The best ideas can change who we are. Medium is where those ideas
+            The best ideas can change who we are. Shmedium is where those ideas
             take shape, take off, and spark powerful conversations. We’re an
             open platform where over 100 million readers come to find insightful
             and dynamic thinking. Here, expert and undiscovered voices alike
@@ -95,7 +95,7 @@ const navToWrite = () => {
           <div className="header-text flexcenter">A living network of curious minds.</div>
         </div>
         <div className="ourstorypage-living-network-content memo-text">
-          Anyone can write on Medium. Thought-leaders, journalists, experts, and
+          Anyone can write on Shmedium. Thought-leaders, journalists, experts, and
           individuals with unique perspectives share their thinking here. You’ll
           find pieces by independent writers from around the globe, stories we
           feature and leading authors, and smart takes on our own suite of blogs
@@ -143,7 +143,7 @@ const navToWrite = () => {
           </div>
           <div className="ourstorypage-quote-container">
             <div className="ourstorypage-quote-quote  memo-text">
-              "Medium is trying to shift the paradigm. They’re catering to those
+              "Shmedium is trying to shift the paradigm. They’re catering to those
               looking for fresh, new, authentic voices. I believe wholeheartedly
               in their mission."
               <p></p>
@@ -162,14 +162,14 @@ const navToWrite = () => {
           </div>
         </div>
         <div className="ourstorypage-create-content  memo-text">
-          A blank page is also a door. At Medium you can walk through it. It's
+          A blank page is also a door. At Shmedium you can walk through it. It's
           easy and free to share your thinking on any topic, connect with an
           audience, express yourself with a range of publishing tools, and even
           earn money for your work.
         </div>
 
         <div className="ourstorypage-create-content-button memo-text flexcenter" onClick={navToWrite}>
-          Write on Medium
+          Write on Shmedium
         </div>
       </div>
 
@@ -180,7 +180,7 @@ const navToWrite = () => {
           <div className="header-text">Get more with membership.</div>
         </div>
         <div className="ourstorypage-membership content-text">
-          Become a Medium member to enjoy unlimited access and directly support
+          Become a Shmedium member to enjoy unlimited access and directly support
           the writers you read most.
         </div>
         <div className="ourstorypage-membership-button flexcenter">
@@ -233,7 +233,7 @@ const navToWrite = () => {
       <div className="ourstorypage-take-medium-container">
         <div className="ourstorypage-take-medium-section">
           <div className="ourstorypage-take-medium-header header-text align-left">
-            Take Medium with you.
+            Take Shmedium with you.
           </div>
 
           <div className="ourstorypage-take-medium-memo memo-text">
@@ -288,7 +288,7 @@ const navToWrite = () => {
           <div className="ourstorypage-learn-more-section-right-top">
             <div>
               <div className="ourstorypage-learn-more-header">
-                The Medium blog
+                The Shmedium blog
               </div>
               <div className="ourstorypage-learn-more-content">
                 Visit our company blog for the latest news, product updates, and
@@ -303,7 +303,7 @@ const navToWrite = () => {
           <div className="ourstorypage-learn-more-section-right-bottom">
             <div>
               <div className="ourstorypage-learn-more-header">
-                Work at Medium
+                Work at Shmedium
               </div>
               <div className="ourstorypage-learn-more-content">
                 Our team is home to engineers, journalists, artists, and
@@ -352,7 +352,7 @@ const navToWrite = () => {
       {/* DIV 12 Stylings */}
       <div className="ourstorypage-footer-container flexcenter">
         <div className="ourstorypage-footer-logo" onClick={handleLogoClick}>
-          <b>Medium</b>
+          <b>Shmedium</b>
         </div>
         <div className="ourstorypage-footer-buttons">
           <div className="ourstorypage-footer-button">Terms</div>

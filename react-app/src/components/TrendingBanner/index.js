@@ -46,7 +46,7 @@ const TrendingBanner = () => {
           />
         </div>
 
-        <div className="memo-text"> Trending on Medium </div>
+        <div className="memo-text"> Trending on Shmedium</div>
       </div>
 
       {!loaded && (

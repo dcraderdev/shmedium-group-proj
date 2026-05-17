@@ -761,7 +761,7 @@ function Navigation() {
           <nav className={`nav-bar flexcenter ${navColor}`}>
             <div className={`nav-buttons memo-text ${buttonStylings}`}>
               <div className="logo large" onClick={handleLogoClick}>
-                <img src={mediumLogoLarge} alt="medium cirlce logo"></img>
+                <img src={mediumLogoSmall} alt="Shmedium logo" /><span className="nav-shmedium-wordmark">Shmedium</span>
               </div>
 
               <div className={`nav-link-buttons ${buttonStylings}`}>

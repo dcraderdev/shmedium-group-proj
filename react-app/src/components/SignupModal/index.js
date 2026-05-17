@@ -161,7 +161,7 @@ function SignupModal() {
   return (
     <div className="signup-form-page-container" ref={formRef}>
       <div className="signup-header-container flexcenter">
-        <div className="signup-header header-text">Join Medium.</div>
+        <div className="signup-header header-text">Join Shmedium.</div>
       </div>
       <div className="signup-close-button" onClick={closeModal}>
         <i className="fa-solid fa-x"></i>
