@@ -134,7 +134,7 @@ function EditProfileModal({ profile, onClose, onSave }) {
             <label className="apc-form-label">Social links</label>
             <div className="apc-social-inputs">
               <div className="apc-social-input-row">
-                <span className="apc-social-prefix">𝕏</span>
+                <span className="apc-social-prefix"><i className="fa-brands fa-x-twitter" /></span>
                 <input
                   className="apc-input"
                   value={twitter}
@@ -143,7 +143,7 @@ function EditProfileModal({ profile, onClose, onSave }) {
                 />
               </div>
               <div className="apc-social-input-row">
-                <span className="apc-social-prefix">⌥</span>
+                <span className="apc-social-prefix"><i className="fa-brands fa-github" /></span>
                 <input
                   className="apc-input"
                   value={github}
@@ -389,6 +389,16 @@ export default function AuthorProfilePage() {
           <span className="apc-stat-label">Stories</span>
         </div>
         <div className="apc-stat">
+          <span className="apc-stat-value">
+            {profile.totalWords != null
+              ? profile.totalWords >= 1000
+                ? `${(profile.totalWords / 1000).toFixed(1)}k`
+                : profile.totalWords
+              : '—'}
+          </span>
+          <span className="apc-stat-label">Words written</span>
+        </div>
+        <div className="apc-stat">
           <span className="apc-stat-value">{profile.totalClaps ?? '—'}</span>
           <span className="apc-stat-label">Claps received</span>
         </div>
@@ -482,7 +492,7 @@ export default function AuthorProfilePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span className="apc-social-icon">𝕏</span>
+                    <span className="apc-social-icon"><i className="fa-brands fa-x-twitter" /></span>
                     @{profile.twitterHandle.replace(/^@/, '')}
                   </a>
                 )}
@@ -493,7 +503,7 @@ export default function AuthorProfilePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span className="apc-social-icon">⌥</span>
+                    <span className="apc-social-icon"><i className="fa-brands fa-github" /></span>
                     {profile.githubHandle}
                   </a>
                 )}

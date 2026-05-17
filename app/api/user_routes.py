@@ -87,9 +87,20 @@ def author_profile(id):
         .scalar()
     ) or 0
 
+    stories_content = (
+        db.session.query(Story.content)
+        .filter(Story.author_id == id, Story.is_published == True)
+        .all()
+    )
+    total_words = sum(
+        len([w for w in (row.content or '').split() if w])
+        for row in stories_content
+    )
+
     profile = u.to_dict()
     profile['totalStories'] = total_stories
     profile['totalClaps'] = total_claps
+    profile['totalWords'] = total_words
     return profile
 
 

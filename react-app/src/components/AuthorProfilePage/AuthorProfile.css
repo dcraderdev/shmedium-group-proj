@@ -116,10 +116,11 @@
 .apc-stats {
   display: flex;
   justify-content: center;
-  gap: 56px;
+  gap: 40px;
   padding: 24px 40px;
   background: #fff;
   border-bottom: 1px solid #e8e8e8;
+  flex-wrap: wrap;
 }
 
 .apc-stat { display: flex; flex-direction: column; align-items: center; gap: 3px; }

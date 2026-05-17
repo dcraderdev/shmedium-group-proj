@@ -98,10 +98,15 @@
 .csp-publish-btn:disabled { background: rgba(26, 137, 23, 0.35); cursor: default; }
 
 /* ── Title ── */
-.title-input-container { width: 100%; margin-bottom: 8px; }
+.title-input-container {
+  width: 100%;
+  margin-bottom: 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8e8e8;
+}
 
 .title-input {
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 700;
   font-family: 'Georgia', serif;
   width: 100%;
@@ -110,17 +115,20 @@
   background: transparent;
   color: #1a1a1a;
   line-height: 1.2;
+  letter-spacing: -0.5px;
 }
-.title-input::placeholder { color: #c8c8c6; }
+.title-input::placeholder { color: #d0d0ce; }
 
 /* ── Text blocks ── */
 .text-wrapper {
   display: flex;
   align-items: flex-start;
   width: 100%;
-  margin: 20px 0 4px;
+  margin: 28px 0 4px;
   position: relative;
 }
+
+.text-wrapper:first-of-type { margin-top: 32px; }
 
 .delete-button {
   flex-shrink: 0;
