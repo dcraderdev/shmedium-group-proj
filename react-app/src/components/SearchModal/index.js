@@ -194,7 +194,7 @@ export default function SearchModal({ onClose }) {
           {!query && recent.length === 0 && trending.length > 0 && (
             <div className="sm-section">
               <div className="sm-section-label">Trending</div>
-              <div className="sm-tags-row" style={{ padding: '6px 20px 12px' }}>
+              <div className="sm-tags-row">
                 {trending.map((t) => (
                   <span
                     key={t}
