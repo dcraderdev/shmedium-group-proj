@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -9,6 +9,7 @@ import StoryTileTwo from '../StoryTileTwo';
 import StoryTileTwoSkeleton from '../StoryTileTwoSkeleton';
 import mediumLogoLarge from '../../public/medium-logo-with-cirlces.svg';
 import * as sessionActions from '../../store/session';
+import { initialLoad } from '../../store/story';
 import mediumLogoCircles from '../../public/medium-logo-circles.jpeg';
 
 const MainPageContent = () => {
@@ -22,6 +23,10 @@ const MainPageContent = () => {
   const stories = useSelector((state) => state.story.stories);
   const loaded = useSelector((state) => state.story.loaded);
   const user = useSelector((state) => state.session.user);
+
+  useEffect(() => {
+    dispatch(initialLoad());
+  }, [dispatch]);
 
 
   const handleLogoClick = () => {
