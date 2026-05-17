@@ -42,8 +42,13 @@ const StoryTileOne = ({ story, index }) => {
   },[user]);
   
   useEffect(()=>{
-    if(story){
-      setDate(story?.createdAt.slice(0,16))
+    if(story?.createdAt){
+      try {
+        const d = new Date(story.createdAt);
+        setDate(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      } catch {
+        setDate('');
+      }
     }
   },[story])
 
