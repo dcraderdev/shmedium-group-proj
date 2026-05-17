@@ -13,7 +13,7 @@ const StoryCard = ({ story }) => {
     >
       <div className="related-card-meta">
         {author?.profileImage && (
-          <img src={author.profileImage} alt={author.firstName} className="related-card-avatar" />
+          <img src={author.profileImage} alt={author.firstName} className="related-card-avatar" loading="lazy" decoding="async" />
         )}
         <span className="related-card-author">
           {author?.firstName} {author?.lastName}

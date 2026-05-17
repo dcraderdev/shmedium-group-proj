@@ -29,6 +29,7 @@ boto3 = "*"
 Pillow = "==10.3.0"
 sendgrid = "*"
 psycopg2-binary = "*"
+flask-compress = "*"
 
 [dev-packages]
 

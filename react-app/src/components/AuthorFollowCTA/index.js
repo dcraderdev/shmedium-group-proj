@@ -39,7 +39,7 @@ const AuthorFollowCTA = ({ author, user, following, onFollow, followedCount }) =
 
       <div className="author-cta-body">
         {author.profileImage && (
-          <img src={author.profileImage} alt={authorName} className="author-cta-avatar" />
+          <img src={author.profileImage} alt={authorName} className="author-cta-avatar" loading="lazy" decoding="async" />
         )}
         <div className="author-cta-info">
           {followedCount > 0 && (

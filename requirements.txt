@@ -30,3 +30,4 @@ wtforms==3.0.1
 boto3
 Pillow==10.3.0
 sendgrid
+flask-compress==1.15

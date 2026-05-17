@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from flask_login import login_required, current_user
 from app.models import db, Story, Tag, StoryImage, StoryTag, Comment, User, Clap, Follower, Bookmark
 from app.forms import StoryForm
@@ -67,10 +67,12 @@ def stories():
 def initial_load():
     stories = _story_with_relations().filter(Story.is_published == True).all()
     tags = Tag.query.all()
-    return {
+    response = make_response({
         'stories': [story.to_dict() for story in stories],
         'tags': [tag.tag for tag in tags],
-    }
+    })
+    response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=30'
+    return response
 
 
 

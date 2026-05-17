@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, make_response, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_login import LoginManager
+from flask_compress import Compress
 from .models import db, User, Story, Follower, Clap, Comment, StoryImage, Tag, StoryTag, SearchQuery, Bookmark, StoryHighlight
 from .models.notification import Notification
 from .api.user_routes import user_routes
@@ -21,6 +22,16 @@ from .config import Config
 from sqlalchemy.orm import joinedload, selectinload
 
 app = Flask(__name__, static_folder='../react-app/build', static_url_path='/')
+
+# Gzip/Brotli all text responses — 70-80% size reduction with no client changes
+app.config['COMPRESS_REGISTER'] = True
+app.config['COMPRESS_MIMETYPES'] = [
+    'text/html', 'text/css', 'text/javascript',
+    'application/javascript', 'application/json',
+    'application/x-javascript', 'image/svg+xml',
+]
+app.config['COMPRESS_LEVEL'] = 6
+Compress(app)
 
 # Setup login manager
 login = LoginManager(app)
@@ -54,11 +65,6 @@ Migrate(app, db)
 CORS(app)
 
 
-# Since we are deploying with Docker and Flask,
-# we won't be using a buildpack when we deploy to Heroku.
-# Therefore, we need to make sure that in production any
-# request made over http is redirected to https.
-# Well.........
 @app.before_request
 def https_redirect():
     if os.environ.get('FLASK_ENV') == 'production':
@@ -69,14 +75,25 @@ def https_redirect():
 
 
 @app.after_request
-def inject_csrf_token(response):
+def add_headers(response):
+    # CSRF token cookie
     response.set_cookie(
         'csrf_token',
         generate_csrf(),
         secure=True if os.environ.get('FLASK_ENV') == 'production' else False,
-        samesite='Strict' if os.environ.get(
-            'FLASK_ENV') == 'production' else None,
+        samesite='Strict' if os.environ.get('FLASK_ENV') == 'production' else None,
         httponly=True)
+
+    # Cache-Control for content-hashed static assets (JS/CSS/media from CRA build)
+    path = request.path
+    if path.startswith('/static/') and any(
+        path.startswith(p) for p in ('/static/js/', '/static/css/', '/static/media/')
+    ):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    elif path == '/' or path.endswith('.html'):
+        # SPA shell must never be stale — browser must revalidate
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+
     return response
 
 
@@ -90,7 +107,6 @@ def api_help():
                     app.view_functions[rule.endpoint].__doc__ ]
                     for rule in app.url_map.iter_rules() if rule.endpoint != 'static' }
     return route_list
-
 
 
 @app.route("/api/init")
@@ -117,13 +133,9 @@ def initial_load():
         selectinload(Story.bookmarks),
         selectinload(Story.highlights),
     ).all()
-    return {
-        'stories': [story.to_dict() for story in stories],
-    }
-
-
-
-
+    response = make_response({'stories': [story.to_dict() for story in stories]})
+    response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=30'
+    return response
 
 
 @app.route('/', defaults={'path': ''})
@@ -134,9 +146,7 @@ def react_root(path):
     react builds in the production environment for favicon
     or index.html requests
     """
-    # if path == 'favicon.ico':
     if path == 'medium-logo-circles-white.jpeg':
-        # return app.send_from_directory('public', 'favicon.ico')
         return app.send_from_directory('public', 'medium-logo-circles-white.jpeg')
     return app.send_static_file('index.html')
 
