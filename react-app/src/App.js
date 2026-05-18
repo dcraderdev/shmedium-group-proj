@@ -5,6 +5,7 @@ import { Route, Switch, useLocation } from 'react-router-dom';
 import { authenticate } from './store/session';
 import { initialLoad } from './store/story';
 import Navigation from './components/Navigation';
+import PortfolioTopHeader from './components/PortfolioTopHeader';
 import { ModalContext } from './context/ModalContext';
 
 // Route-level chunks — each becomes its own JS file, loaded only when visited
@@ -85,6 +86,7 @@ function App() {
 
   return (
     <>
+      <PortfolioTopHeader />
       {searchOpen && (
         <Suspense fallback={null}>
           <SearchModal onClose={closeSearch} />
