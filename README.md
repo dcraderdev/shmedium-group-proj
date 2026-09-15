@@ -26,10 +26,16 @@ A Medium clone built as an App Academy capstone (May–Jun 2023). Flask + Postgr
 3. Run migrations and seed:
 
    ```bash
-   flask db upgrade
+   flask db upgrade heads
    flask seed all
    flask run
    ```
+
+   Use `upgrade heads`, not `upgrade`. The migration history has several
+   independent branches off `a1b2c3d4e5f6` (bookmarks, notifications, FTS,
+   image variants, profile fields), so there is more than one head. Plain
+   `flask db upgrade` cannot pick one and exits **without applying anything and
+   without an error** — you end up with an empty database and no indication why.
 
 4. In a second terminal, start the React app:
 

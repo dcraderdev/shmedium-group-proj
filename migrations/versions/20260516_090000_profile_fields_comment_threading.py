@@ -1,8 +1,14 @@
 """Add profile fields to users and parent_id to comments
 
-Revision ID: e5f6a1b2c3d4
+Revision ID: f1a2b3c4d5e6
 Revises: a1b2c3d4e5f6
 Create Date: 2026-05-16 09:00:00
+
+NOTE: this revision was originally authored as 'e5f6a1b2c3d4', which collided
+with 20260516_120000_add_story_is_published.py. Alembic silently dropped one of
+the two from the revision graph, so these columns never got created. Renamed to
+a unique id. The upgrade body is idempotent (IF NOT EXISTS), so it is safe to
+run against a database that was partially migrated by hand.
 """
 from alembic import op
 import sqlalchemy as sa
@@ -11,7 +17,7 @@ import os
 environment = os.getenv("FLASK_ENV")
 SCHEMA = os.environ.get("SCHEMA")
 
-revision = 'e5f6a1b2c3d4'
+revision = 'f1a2b3c4d5e6'
 down_revision = 'a1b2c3d4e5f6'
 branch_labels = None
 depends_on = None
