@@ -76,7 +76,7 @@ def seed_users():
         username='bobbie',
         email='bobbie@aa.io',
         password='password',
-        profile_image='https://freeiconshop.com/wp-content/uploads/edd/person-outline-filled.png',
+        profile_image='https://cdn-icons-png.flaticon.com/512/149/149071.png',
         first_name='Bobbie',
         last_name='Johnson'
     )
@@ -207,7 +207,7 @@ def seed_users():
         username='aquaman',
         email='aquaman@example.com',
         password='atlantis',
-        profile_image='https://ikonthology.com/wp-content/uploads/edd/2022/08/Aquaman-bold-scifi.png',
+        profile_image='https://cdn-icons-png.flaticon.com/512/1674/1674291.png',
         first_name='Arthur',
         last_name='Curry'
     )
