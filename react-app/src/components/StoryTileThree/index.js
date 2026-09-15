@@ -47,17 +47,24 @@ import * as sessionActions from '../../store/session'
 
   useEffect(()=>{
     if(story){
-      let parsedContent = story.content.replace(/<[^>]*>/g, '').slice(0, 80) + '...'
+      // The feed payload from /api/init is the slim one — it omits `content`
+      // to save ~9 SELECTs per request, and carries `slicedIntro` instead.
+      // Falling back keeps this tile working for both shapes; reading
+      // `.replace` off an absent `content` used to throw during render and
+      // unmount the whole app (blank page on /home).
+      const preview = story.content || story.slicedIntro || ''
+      let parsedContent = preview.replace(/<[^>]*>/g, '').slice(0, 80) + '...'
       setStoryContent(parsedContent)
-      let month = story?.createdAt.slice(8,11)
-      let day = story?.createdAt.slice(5,7)
+      let month = story?.createdAt?.slice(8,11)
+      let day = story?.createdAt?.slice(5,7)
       setDate(`${month} ${day}`)
 
-      if(!story.images.length){
+      const images = story.images || []
+      if(!images.length){
         setThumbnail('https://miro.medium.com/v2/resize:fit:1200/1*jfdwtvU6V6g99q3G7gq7dQ.png')
-      }    
-      if(story.images.length){
-        setThumbnail(story.images[0].url)
+      }
+      if(images.length){
+        setThumbnail(images[0].url)
       }
 
 
