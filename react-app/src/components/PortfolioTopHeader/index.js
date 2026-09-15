@@ -48,8 +48,32 @@ export default function PortfolioTopHeader() {
       }
     };
     shiftHostNavs();
+
+    // The host app mounts its own nav after this bar does, and swaps it again
+    // when auth resolves or the route changes. A single scan at mount therefore
+    // misses it: the nav keeps top:0 and renders underneath this bar, clipping
+    // the logo and icons. Re-scan when the DOM changes so any nav that appears
+    // later still gets offset.
+    //
+    // Debounced rather than run per mutation — the scan walks every element and
+    // reads computed styles, which is far too heavy to repeat on each batch
+    // during a render.
+    let rescanTimer = 0;
+    const scheduleRescan = () => {
+      if (rescanTimer) return;
+      rescanTimer = window.setTimeout(() => {
+        rescanTimer = 0;
+        shiftHostNavs();
+      }, 300);
+    };
+
+    const observer = new MutationObserver(scheduleRescan);
+    observer.observe(document.body, { childList: true, subtree: true });
+
     window.addEventListener('resize', shiftHostNavs);
     return () => {
+      observer.disconnect();
+      if (rescanTimer) window.clearTimeout(rescanTimer);
       window.removeEventListener('resize', shiftHostNavs);
       root.classList.remove('dt-th-mounted');
       root.classList.remove('dt-th-hidden');

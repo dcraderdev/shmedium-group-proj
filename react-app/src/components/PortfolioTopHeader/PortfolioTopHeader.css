@@ -73,6 +73,19 @@ html { --dt-th-h: 34px; }
 html.dt-th-hidden { --dt-th-h: 0px; }
 html.dt-th-mounted { scroll-padding-top: var(--dt-th-h); }
 html.dt-th-mounted [data-dt-shifted] { top: var(--dt-th-h) !important; transition: top 0.18s ease-out; }
+
+/* Reserve the bar's height in the document flow.
+ *
+ * Shifting the host's fixed nav down by --dt-th-h (above) keeps the nav out
+ * from under this bar, but it does nothing for the static content below, which
+ * is still laid out as though the nav sat at top:0. The result was a band of
+ * content hidden behind the nav — on mobile the feed's "For you / By you /
+ * Following" tabs rendered at y=55 while the shifted nav occupied 32-88.
+ *
+ * Padding the body moves static content down by exactly the amount the nav
+ * moved, so the two stay in step. Fixed and sticky elements ignore this
+ * padding, which is correct: those are handled by the rule above. */
+html.dt-th-mounted body { padding-top: var(--dt-th-h); transition: padding-top 0.18s ease-out; }
 @media (max-width: 520px) {
   html { --dt-th-h: 32px; }
   #dcrader-th .dt-inner { height: 32px; padding: 0 10px; gap: 8px; }
