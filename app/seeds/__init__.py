@@ -9,6 +9,7 @@ from .story_images import seed_story_images, undo_story_images
 from .story_tags import seed_story_tags, undo_story_tags
 from .comment_claps import seed_comment_claps, undo_comment_claps
 from .realistic_articles import seed_realistic_articles, undo_realistic_articles
+from .notifications import seed_notifications, undo_notifications
 
 from app.models.db import db, environment, SCHEMA
 
@@ -35,6 +36,7 @@ def seed():
         undo_story_tags()
         undo_comment_claps()
         undo_realistic_articles()
+        undo_notifications()
 
     seed_users()
     seed_tags()
@@ -46,6 +48,8 @@ def seed():
     seed_story_images()
     seed_story_tags()
     seed_realistic_articles()
+    # Must run last: derives notifications from the claps/comments/follows above.
+    seed_notifications()
 
     # Add other seed functions here
 
@@ -63,9 +67,6 @@ def undo():
     undo_story_tags()
     undo_comment_claps()
     undo_realistic_articles()
-
-    
-    
-
+    undo_notifications()
 
     # Add other undo functions here

@@ -1,5 +1,56 @@
 from app.models import db, User, environment, SCHEMA
 from sqlalchemy.sql import text
+
+
+# Author bios, keyed by username.
+#
+# The bio / website_url columns landed with the profile-fields migration but
+# nothing ever populated them, so every author's About tab read "No bio yet."
+# and the profile header sat empty. Written to match the topics each author
+# actually writes about in the seeded stories.
+USER_PROFILES = {
+    'Demo': (
+        "Poking around this Shmedium demo. Everything here is seed data — "
+        "read a few stories, clap, leave a comment, publish something of your own.",
+        'https://dcrader.dev',
+    ),
+    'marnie': ("Writing about the habits that stuck and the ones that did not. Former teacher, permanent note-taker.", None),
+    'bobbie': ("Backend engineer. Mostly Postgres, occasionally opinions about microservices.", None),
+    'robbie': ("Designer who codes a little. Interested in typography and the parts of design nobody notices.", None),
+    'doug': ("Twenty years in and still reading other people's code for fun. Notes on interviews and careers.", None),
+    'spiderman': ("Photographer by night. I write about cities, commuting, and paying attention.", None),
+    'wonderwoman': ("Essays on history, conflict, and the stories we tell about both.", None),
+    'ironman': ("Hardware, prototypes, and the gap between a demo and a product.", None),
+    'superman': ("Small-town reporter instincts, applied to technology writing.", None),
+    'batman': ("Notes on focus, discipline, and working alone at unreasonable hours.", None),
+    'wolverine': ("Long walks, longer memories. Writing about travel and starting over.", None),
+    'storm': ("Climate, weather, and the systems that connect them. Occasional poetry.", None),
+    'captainamerica': ("Writing about teams, trust, and doing the unglamorous work.", None),
+    'hulk': ("Research scientist. Explaining complicated things without dumbing them down.", None),
+    'blackwidow': ("Security, privacy, and knowing when to walk away from a system.", None),
+    'thor': ("Myth, language, and why old stories keep working.", None),
+    'flash': ("Running, pacing, and the surprisingly slow business of getting fast.", None),
+    'greenlantern': ("On willpower, motivation, and why neither is a strategy.", None),
+    'aquaman': ("Oceans, ecosystems, and reading history sideways.", None),
+    'blackpanther': ("Engineering leadership, systems thinking, and building things that last.", None),
+    'doctorstrange': ("Medicine, decisions under uncertainty, and learning in public.", None),
+    'vision': ("Machine learning, plainly explained. Skeptical of most demos, including my own.", None),
+    'scarletwitch': ("Writing about grief, change, and the stories we revise about ourselves.", None),
+}
+
+
+def _apply_profiles():
+    """Fill in bio / website for the seeded accounts."""
+    for username, (bio, website) in USER_PROFILES.items():
+        user = User.query.filter(User.username == username).first()
+        if user is None:
+            continue
+        user.bio = bio
+        if website:
+            user.website_url = website
+    db.session.commit()
+
+
 # Adds a demo user, you can add other users here if you want
 def seed_users():
     User.query.delete() 
@@ -219,6 +270,8 @@ def seed_users():
 
 
     db.session.commit()
+
+    _apply_profiles()
 
 # Uses a raw SQL query to TRUNCATE or DELETE the users table. SQLAlchemy doesn't
 # have a built-in function to do this. With PostgreSQL in production, TRUNCATE

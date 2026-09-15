@@ -1,5 +1,87 @@
-from app.models import db, StoryImage, environment, SCHEMA
+import re
+
+from app.models import db, StoryImage, Story, environment, SCHEMA
 from sqlalchemy.sql import text
+
+
+# Matches the end of a sentence followed by whitespace, allowing for a closing
+# quote or bracket first ('... end." Next').
+_SENTENCE_END = re.compile(r'[.!?]["\')\]]?\s')
+
+
+def _sentence_boundary(content, fraction=0.6):
+    """Character offset of the sentence end nearest `fraction` through content.
+
+    StoryImage.position is a character offset into Story.content; the reader
+    view slices the body there and inserts the image. These older seed stories
+    are a single unbroken block of prose with no paragraph separators, so a
+    sentence end is the only natural break available.
+    """
+    if not content:
+        return 0
+
+    target = int(len(content) * fraction)
+    boundaries = [m.end() for m in _SENTENCE_END.finditer(content)]
+    if not boundaries:
+        return min(target, len(content))
+
+    pos = min(boundaries, key=lambda end: abs(end - target))
+
+    # Never land inside an HTML tag — that would split the markup in half.
+    opening = content.rfind('<', 0, pos)
+    if opening != -1 and content.find('>', opening) >= pos:
+        closing = content.find('>', opening)
+        pos = closing + 1 if closing != -1 else pos
+
+    return max(0, min(pos, len(content)))
+
+
+def _relocate_unanchored_images():
+    """Move images whose position falls outside their article onto a real break.
+
+    Twenty of the hand-written rows below use position=55555 as a sentinel
+    meaning "at the end". The bodies are only 600-950 characters, so those
+    images render after the final paragraph instead of breaking up the text,
+    and the number only works by accident — any article longer than 55555
+    characters would place the image mid-sentence.
+
+    Rather than hand-pick an offset per story, anchor anything out of range to
+    the sentence nearest 60% through the body. Stories that already pair a
+    hero at position 0 with one of these sentinels end up with the hero on top
+    and the second image mid-article, matching the rest of the seed data.
+    """
+    stories = {s.id: s for s in Story.query.all()}
+
+    images_by_story = {}
+    for image in StoryImage.query.order_by(StoryImage.story_id, StoryImage.id).all():
+        images_by_story.setdefault(image.story_id, []).append(image)
+
+    relocated = 0
+    for story_id, images in images_by_story.items():
+        story = stories.get(story_id)
+        if story is None or not story.content:
+            continue
+
+        length = len(story.content)
+        taken = {img.position for img in images if 0 <= img.position <= length}
+
+        for image in images:
+            if 0 <= image.position <= length:
+                continue
+
+            position = _sentence_boundary(story.content)
+            # Two images resolving to the same offset would stack; nudge past.
+            while position in taken and position < length:
+                position += 1
+
+            image.position = position
+            taken.add(position)
+            relocated += 1
+
+    if relocated:
+        db.session.commit()
+
+    return relocated
 
 
 def seed_story_images():
@@ -203,6 +285,8 @@ def seed_story_images():
         db.session.add(story_image_item)
 
     db.session.commit()
+
+    _relocate_unanchored_images()
 
 def undo_story_images():
     if environment == "production":
