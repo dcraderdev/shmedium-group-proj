@@ -42,8 +42,15 @@ ReactDOM.render(
 	document.getElementById("root")
 );
 
-// Cache the app shell offline with Workbox (production only).
-serviceWorkerRegistration.register();
+// Service worker intentionally disabled. The old cache-first worker pinned
+// returning visitors to whatever build they first loaded, so deployed fixes
+// never reached them (see public/sw.js for the full write-up).
+//
+// unregister() tears down the worker for clients that already have one; the
+// kill-switch in public/sw.js covers clients whose cached main bundle is too
+// old to even run this line. Both are needed — keep them until it is certain
+// no client is still holding the old worker.
+serviceWorkerRegistration.unregister();
 
 // Log Core Web Vitals to the console. Swap console.log for a Sentry/analytics
 // sender (e.g. sendToAnalytics) to track regressions in production.
