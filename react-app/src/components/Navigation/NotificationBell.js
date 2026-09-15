@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { fetchNotifications, markAllRead, markOneRead } from '../../store/notifications';
+import { markAllRead, markOneRead } from '../../store/notifications';
 import bellIcon from '../../public/bell-icon.svg';
 
 function timeAgo(dateStr) {
@@ -30,17 +30,13 @@ function notificationText(n) {
 function NotificationBell({ showBell }) {
   const dispatch = useDispatch();
   const history = useHistory();
-  const user = useSelector((s) => s.session.user);
   const { notifications, unreadCount } = useSelector((s) => s.notifications);
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef(null);
 
-  useEffect(() => {
-    if (!user) return;
-    dispatch(fetchNotifications());
-    const interval = setInterval(() => dispatch(fetchNotifications()), 30000);
-    return () => clearInterval(interval);
-  }, [dispatch, user]);
+  // Fetching and polling are owned by Navigation, which mounts once. Both the
+  // desktop and mobile bells mount at the same time, so polling from here sent
+  // every request twice. This component only renders what is already in redux.
 
   useEffect(() => {
     const handler = (e) => {

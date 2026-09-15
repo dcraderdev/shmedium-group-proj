@@ -86,27 +86,45 @@ const removeDraftAction = (id) => ({ type: REMOVE_DRAFT, payload: id });
 
 const initialState = { stories: [], tags: [], loaded: false, currentStory: null, authorProfile: null, authorStories: null, drafts: [] };
 
+// Tracks an in-flight /api/story/initialize request so concurrent callers share
+// one response. The `loaded` flag below only flips once the response lands, so
+// without this every mount that happens in the same tick — App plus whichever
+// of FeedPage / MainPageContent / CreateStoryPage is rendering — fires its own
+// duplicate request for the same payload.
+let initialLoadRequest = null;
+
 export const initialLoad = () => async (dispatch, getState) => {
 	if (getState().story.loaded) return null;
-	const response = await fetch("/api/story/initialize", {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-		}
-	});
+	if (initialLoadRequest) return initialLoadRequest;
 
-	if (response.ok) {
-		const data = await response.json();
-		dispatch(initialLoadAction(data));
-		return null;
-	} else if (response.status < 500) {
-		const data = await response.json();
-		if (data.errors) {
+	initialLoadRequest = (async () => {
+		const response = await fetch("/api/story/initialize", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			}
+		});
 
-			return data.errors;
+		if (response.ok) {
+			const data = await response.json();
+			dispatch(initialLoadAction(data));
+			return null;
+		} else if (response.status < 500) {
+			const data = await response.json();
+			if (data.errors) {
+
+				return data.errors;
+			}
+		} else {
+			return ["An error occurred. Please try again."];
 		}
-	} else {
-		return ["An error occurred. Please try again."];
+	})();
+
+	try {
+		return await initialLoadRequest;
+	} finally {
+		// Cleared either way: a failed attempt must not block a later retry.
+		initialLoadRequest = null;
 	}
 };
 

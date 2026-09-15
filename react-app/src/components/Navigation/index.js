@@ -21,6 +21,10 @@ import bellIcon from '../../public/bell-icon.svg';
 import magnifyGlass from '../../public/magnify-glass.svg';
 import magnifyGlassBlack from '../../public/magnify-glass-black.svg';
 import NotificationBell from './NotificationBell';
+import * as notificationActions from '../../store/notifications';
+
+// How often to refresh the bell for a signed-in reader, in milliseconds.
+const NOTIFICATION_POLL_MS = 30000;
 
 const colorSchemes = {
   '/': ['nav-yellow', 'nav-white', 'button-black', 'button-green'],
@@ -77,6 +81,41 @@ function Navigation() {
 
   const user = useSelector((state) => state.session.user);
   // const searchResults = useSelector((state) => state.session.search);
+
+  // Notification polling lives here, not in NotificationBell.
+  //
+  // Navigation renders two bells — one for the desktop layout and one for
+  // mobile — and both mount regardless of which is visible, since they are
+  // hidden with CSS rather than unmounted. With the poll inside the bell that
+  // meant two initial requests and two intervals, so /api/notifications/ was
+  // being hit twice as often as intended for every signed-in visitor.
+  // Navigation mounts once (App.js), so owning the poll here gives exactly one
+  // request per cycle, and the bells simply read the result from redux.
+  //
+  // The repeating poll pauses while the tab is hidden so a backgrounded tab
+  // does not hammer a free-tier API all day, and the visibility handler catches
+  // it up the moment the reader comes back. The first fetch is deliberately
+  // unconditional: a page can be opened in a background tab (or an embedded
+  // view that reports itself hidden), and the bell should still be populated
+  // and correct the instant it becomes visible.
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const fetchNow = () => dispatch(notificationActions.fetchNotifications());
+    const pollIfVisible = () => {
+      if (document.visibilityState === 'hidden') return;
+      fetchNow();
+    };
+
+    fetchNow();
+    const interval = setInterval(pollIfVisible, NOTIFICATION_POLL_MS);
+    document.addEventListener('visibilitychange', pollIfVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', pollIfVisible);
+    };
+  }, [dispatch, user]);
 
 
   const { scrollPosition, windowSize, searchInputRef } =
