@@ -36,6 +36,59 @@ def _sentence_boundary(content, fraction=0.6):
     return max(0, min(pos, len(content)))
 
 
+# Widest the app ever renders one of these: the article column is ~700px, so
+# 1200 still covers a 2x display.
+MAX_IMAGE_WIDTH = 1200
+
+_SIZEABLE_HOSTS = ('images.pexels.com', 'images.unsplash.com', 'plus.unsplash.com')
+
+
+def _cap_image_width(url):
+    """Ask the CDN for a sensibly sized image instead of the original.
+
+    47 of the seeded URLs requested w=3000, and several carried h=/dpr= on top
+    of that, so a feed tile 343px wide on a phone was pulling down multi-megabyte
+    originals. Both Pexels and Unsplash resize from query params, so capping the
+    width costs nothing and changes no layout.
+
+    Returns the URL unchanged for hosts that do not support this.
+    """
+    if not url or not any(host in url for host in _SIZEABLE_HOSTS):
+        return url
+
+    base, _, query = url.partition('?')
+    if not query:
+        return f"{base}?w={MAX_IMAGE_WIDTH}"
+
+    kept = []
+    for part in query.split('&'):
+        if not part:
+            continue
+        key = part.split('=', 1)[0].lower()
+        # h and dpr override the width we are trying to set.
+        if key in ('w', 'h', 'dpr'):
+            continue
+        kept.append(part)
+
+    kept.append(f"w={MAX_IMAGE_WIDTH}")
+    return f"{base}?{'&'.join(kept)}"
+
+
+def _normalize_image_widths():
+    """Cap every resizable story image at MAX_IMAGE_WIDTH."""
+    changed = 0
+    for image in StoryImage.query.all():
+        capped = _cap_image_width(image.url)
+        if capped != image.url:
+            image.url = capped
+            changed += 1
+
+    if changed:
+        db.session.commit()
+
+    return changed
+
+
 def _relocate_unanchored_images():
     """Move images whose position falls outside their article onto a real break.
 
@@ -87,7 +140,11 @@ def _relocate_unanchored_images():
 def seed_story_images():
     StoryImage.query.delete() 
 
-    story_image1 = StoryImage(story_id=1, url='https://hips.hearstapps.com/hmg-prod/images/how-to-write-a-love-letter-1608316069.png', position=835, alt_tag='love letter')
+    # Was a 3.9MB uncompressed PNG from hips.hearstapps.com. That host has no
+    # useful sizing API (its resize param still returns 1.3MB), and this is the
+    # featured tile on the landing page — the first image any visitor waits for.
+    # Swapped for an equivalent Unsplash photo at a sane render width: 87KB.
+    story_image1 = StoryImage(story_id=1, url='https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80', position=835, alt_tag='A fountain pen writing in cursive on lined paper — photo via Unsplash')
     story_image2 = StoryImage(story_id=1, url='https://images.pexels.com/photos/356372/pexels-photo-356372.jpeg?auto=compress&cs=tinysrgb&w=3000&h=3000&dpr=1', position=2676, alt_tag='pen writing a letter')
 
     story_image3 = StoryImage(story_id=2, url='https://images.pexels.com/photos/4906289/pexels-photo-4906289.jpeg?auto=compress&cs=tinysrgb&w=3000&h=3000&dpr=1', position=1374, alt_tag='woman smiling')
@@ -287,6 +344,7 @@ def seed_story_images():
     db.session.commit()
 
     _relocate_unanchored_images()
+    _normalize_image_widths()
 
 def undo_story_images():
     if environment == "production":
