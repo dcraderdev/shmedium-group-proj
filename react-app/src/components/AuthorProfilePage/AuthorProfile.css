@@ -11,7 +11,12 @@
 
 .apc-hero {
   position: relative;
-  height: 360px;
+  /* min-height, not height: the content is bottom-aligned, so when it grows
+     past a fixed height it overflows *upward* and slides under the fixed nav
+     rather than pushing the hero taller. That is what hid the avatar once
+     author bios were added — at 375px the content needed 309px inside a 280px
+     hero, putting the avatar at y=3 behind a nav occupying 32-88. */
+  min-height: 360px;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -32,7 +37,10 @@
 .apc-hero-content {
   position: relative;
   z-index: 1;
-  padding: 0 40px 36px;
+  /* Top padding keeps the avatar clear of the fixed nav that overlays the top
+     of the hero. Without it the bottom-aligned content starts inside the nav's
+     56px band and the avatar is half-hidden behind it. */
+  padding: 72px 40px 36px;
   color: #fff;
   width: 100%;
   max-width: 860px;
@@ -629,8 +637,8 @@
 /* ── Mobile ────────────────────────────────────────────────────────── */
 
 @media screen and (max-width: 640px) {
-  .apc-hero { height: 280px; }
-  .apc-hero-content { padding: 0 20px 24px; }
+  .apc-hero { min-height: 280px; }
+  .apc-hero-content { padding: 72px 20px 24px; }
   .apc-name { font-size: 1.6rem; }
   .apc-tabs-bar { padding: 0 16px; }
   .apc-tab { padding: 12px 12px; font-size: 0.85rem; }
