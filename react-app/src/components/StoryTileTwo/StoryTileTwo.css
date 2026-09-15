@@ -14,21 +14,39 @@
   border-bottom: 1px solid var(--color-border-light);
   background: transparent;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
   border-radius: 0;
   position: relative;
 }
 
 .story-tile-style2:last-child { border-bottom: none; }
 
-/* Hover lift */
-.story-tile-style2:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  background: var(--color-card);
+/* Hover surface.
+ *
+ * Drawn as a pseudo-element rather than by styling the row itself. The row has
+ * no horizontal padding — its content is flush with the column edges — so
+ * putting a background straight on it produced a white card with the byline and
+ * image jammed against its corners. Insetting this element negatively lets the
+ * surface extend past the content on both sides, which is the padding the card
+ * appeared to be missing, without moving any content or widening the separator
+ * beneath it.
+ */
+.story-tile-style2::before {
+  content: '';
+  position: absolute;
+  inset: 6px -16px;
   border-radius: 8px;
-  /* Counteract the border-bottom disappearing on hover */
-  z-index: 1;
+  background: transparent;
+  box-shadow: none;
+  transition: background 0.16s ease, box-shadow 0.16s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.story-tile-style2:hover::before {
+  background: var(--color-card);
+  /* Previously a 24px-blur shadow plus translateY(-2px). The lift made each row
+     jump as the pointer crossed it, which in a dense feed reads as flicker. */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 /* ── Featured first card ──────────────────────────────────────────────── */
@@ -42,9 +60,16 @@
   gap: 32px;
 }
 
+/* The featured tile is already a white card with its own padding, so it needs no
+   hover surface behind it — only a slightly deeper shadow. */
+.story-tile-style2.featured::before { content: none; }
+
+.story-tile-style2.featured {
+  transition: box-shadow 0.16s ease;
+}
+
 .story-tile-style2.featured:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  transform: translateY(-3px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.07);
 }
 
 /* ── Content column (left) ────────────────────────────────────────────── */
@@ -248,7 +273,9 @@
 /* Image scale on card hover */
 .story-tile-style2:hover .style2-story-image img,
 .story-tile-style2:hover .style2-story-image picture img {
-  transform: scale(1.06);
+  /* Eased back from 1.06 — with the row no longer lifting, a smaller zoom is
+     enough to signal the hover without the thumbnail visibly straining. */
+  transform: scale(1.03);
 }
 
 /* Placeholder when no image URL is available */
@@ -305,12 +332,14 @@
     font-size: 14px;
   }
 
-  .story-tile-style2:hover {
-    transform: none;
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-left: 0;
-    margin-right: 0;
+  /* The tile already carries 16px of horizontal padding at this width, so the
+     hover surface should sit inside it rather than bleeding to the screen
+     edges the way the negative inset does on desktop.
+     (This replaces an override that cancelled the old hover lift and re-applied
+     padding the tile already had — dead weight now that the hover neither
+     transforms nor repads.) */
+  .story-tile-style2::before {
+    inset: 4px 0;
   }
 }
 
