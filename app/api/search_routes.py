@@ -13,18 +13,23 @@ search_routes = Blueprint('search', __name__)
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _eager_options():
+    """Relations needed to render a search result.
+
+    Results render as feed tiles, so this deliberately mirrors the feed's slim
+    load rather than the full article one. Eager-loading comments (with their
+    users and claps), story claps, and the author's follower/following lists
+    added roughly ten extra round trips per request, and every one of them
+    crosses from the app in sjc to the database in us-east-1. A search for
+    "design" took 6.6 seconds against production while the full-text query
+    itself measured 0.08ms — the cost was entirely loading and serializing
+    relations the results page never shows.
+
+    Counts come from a single aggregate instead (see _search_result_dicts).
+    """
     return [
-        selectinload(Story.author).options(
-            selectinload(User.followers),
-            selectinload(User.following),
-        ),
+        selectinload(Story.author),
         selectinload(Story.tags).joinedload(StoryTag.tag),
         selectinload(Story.images),
-        selectinload(Story.comments).options(
-            joinedload(Comment.user),
-            selectinload(Comment.claps),
-        ),
-        selectinload(Story.claps),
     ]
 
 
@@ -42,10 +47,21 @@ def _build_tsv():
     )
 
 
+def _search_queries():
+    """Query object for SearchQuery.
+
+    SearchQuery declares a column named `query`, which shadows the `query`
+    property Flask-SQLAlchemy puts on every model. `SearchQuery.query` therefore
+    resolves to the InstrumentedAttribute for the column, and calling .filter()
+    or .order_by() on it raises AttributeError. Go through the session instead.
+    """
+    return db.session.query(SearchQuery)
+
+
 def _log_search(query):
     try:
         key = query.lower()[:255]
-        existing = SearchQuery.query.filter_by(query=key).first()
+        existing = _search_queries().filter_by(query=key).first()
         if existing:
             existing.count += 1
             existing.last_searched_at = datetime.utcnow()
@@ -106,12 +122,31 @@ def _get_snippet(content, query, max_len=220):
     return text[:max_len] + ('…' if len(text) > max_len else '')
 
 
-def _story_to_search_dict(story, query):
-    d = story.to_dict()
+def _story_to_search_dict(story, query, counts=None):
+    """Serialize one result in the feed shape, plus the search-only extras.
+
+    `story.content` is a plain column on the row that is already loaded, so the
+    snippet costs nothing extra even though to_dict_feed leaves content out of
+    the response.
+    """
+    counts = counts or {}
+    d = story.to_dict_feed(
+        clap_count=counts.get('claps', 0),
+        comment_count=counts.get('comments', 0),
+        bookmark_count=counts.get('bookmarks', 0),
+    )
     snippet = _get_snippet(story.content, query)
     d['snippet'] = _highlight(snippet, query)
     d['titleHighlighted'] = _highlight(story.title, query)
     return d
+
+
+def _search_result_dicts(stories, query):
+    """Serialize a page of results, pulling all counts in one aggregate query."""
+    from app.api.story_routes import _bulk_counts
+
+    counts = _bulk_counts([s.id for s in stories])
+    return [_story_to_search_dict(s, query, counts.get(s.id)) for s in stories]
 
 
 # ── Count helpers (fast — no eager loading, no OFFSET) ───────────────────────
@@ -271,9 +306,9 @@ def search():
 
     return jsonify({
         'search': query,
-        'stories': [_story_to_search_dict(s, query) for s in stories],
+        'stories': _search_result_dicts(stories, query),
         'authors': [a.to_dict() for a in authors],
-        'taggedStories': [_story_to_search_dict(s, query) for s in tagged_stories],
+        'taggedStories': _search_result_dicts(tagged_stories, query),
         'tags': [t.to_dict() for t in matching_tags],
         'totalStories': total_stories,
         'totalAuthors': total_authors,
@@ -344,7 +379,7 @@ def popular_searches():
     """Top searches from the last 7 days."""
     cutoff = datetime.utcnow() - timedelta(days=7)
     popular = (
-        SearchQuery.query
+        _search_queries()
         .filter(SearchQuery.last_searched_at >= cutoff)
         .order_by(SearchQuery.count.desc())
         .limit(10)
