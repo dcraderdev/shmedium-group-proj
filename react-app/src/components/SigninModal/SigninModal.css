@@ -7,6 +7,10 @@
 .signin-form-page-container {
   z-index: 10000000000000;
   background: var(--color-card);
+  /* width:100% plus 20px padding made the panel 40px wider than the viewport
+     (415px at 375px), so it hung off both edges and the form sat visibly
+     off-centre inside it. There is no global border-box rule in this project. */
+  box-sizing: border-box;
   padding: 20px;
   border-radius: var(--radius-md);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -73,6 +77,9 @@
 .signin-demo-hint b {
   color: var(--color-text-primary);
   font-weight: 600;
+  /* Keeps the account name intact instead of breaking "Demo User" across
+     lines on a narrow screen. */
+  white-space: nowrap;
 }
 
 .signin-divider {
@@ -226,11 +233,17 @@
 .signin-forgot-account-container{
   color: var(--color-text-secondary);
   margin-top: 50px;
-  height: 40px;
+  /* Was a fixed 40px height with no wrapping: on a narrow screen the question
+     wrapped to two lines while "Get help." stayed pinned beside it, leaving a
+     stranded fragment on the right. Let the two parts wrap together instead. */
+  min-height: 40px;
   width: min(90%, 500px);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  text-align: center;
   font-size: 13px;
 }
 
