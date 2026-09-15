@@ -20,9 +20,8 @@ const SidePanel = () => {
   const loaded = useSelector(state=>state.story.loaded)
 
   const searchTag = (tag) => {
-    // console.log(tag);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
+    // Scrolling is handled by StoryFeed when the feed actually changes — doing
+    // it here ran before the new content rendered and got clobbered.
     dispatch(sessionActions.search(tag))
     dispatch(sessionActions.setFeed(tag))
     dispatch(sessionActions.setSubFeed('taggedStories'))

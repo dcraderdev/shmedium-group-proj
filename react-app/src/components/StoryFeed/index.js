@@ -54,10 +54,29 @@ const StoryFeed = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const sentinelRef = useRef(null);
+  const feedEverChanged = useRef(false);
 
-  // Reset display count when feed changes
+  // Reset display count when feed changes, and return the reader to the top.
+  //
+  // Scrolling belongs here rather than in the click handlers: a feed can be
+  // switched from the sidebar, the landing page tag list, a tag chip on a
+  // story tile, or the sub-feed tabs, and doing it at the source both misses
+  // cases and fires before the new content swaps in — the scroll gets
+  // clobbered by the re-render, which left you looking at blank space halfway
+  // down a freshly-filtered feed.
+  //
+  // Deliberately skips the first run. This effect also fires when FeedPage
+  // remounts, which is what happens on a back navigation from an article, and
+  // scrolling there would throw away the reader's place in the feed.
   useEffect(() => {
     setDisplayCount(BATCH);
+
+    if (!feedEverChanged.current) {
+      feedEverChanged.current = true;
+      return;
+    }
+
+    window.scrollTo({ top: 0 });
   }, [currentFeed, subFeed]);
 
   // Build feedContent from redux state
