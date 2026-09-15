@@ -271,6 +271,13 @@ function Navigation() {
     }
   };
 
+  // Mirrors the profile dropdown's Sign Out, which only exists on desktop.
+  const handleSignOut = () => {
+    setMenuOpen(false);
+    history.push('/');
+    dispatch(sessionActions.logout());
+  };
+
   const demoUser = async (e) => {
     e.preventDefault();
     const response = await dispatch(
@@ -592,7 +599,11 @@ function Navigation() {
           <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
           <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
           <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
-          <div className="mobile-nav-item" onClick={(e) => { demoUser(e); setMenuOpen(false); }}>Sign in as Demo</div>
+          {/* This drawer only renders for a signed-in reader, so offering
+              "Sign in as Demo" here was both nonsensical and hid the fact that
+              there was no way to sign out on mobile at all — the Sign Out in the
+              profile dropdown is desktop-only. */}
+          <div className="mobile-nav-item" onClick={handleSignOut}>Sign Out</div>
         </div>
         </>
       )}
