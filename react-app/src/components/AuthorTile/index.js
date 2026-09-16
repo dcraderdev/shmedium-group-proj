@@ -9,6 +9,7 @@ import openBook from '../../public/open-book.png';
 import quill from '../../public/quill.png';
 import userOutline from '../../public/user-outline.png';
 import fountainPen from '../../public/fountain-pen.png';
+import { clickable } from '../../utils/a11y';
 
 
 const profileImages = {
@@ -86,7 +87,7 @@ const AuthorTile = ({ author }) => {
           </div>
           <div 
           className="style1-author-name memo-text"
-          onClick={() => history.push(`/author/${author.id}`)}>
+          {...clickable(() => history.push(`/author/${author.id}`))}>
             {name}
           </div>
         </div>
@@ -102,7 +103,7 @@ const AuthorTile = ({ author }) => {
 
             {userId && userId !== author.id && (
               <div className='authortile-style1-followers-container'>
-                <div className='authortile-style1-follow-button' onClick={handleFollow}>{following ? 'Unfollow' : 'Follow'}</div>
+                <div className='authortile-style1-follow-button' {...clickable(handleFollow)}>{following ? 'Unfollow' : 'Follow'}</div>
               </div>
             )}
 

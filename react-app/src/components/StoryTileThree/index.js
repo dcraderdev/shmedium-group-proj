@@ -9,6 +9,7 @@ import quill from '../../public/quill.png';
 import userOutline from '../../public/user-outline.png';
 import fountainPen from '../../public/fountain-pen.png';
 import * as sessionActions from '../../store/session'
+import { clickable } from '../../utils/a11y';
 
 
   
@@ -100,12 +101,12 @@ import * as sessionActions from '../../store/session'
           </div>
           <div 
           className="style3-author-name memo-text"
-          onClick={()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors')}>
+          {...clickable(()=>navToFeed(`${story?.authorInfo?.firstName} ${story?.authorInfo?.lastName}`, 'authors'))}>
             {story?.authorInfo.firstName} {story?.authorInfo.lastName}
           </div>
         </div>
         <div className="style3-story-title-container">
-          <div className=" style3-story-title memo-text" onClick={() => history.push(`/story/${story.id}`)}>{story?.title}</div>
+          <div className=" style3-story-title memo-text" {...clickable(() => history.push(`/story/${story.id}`))}>{story?.title}</div>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useContext } from 'react';
 import { useHistory} from 'react-router-dom';
 import { useDispatch, useSelector  } from 'react-redux';
 import { ModalContext } from '../../context/ModalContext';
+import useDialog from '../../hooks/useDialog';
 import * as sessionActions from '../../store/session';
 import * as storyActions from '../../store/story';
 
@@ -12,6 +13,8 @@ function ProfileButtonModal() {
   const dispatch = useDispatch();
   const { closeModal } = useContext(ModalContext);
   const formRef = useRef(null);
+  // WCAG 2.1.1 / 2.1.2 / 2.4.3 — Escape, focus trap, focus restore.
+  useDialog(formRef, closeModal);
   const user = useSelector(state => state.session.user);
   // const currentFeed = useSelector((state) => state.session.currentFeed);
 
@@ -57,7 +60,13 @@ function ProfileButtonModal() {
 
 
   return (
-    <div className="profile-menu" ref={formRef}>
+    <div
+      className="profile-menu"
+      ref={formRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Account menu"
+    >
       <div className="profile-dropdown">
         <div className="greeting">Hello, {user.firstName}</div>
         <button className="my-stories" onClick={handleViewProfile}>View Profile</button>

@@ -11,6 +11,7 @@ import mediumLogoLarge from '../../public/medium-logo-with-cirlces.svg';
 import * as sessionActions from '../../store/session';
 import { initialLoad } from '../../store/story';
 import mediumLogoCircles from '../../public/medium-logo-circles.jpeg';
+import { clickable } from '../../utils/a11y';
 
 const MainPageContent = () => {
   const { windowSize } = useContext(WindowContext);
@@ -101,7 +102,7 @@ const MainPageContent = () => {
                 <StoryTileTwoSkeleton />
               </div>
               <div className="main-page-small-view-footer">
-                <div className="footer-logo" onClick={handleLogoClick}>
+                <div className="footer-logo" aria-label="Shmedium home" {...clickable(handleLogoClick)}>
                   <img src={mediumLogoLarge} alt="medium circle logo" loading="lazy" decoding="async" />
                 </div>
                 <div className="main-page-small-view-footer-item">About</div>
@@ -134,18 +135,18 @@ const MainPageContent = () => {
                     ))}
                   </div>
                 </div>
-                <div className="see-more-topics" onClick={() => setIsExtended(!isExtended)}>
+                <div className="see-more-topics" {...clickable(() => setIsExtended(!isExtended))}>
                   {isExtended ? 'See less topics' : 'See more topics'}
                 </div>
                 <div className="main-page-footer">
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Help</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Status</div>
-                  <div className="main-page-footer-item" onClick={navToFeedStory}>Writers</div>
-                  <div className="main-page-footer-item" onClick={navToFeedStory}>Blog</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Careers</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Privacy</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Terms</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>About</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Help</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Status</div>
+                  <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Writers</div>
+                  <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Blog</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Careers</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Privacy</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Terms</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>About</div>
                 </div>
               </div>
             </div>
@@ -162,10 +163,10 @@ const MainPageContent = () => {
               <div className={isExtended ? 'main-page-small-view-tags-extended' : 'main-page-small-view-tags'}>
                 <div className="main-page-small-view-tag-header memo-text">Discover more of what matters to you</div>
                 {tags && tags.map((tag, i) => (
-                  <div key={i} className="main-page-tag memo-text" onClick={() => navToFeed(tag)}>{tag}</div>
+                  <div key={i} className="main-page-tag memo-text" {...clickable(() => navToFeed(tag))}>{tag}</div>
                 ))}
               </div>
-              <div className="see-more-topics small memo-text" onClick={() => setIsExtended(!isExtended)}>
+              <div className="see-more-topics small memo-text" {...clickable(() => setIsExtended(!isExtended))}>
                 {isExtended ? 'See less topics' : 'See more topics'}
               </div>
 
@@ -177,13 +178,13 @@ const MainPageContent = () => {
               </div>
 
               <div className="main-page-small-view-footer">
-                <div className="footer-logo" onClick={handleLogoClick}>
+                <div className="footer-logo" aria-label="Shmedium home" {...clickable(handleLogoClick)}>
                   <img src={mediumLogoCircles} alt="medium circle logo" loading="lazy" decoding="async" />
                 </div>
-                <div className="main-page-small-view-footer-item" onClick={navToOurStory}>About</div>
-                <div className="main-page-small-view-footer-item" onClick={navToOurStory}>Help</div>
-                <div className="main-page-small-view-footer-item" onClick={navToOurStory}>Terms</div>
-                <div className="main-page-small-view-footer-item" onClick={navToOurStory}>Privacy</div>
+                <div className="main-page-small-view-footer-item" {...clickable(navToOurStory)}>About</div>
+                <div className="main-page-small-view-footer-item" {...clickable(navToOurStory)}>Help</div>
+                <div className="main-page-small-view-footer-item" {...clickable(navToOurStory)}>Terms</div>
+                <div className="main-page-small-view-footer-item" {...clickable(navToOurStory)}>Privacy</div>
               </div>
             </div>
           ) : (
@@ -203,24 +204,24 @@ const MainPageContent = () => {
                 <div className="main-page-tags-wrapper loaded">
                   <div className={isExtended ? 'main-page-tags-extended loaded' : 'main-page-tags loaded'}>
                     {tags && tags.map((tag, i) => (
-                      <div key={i} className="main-page-tag memo-text" onClick={() => navToFeed(tag)}>{tag}</div>
+                      <div key={i} className="main-page-tag memo-text" {...clickable(() => navToFeed(tag))}>{tag}</div>
                     ))}
                   </div>
                 </div>
 
-                <div className="see-more-topics" onClick={() => setIsExtended(!isExtended)}>
+                <div className="see-more-topics" {...clickable(() => setIsExtended(!isExtended))}>
                   {isExtended ? 'See less topics' : 'See more topics'}
                 </div>
 
                 <div className="main-page-footer">
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Help</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Status</div>
-                  <div className="main-page-footer-item" onClick={navToFeedStory}>Writers</div>
-                  <div className="main-page-footer-item" onClick={navToFeedStory}>Blog</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Careers</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Privacy</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>Terms</div>
-                  <div className="main-page-footer-item" onClick={navToOurStory}>About</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Help</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Status</div>
+                  <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Writers</div>
+                  <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Blog</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Careers</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Privacy</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>Terms</div>
+                  <div className="main-page-footer-item" {...clickable(navToOurStory)}>About</div>
                 </div>
               </div>
             </div>

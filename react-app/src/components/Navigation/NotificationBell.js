@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { markAllRead, markOneRead } from '../../store/notifications';
 import bellIcon from '../../public/bell-icon.svg';
+import { clickable } from '../../utils/a11y';
 
 function timeAgo(dateStr) {
   const now = new Date();
@@ -73,12 +74,26 @@ function NotificationBell({ showBell }) {
 
   return (
     <div className="bell-icon-container bell-wrapper" ref={bellRef}>
-      <div className="bell-trigger" onClick={handleBellClick}>
-        {showBell && <img src={bellIcon} alt="notifications" />}
-        {unreadCount > 0 && (
-          <span className="bell-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
-        )}
-      </div>
+      {/* With showBell false and nothing unread this rendered as an empty
+          focusable role="button" — a tab stop with no name and nothing to see
+          (WCAG 4.1.2). Only render the control when it has something to show,
+          and name it here rather than leaning on the icon's alt text. */}
+      {(showBell || unreadCount > 0) && (
+        <div
+          className="bell-trigger"
+          aria-label={
+            unreadCount > 0
+              ? `Notifications, ${unreadCount} unread`
+              : 'Notifications'
+          }
+          {...clickable(handleBellClick)}
+        >
+          {showBell && <img src={bellIcon} alt="" />}
+          {unreadCount > 0 && (
+            <span className="bell-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          )}
+        </div>
+      )}
 
       {bellOpen && (
         <div className="bell-dropdown">
@@ -99,7 +114,7 @@ function NotificationBell({ showBell }) {
                 <div
                   key={n.id}
                   className={`bell-notif-item ${!n.read ? 'bell-notif-unread' : ''}`}
-                  onClick={() => handleNotifItemClick(n)}
+                  {...clickable(() => handleNotifItemClick(n))}
                 >
                   {!n.read && <span className="bell-notif-dot" />}
                   <div className="bell-notif-body">

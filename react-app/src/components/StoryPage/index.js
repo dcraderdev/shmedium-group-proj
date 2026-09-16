@@ -18,6 +18,7 @@ import HighlightClipper from '../HighlightClipper';
 import RelatedStories from '../RelatedStories';
 import AuthorFollowCTA from '../AuthorFollowCTA';
 import BookmarkButton from '../BookmarkButton';
+import { clickable } from '../../utils/a11y';
 
 const slugify = (text) =>
   text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').slice(0, 60);
@@ -244,7 +245,7 @@ const StoryPage = () => {
                 />
                 <div className="author-information memo-text">
                   <div className="author-name-and-follow">
-                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
+                    <div style={{ cursor: 'pointer' }} {...clickable(() => navToAuthorProfile(story.authorInfo?.id))}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
                     </div>
                     {user && user.id !== story.authorInfo?.id && (
@@ -394,7 +395,7 @@ const StoryPage = () => {
                 />
                 <div className="author-information memo-text">
                   <div className="author-name-and-follow">
-                    <div style={{ cursor: 'pointer' }} onClick={() => navToAuthorProfile(story.authorInfo?.id)}>
+                    <div style={{ cursor: 'pointer' }} {...clickable(() => navToAuthorProfile(story.authorInfo?.id))}>
                       {story.authorInfo?.firstName} {story.authorInfo?.lastName}
                     </div>
                     {user && user.id !== story.authorInfo?.id && (

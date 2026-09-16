@@ -22,6 +22,7 @@ import magnifyGlass from '../../public/magnify-glass.svg';
 import magnifyGlassBlack from '../../public/magnify-glass-black.svg';
 import NotificationBell from './NotificationBell';
 import * as notificationActions from '../../store/notifications';
+import { clickable } from '../../utils/a11y';
 
 // How often to refresh the bell for a signed-in reader, in milliseconds.
 const NOTIFICATION_POLL_MS = 30000;
@@ -393,11 +394,12 @@ function Navigation() {
         <>
         <nav
           className={`nav-bar ${isHomePage ? 'logged' : ''} flexcenter ${navColor}`}
+          aria-label="Main"
         >
           <div className={`nav-buttons memo-text ${buttonStylings}`}>
             <div className="flexcenter">
-              <div className="logo small" onClick={handleLogoClick}>
-                <img src={mediumLogoSmall} alt="medium cirlce logo" />
+              <div className="logo small" aria-label="Shmedium home" {...clickable(handleLogoClick)}>
+                <img src={mediumLogoSmall} alt="" />
               </div>
 
               <div
@@ -410,13 +412,13 @@ function Navigation() {
                 {isWritePage && (
                   <div
                     className="maginfy-container scaled-down"
-                    onClick={newSearch}
+                    {...clickable(newSearch)}
                   >
                     <img src={magnifyGlassBlack} alt="medium cirlce logo" />
                   </div>
                 )}
                 {!isWritePage && (
-                  <div className="maginfy-container" onClick={newSearch}>
+                  <div className="maginfy-container" aria-label="Search" {...clickable(newSearch)}>
                     <img
                       className=""
                       src={magnifyGlass}
@@ -524,7 +526,8 @@ function Navigation() {
               <div className={`nav-user-buttons `}>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} black`}
-                  onClick={handleWriteClick}
+                  aria-label="Write a story"
+                  {...clickable(handleWriteClick)}
                 >
                   <div className={`write-icon-container`}></div>
                   <div className="memo-text"></div>
@@ -534,15 +537,16 @@ function Navigation() {
 
                 <div
                   className={`nav-user-profile-div`}
-                  onClick={handleProfileClick}
+                  aria-label="Account menu"
+                  {...clickable(handleProfileClick)}
                 >
                   {user && user.profileImage && (
-                    <div className={`profile-div`} onClick={handleProfileClick}>
+                    <div className={`profile-div`}>
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
                   {user && !user.profileImage && (
-                    <div className={`profile-div`} onClick={handleProfileClick}>
+                    <div className={`profile-div`}>
                       <img src={quill} alt="user profile icon" />
                     </div>
                   )}
@@ -552,7 +556,8 @@ function Navigation() {
               <div className={`nav-user-buttons `}>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''}`}
-                  onClick={handleWriteClick}
+                  aria-label="Write a story"
+                  {...clickable(handleWriteClick)}
                 >
                   <div className={`write-icon-container`}>
                     <img className={`write-icon`} src={writeIcon} alt="write symbol" />
@@ -564,15 +569,16 @@ function Navigation() {
 
                 <div
                   className={`nav-user-profile-div`}
-                  onClick={handleProfileClick}
+                  aria-label="Account menu"
+                  {...clickable(handleProfileClick)}
                 >
                   {user && user.profileImage && (
-                    <div className={`profile-div`} onClick={handleProfileClick}>
+                    <div className={`profile-div`}>
                       <img src={profileImageSrc} alt="user profile icon" />
                     </div>
                   )}
                   {user && !user.profileImage && (
-                    <div className={`profile-div`} onClick={handleProfileClick}>
+                    <div className={`profile-div`}>
                       <img src={quill} alt="user profile icon" />
                     </div>
                   )}
@@ -596,14 +602,14 @@ function Navigation() {
 
         {/* Mobile drawer — logged-in */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
-          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
-          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { handleProfileClick(); setMenuOpen(false); }}>Profile</div>
+          <div className="mobile-nav-item" {...clickable(() => { openSearchModal(); setMenuOpen(false); })}>Search</div>
+          <div className="mobile-nav-item" {...clickable(() => { handleWriteClick(); setMenuOpen(false); })}>Write</div>
+          <div className="mobile-nav-item" {...clickable(() => { handleProfileClick(); setMenuOpen(false); })}>Profile</div>
           {/* This drawer only renders for a signed-in reader, so offering
               "Sign in as Demo" here was both nonsensical and hid the fact that
               there was no way to sign out on mobile at all — the Sign Out in the
               profile dropdown is desktop-only. */}
-          <div className="mobile-nav-item" onClick={handleSignOut}>Sign Out</div>
+          <div className="mobile-nav-item" {...clickable(handleSignOut)}>Sign Out</div>
         </div>
         </>
       )}
@@ -619,11 +625,11 @@ function Navigation() {
 
       {!user && !isLandingPage && (
         <>
-        <nav className={`nav-bar logged flexcenter ${navColor}`}>
+        <nav className={`nav-bar logged flexcenter ${navColor}`} aria-label="Main">
           <div className={`nav-buttons memo-text ${buttonStylings}`}>
             <div className="flexcenter">
-              <div className="logo small" onClick={handleLogoClick}>
-                <img src={mediumLogoSmall} alt="medium cirlce logo" />
+              <div className="logo small" aria-label="Shmedium home" {...clickable(handleLogoClick)}>
+                <img src={mediumLogoSmall} alt="" />
               </div>
 
               {windowSize > 700 && (
@@ -635,13 +641,13 @@ function Navigation() {
                   {isWritePage && (
                     <div
                       className="maginfy-container scaled-down"
-                      onClick={newSearch}
+                      {...clickable(newSearch)}
                     >
                       <img src={magnifyGlassBlack} alt="medium cirlce logo" />
                     </div>
                   )}
                   {!isWritePage && (
-                    <div className="maginfy-container" onClick={newSearch}>
+                    <div className="maginfy-container" aria-label="Search" {...clickable(newSearch)}>
                       <img
                         className=""
                         src={magnifyGlass}
@@ -743,7 +749,8 @@ function Navigation() {
               <div className={`nav-user-buttons `}>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''} black`}
-                  onClick={handleWriteClick}
+                  aria-label="Write a story"
+                  {...clickable(handleWriteClick)}
                 >
                   <div className={`write-icon-container`}></div>
                   <div className="memo-text"></div>
@@ -751,9 +758,10 @@ function Navigation() {
 
                 <div
                   className={`nav-user-profile-div`}
-                  onClick={handleProfileClick}
+                  aria-label="Account menu"
+                  {...clickable(handleProfileClick)}
                 >
-                  <div className={`profile-div`} onClick={handleProfileClick}>
+                  <div className={`profile-div`}>
                     <img src={userOutline} alt="user profile icon" />
                   </div>
                 </div>
@@ -762,7 +770,8 @@ function Navigation() {
               <div className={`nav-user-buttons `}>
                 <div
                   className={`nav-write ${!showWriteButton ? 'hidden' : ''}`}
-                  onClick={handleWriteClick}
+                  aria-label="Write a story"
+                  {...clickable(handleWriteClick)}
                 >
                   <div className={`write-icon-container`}>
                     <img className={`write-icon`} src={writeIcon} alt="write symbol" />
@@ -772,9 +781,10 @@ function Navigation() {
 
                 <div
                   className={`nav-user-profile-div`}
-                  onClick={handleProfileClick}
+                  aria-label="Account menu"
+                  {...clickable(handleProfileClick)}
                 >
-                  <div className={`profile-div`} onClick={handleProfileClick}>
+                  <div className={`profile-div`}>
                     <img src={userOutline} alt="user profile icon" />
                   </div>
                 </div>
@@ -797,10 +807,10 @@ function Navigation() {
 
         {/* Mobile drawer — logged-out */}
         <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
-          <div className="mobile-nav-item" onClick={() => { openSearchModal(); setMenuOpen(false); }}>Search</div>
-          <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-          <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
-          <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
+          <div className="mobile-nav-item" {...clickable(() => { openSearchModal(); setMenuOpen(false); })}>Search</div>
+          <div className="mobile-nav-item" {...clickable(() => { handleWriteClick(); setMenuOpen(false); })}>Write</div>
+          <div className="mobile-nav-item" {...clickable(() => { handleSigninClick(); setMenuOpen(false); })}>Sign In</div>
+          <div className="mobile-nav-get-started" {...clickable(() => { handleSignupClick(); setMenuOpen(false); })}>Get started</div>
         </div>
         </>
       )}
@@ -808,40 +818,42 @@ function Navigation() {
       {/* // For no user and at landing page */}
       {!user && isLandingPage && (
         <>
-          <nav className={`nav-bar flexcenter ${navColor}`}>
+          <nav className={`nav-bar flexcenter ${navColor}`} aria-label="Main">
             <div className={`nav-buttons memo-text ${buttonStylings}`}>
-              <div className="logo large" onClick={handleLogoClick}>
-                <img src={mediumLogoSmall} alt="Shmedium logo" /><span className="nav-shmedium-wordmark">Shmedium</span>
+              <div className="logo large" {...clickable(handleLogoClick)}>
+                {/* Decorative: the wordmark beside it names the control, so an
+                    alt here would duplicate it and break WCAG 2.5.3. */}
+                <img src={mediumLogoSmall} alt="" /><span className="nav-shmedium-wordmark">Shmedium</span>
               </div>
 
               <div className={`nav-link-buttons ${buttonStylings}`}>
                 <div
                   className={`nav-button ${buttonStylings}`}
-                  onClick={handleStoryClick}
+                  {...clickable(handleStoryClick)}
                 >
                   Our Story
                 </div>
                 <div
                   className={`nav-button ${buttonStylings}`}
-                  onClick={demoUser}
+                  {...clickable(demoUser)}
                 >
                   Demo User
                 </div>
                 <div
                   className={`nav-button ${buttonStylings}`}
-                  onClick={handleWriteClick}
+                  {...clickable(handleWriteClick)}
                 >
                   Write
                 </div>
                 <div
                   className={`sign-in-nav-button nav-button2 ${buttonStylings}`}
-                  onClick={handleSigninClick}
+                  {...clickable(handleSigninClick)}
                 >
                   Sign In
                 </div>
                 <div
                   className={`get-started button ${buttonStyle}`}
-                  onClick={handleSignupClick}
+                  {...clickable(handleSignupClick)}
                 >
                   Get started
                 </div>
@@ -863,11 +875,11 @@ function Navigation() {
 
           {/* Mobile drawer */}
           <div className={`mobile-nav-drawer ${menuOpen ? 'open' : ''}`}>
-            <div className="mobile-nav-item" onClick={() => { handleStoryClick(); setMenuOpen(false); }}>Our Story</div>
-            <div className="mobile-nav-item" onClick={demoUser}>Demo User</div>
-            <div className="mobile-nav-item" onClick={() => { handleWriteClick(); setMenuOpen(false); }}>Write</div>
-            <div className="mobile-nav-item" onClick={() => { handleSigninClick(); setMenuOpen(false); }}>Sign In</div>
-            <div className="mobile-nav-get-started" onClick={() => { handleSignupClick(); setMenuOpen(false); }}>Get started</div>
+            <div className="mobile-nav-item" {...clickable(() => { handleStoryClick(); setMenuOpen(false); })}>Our Story</div>
+            <div className="mobile-nav-item" {...clickable(demoUser)}>Demo User</div>
+            <div className="mobile-nav-item" {...clickable(() => { handleWriteClick(); setMenuOpen(false); })}>Write</div>
+            <div className="mobile-nav-item" {...clickable(() => { handleSigninClick(); setMenuOpen(false); })}>Sign In</div>
+            <div className="mobile-nav-get-started" {...clickable(() => { handleSignupClick(); setMenuOpen(false); })}>Get started</div>
           </div>
         </>
       )}

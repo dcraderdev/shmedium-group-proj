@@ -9,6 +9,7 @@ import quill from '../../public/quill.png';
 import userOutline from '../../public/user-outline.png';
 import fountainPen from '../../public/fountain-pen.png';
 import * as sessionActions from '../../store/session'
+import { clickable } from '../../utils/a11y';
 
 
 const StoryTileOne = ({ story, index }) => {
@@ -84,7 +85,7 @@ const StoryTileOne = ({ story, index }) => {
               </div>
               <div
                 className="style1-author-name memo-text"
-                onClick={() => navToFeed(`${story?.authorInfo.firstName} ${story?.authorInfo.lastName}`, 'authors')}
+                {...clickable(() => navToFeed(`${story?.authorInfo.firstName} ${story?.authorInfo.lastName}`, 'authors'))}
               >
                 {story?.authorInfo.firstName} {story?.authorInfo.lastName}
               </div>
@@ -92,7 +93,7 @@ const StoryTileOne = ({ story, index }) => {
             <div className="style1-story-title-container">
               <div
                 className=" style1-story-title memo-text"
-                onClick={() => history.push(`/story/${story.id}`)}
+                {...clickable(() => history.push(`/story/${story.id}`))}
               >
                 {story?.title}
               </div>
@@ -131,7 +132,7 @@ const StoryTileOne = ({ story, index }) => {
               </div>
               <div
                 className="style1-author-name memo-text"
-                onClick={() => navToFeed(`${story?.authorInfo.firstName} ${story?.authorInfo.lastName}`, 'authors')}
+                {...clickable(() => navToFeed(`${story?.authorInfo.firstName} ${story?.authorInfo.lastName}`, 'authors'))}
               >
                 {story?.authorInfo.firstName} {story?.authorInfo.lastName}
               </div>
@@ -139,7 +140,7 @@ const StoryTileOne = ({ story, index }) => {
             <div className="style1-story-title-container">
               <div
                 className=" style1-story-title memo-text"
-                onClick={() => history.push(`/story/${story.id}`)}
+                {...clickable(() => history.push(`/story/${story.id}`))}
               >
                 {story?.title}
               </div>

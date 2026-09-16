@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import './StoryTileTwo.css';
 import * as sessionActions from '../../store/session';
+import { clickable } from '../../utils/a11y';
 
 const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
   const history = useHistory();
@@ -59,7 +60,7 @@ const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
       <div className="style2-content">
 
         {/* Byline row */}
-        <div className="style2-author-container" onClick={navToAuthor}>
+        <div className="style2-author-container" {...clickable(navToAuthor)}>
           <div className="style2-profile-image">
             {story?.authorInfo?.profileImage && (
               <img
@@ -86,7 +87,7 @@ const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
         </div>
 
         {/* Title */}
-        <div className="style2-story-title-container" onClick={navToStory}>
+        <div className="style2-story-title-container" {...clickable(navToStory)}>
           {titleHtml ? (
             <h2
               className="style2-story-title"
@@ -132,6 +133,8 @@ const StoryTileTwo = ({ story, titleHtml, hideIntro, featured = false }) => {
       </div>
 
       {/* ── Thumbnail column ── */}
+      {/* Decorative: the title beside it is the labelled control, so this
+          stays aria-hidden and out of the tab order (WCAG 4.1.2). */}
       <div className="style2-story-image" onClick={navToStory} aria-hidden="true">
         {thumbnailVariants ? (
           <picture>

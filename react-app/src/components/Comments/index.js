@@ -13,6 +13,7 @@ import {
 import './Comments.css';
 import { WindowContext } from '../../context/WindowContext';
 import { ModalContext } from '../../context/ModalContext';
+import { clickable } from '../../utils/a11y';
 
 const EDIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -380,7 +381,7 @@ const Comments = ({ userId, storyId, authorInfo, setShowComments }) => {
         <div className="cmt-signin-prompt">
           <span
             className="cmt-signin-link"
-            onClick={() => { openModal('signin'); setShowComments(false); }}
+            {...clickable(() => { openModal('signin'); setShowComments(false); })}
           >
             Sign in
           </span>{' '}

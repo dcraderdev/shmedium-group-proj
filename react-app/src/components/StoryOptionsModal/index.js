@@ -2,6 +2,7 @@ import React, { useContext, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ModalContext } from '../../context/ModalContext';
+import useDialog from '../../hooks/useDialog';
 // import * as sessionActions from '../../store/session';
 import * as storyActions from '../../store/story';
 import './StoryOptionsModal.css';
@@ -11,6 +12,8 @@ function StoryOptionsModal() {
     const dispatch = useDispatch();
     const { closeModal } = useContext(ModalContext);
     const formRef = useRef(null);
+  // WCAG 2.1.1 / 2.1.2 / 2.4.3 — Escape, focus trap, focus restore.
+  useDialog(formRef, closeModal);
     const currentStory = useSelector(state => state.story.currentStory);
     // const {id} = useParams();
 
@@ -46,7 +49,13 @@ function StoryOptionsModal() {
     return (
       <>
         <div className="backdrop" onClick={closeModal}></div>
-        <div className="story-options-menu" ref={formRef}>
+        <div
+          className="story-options-menu"
+          ref={formRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Story options"
+        >
           <div className="story-options-buttons">
               <button className='edit-story-button' onClick={editCurrentStory}>Edit Story</button>
               <button className='delete-story-button' onClick={deleteCurrentStory}>Delete Story</button>

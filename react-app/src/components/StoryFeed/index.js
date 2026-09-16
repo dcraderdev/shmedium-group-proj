@@ -11,6 +11,7 @@ import AuthorTile from '../AuthorTile';
 import StoryTileFourSkeleton from '../StoryTileFourSkeleton';
 import StoryTileTwoSkeleton from '../StoryTileTwoSkeleton';
 import magnifyGlass from '../../public/magnify-glass.svg';
+import { clickable } from '../../utils/a11y';
 
 const BATCH = 10;
 
@@ -169,7 +170,8 @@ const StoryFeed = () => {
         <div className="feed-select-container">
           <div
             className="feed-select small memo-text flexcenter"
-            onClick={() => {
+            aria-label="Search stories"
+            {...clickable(() => {
               const input = searchInputRef.current;
               if (input && input.offsetParent !== null) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -177,7 +179,7 @@ const StoryFeed = () => {
               } else {
                 window.dispatchEvent(new CustomEvent('open-search-modal'));
               }
-            }}
+            })}
           >
             <div className="add-container flexcenter">
               <img src={magnifyGlass} alt="search" />
@@ -186,27 +188,27 @@ const StoryFeed = () => {
 
           <div
             className={`feed-select med memo-text flexcenter ${currentFeed === 'for you' ? 'selected' : ''}`}
-            onClick={() => handleSelectFeed('for you')}
+            {...clickable(() => handleSelectFeed('for you'))}
           >
             For you
           </div>
 
           <div
             className={`feed-select med memo-text flexcenter ${currentFeed === 'by you' ? 'selected' : ''}`}
-            onClick={() => {
+            {...clickable(() => {
               handleSelectFeed('by you');
               dispatch(storyActions.getUserStories());
-            }}
+            })}
           >
             By you
           </div>
 
           <div
             className={`feed-select large memo-text flexcenter ${currentFeed === 'following' ? 'selected' : ''}`}
-            onClick={() => {
+            {...clickable(() => {
               handleSelectFeed('following');
               dispatch(storyActions.getSubscribedStories());
-            }}
+            })}
           >
             Following
           </div>
@@ -215,9 +217,9 @@ const StoryFeed = () => {
             <div key={i}>
               <div
                 className={`feed-select dyna memo-text flexcenter ${currentFeed === searchQuery ? 'selected' : ''}`}
-                onClick={() => handleSelectFeed(searchQuery)}
+                {...clickable(() => handleSelectFeed(searchQuery))}
               >
-                <div className="search-close-tab" onClick={(e) => handleRemoveSearch(e, searchQuery)}>×</div>
+                <div className="search-close-tab" aria-label={`Close ${searchQuery} tab`} {...clickable((e) => handleRemoveSearch(e, searchQuery))}>×</div>
                 {searchQuery}
               </div>
             </div>
@@ -231,19 +233,19 @@ const StoryFeed = () => {
           <div className="feed-select-container">
             <div
               className={`feed-select med memo-text flexcenter ${subFeed === 'stories' ? 'selected' : ''}`}
-              onClick={() => handleSelectSubFeed('stories')}
+              {...clickable(() => handleSelectSubFeed('stories'))}
             >
               Stories
             </div>
             <div
               className={`feed-select large memo-text flexcenter ${subFeed === 'authors' ? 'selected' : ''}`}
-              onClick={() => handleSelectSubFeed('authors')}
+              {...clickable(() => handleSelectSubFeed('authors'))}
             >
               Authors
             </div>
             <div
               className={`feed-select large memo-text flexcenter ${subFeed === 'taggedStories' ? 'selected' : ''}`}
-              onClick={() => handleSelectSubFeed('taggedStories')}
+              {...clickable(() => handleSelectSubFeed('taggedStories'))}
             >
               Tags
             </div>

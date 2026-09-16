@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import * as storyActions from '../../store/story';
 import './DraftsPage.css';
+import { clickable } from '../../utils/a11y';
 
 function fmtDate(iso) {
   if (!iso) return '';
@@ -93,10 +94,10 @@ export default function DraftsPage() {
               key={draft.id}
               className={`draft-card ${confirmDelete === draft.id ? 'confirming' : ''}`}
             >
-              <div className="draft-card-body" onClick={() => {
+              <div className="draft-card-body" {...clickable(() => {
                 if (confirmDelete === draft.id) return;
                 handleEdit(draft);
-              }}>
+              })}>
                 <div className="draft-card-left">
                   <h2 className="draft-card-title">
                     {draft.title || <span className="draft-untitled">Untitled</span>}

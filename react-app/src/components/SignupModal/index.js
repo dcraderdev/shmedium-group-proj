@@ -4,7 +4,9 @@ import { useHistory } from 'react-router-dom';
 import './SignupModal.css';
 import { ModalContext } from '../../context/ModalContext';
 import * as sessionActions from '../../store/session';
+import useDialog from '../../hooks/useDialog';
 import profileImages from './profileImages';
+import { clickable } from '../../utils/a11y';
 
 
 function SignupModal() {
@@ -14,6 +16,8 @@ function SignupModal() {
   const dispatch = useDispatch();
   const history = useHistory();
   const formRef = useRef(null);
+  // WCAG 2.1.1 / 2.1.2 / 2.4.3 — Escape, focus trap, focus restore.
+  useDialog(formRef, closeModal);
   const [credential, setCredential] = useState('');
   const [emailText, setEmailText] = useState('Please enter an email');
   const [emailClass, setEmailClass] = useState('emailField');
@@ -159,11 +163,17 @@ function SignupModal() {
   };
 
   return (
-    <div className="signup-form-page-container" ref={formRef}>
+    <div
+      className="signup-form-page-container"
+      ref={formRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create an account"
+    >
       <div className="signup-header-container flexcenter">
         <div className="signup-header header-text">Join Shmedium.</div>
       </div>
-      <div className="signup-close-button" onClick={closeModal}>
+      <div className="signup-close-button" aria-label="Close" {...clickable(closeModal)}>
         <i className="fa-solid fa-x"></i>
       </div>
 
@@ -232,10 +242,10 @@ function SignupModal() {
                   className={`signup-profile-image-button ${glowing ? 'glowing' : ''} ${
                     profileImage.url === image ? 'icon-selected' : ''
                   }`}
-                  onClick={() => {
+                  {...clickable(() => {
                     setProfileImage({ url: image, alt: `profileImage${index}` });
                     setGlowing(false);
-                  }}
+                  })}
                 >
 
                   <img
@@ -263,7 +273,7 @@ function SignupModal() {
         <div className="signup-no-account-container flexcenter">
           <div className="flexcenter memo-text">
             Already have an account?
-            <div onClick={handleSignIn} className="create-one">
+            <div {...clickable(handleSignIn)} className="create-one">
               Sign in
             </div>
           </div>
