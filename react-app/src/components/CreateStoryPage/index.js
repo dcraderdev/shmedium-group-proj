@@ -357,6 +357,10 @@ const CreateStoryPage = () => {
 
   return (
     <div className="createstory-container">
+      {/* WCAG 1.3.1: the editor's only text is the story being written, so the
+          page itself had no heading to orient a screen-reader user. */}
+      <h1 className="visually-hidden">{isEditing ? 'Edit story' : 'Write a story'}</h1>
+
       {/* Top toolbar */}
       <div className="csp-toolbar">
         <div className="csp-status-area">

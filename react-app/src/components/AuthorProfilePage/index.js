@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import * as storyActions from '../../store/story';
 import './AuthorProfile.css';
+import { clickable } from '../../utils/a11y';
 
 const TABS = ['Stories', 'About', 'Followers', 'Following'];
 const DEFAULT_COVER = 'https://miro.medium.com/v2/resize:fit:1500/1*k3c5bfQ5F4kLVZMuJl-7RA.jpeg';
@@ -185,7 +186,7 @@ function StoryCard({ story, onNavigate }) {
     'https://miro.medium.com/v2/resize:fit:1200/1*jfdwtvU6V6g99q3G7gq7dQ.png';
 
   return (
-    <div className="apc-story-card" onClick={() => onNavigate(story.id)}>
+    <div className="apc-story-card" {...clickable(() => onNavigate(story.id))}>
       <div className="apc-story-card-img" style={{ backgroundImage: `url(${thumbnail})` }} />
       <div className="apc-story-card-body">
         <h3 className="apc-story-card-title">{story.title}</h3>
@@ -220,7 +221,7 @@ function FollowerPill({ record, viewAs }) {
   const name = `${user.firstName} ${user.lastName}`;
 
   return (
-    <div className="apc-user-pill" onClick={() => history.push(`/author/${user.id}`)}>
+    <div className="apc-user-pill" {...clickable(() => history.push(`/author/${user.id}`))}>
       <img className="apc-user-pill-avatar" src={avatar} alt={name} loading="lazy" />
       <span className="apc-user-pill-name">{name}</span>
       <span className="apc-user-pill-arrow">→</span>
@@ -404,6 +405,10 @@ export default function AuthorProfilePage() {
 
       {/* ── Tab content ── */}
       <div className="apc-tab-content">
+        {/* WCAG 1.3.1: the story cards are h3, and the only heading above them
+            was the author's h1 — a skipped level. This names the section at h2
+            so the outline reads h1 → h2 → h3, and it tracks the active tab. */}
+        <h2 className="visually-hidden">{activeTab}</h2>
 
         {/* Stories */}
         {activeTab === 'Stories' && (

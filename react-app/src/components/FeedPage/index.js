@@ -31,6 +31,10 @@ const FeedPage = () => {
  
   return (
     <>
+      {/* WCAG 1.3.1 / 2.4.6: the feed is the page's subject but had no heading,
+          so screen-reader users landed on an unnamed list of articles. The title
+          is visual noise sighted users do not need, hence visually hidden. */}
+      <h1 className="visually-hidden">Your feed</h1>
 
       {windowSize < 960 &&(
         <div className='feedpage-container flex'>

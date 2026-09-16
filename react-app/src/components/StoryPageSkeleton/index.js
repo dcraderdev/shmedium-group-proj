@@ -8,7 +8,6 @@ import commentBubble from '../../public/comment.svg';
 
 const StoryPageSkeleton = () => {
   const [showComments, setShowComments] = useState(false);
-  const story = useSelector((state) => state.story.currentStory);
 
   // const currentUserId = useSelector(state => state.session.user?.id);
 
@@ -16,8 +15,13 @@ const StoryPageSkeleton = () => {
   return (
     <>
 
+      {/* This is the loading placeholder, and it used to be wrapped in
+          {story && (...)} — so it rendered only once the story had already
+          arrived, and nothing at all while the story was loading. The page was
+          therefore blank for the whole fetch (measured ~1.8s against
+          production), with no heading for a screen reader to land on. Nothing
+          in here reads from `story`; it is all shimmer blocks. */}
       <div className="story-page">
-        {story && (
           <>
             <h4 className="member-only">
               <img
@@ -28,7 +32,12 @@ const StoryPageSkeleton = () => {
               Member-only story
             </h4>
 
-            <h1 className="storypageskeleton-story-title shimmer"></h1>
+            {/* WCAG 1.3.1 / 2.4.6: an empty h1 is not a heading. While the story
+                loads this is the page's only h1, so it carries the loading state
+                for assistive tech and the shimmer block for everyone else. */}
+            <h1 className="storypageskeleton-story-title shimmer">
+              <span className="visually-hidden">Loading story…</span>
+            </h1>
 
 
 
@@ -188,7 +197,6 @@ const StoryPageSkeleton = () => {
             </div>
 
           </>
-        )}
       </div>
     </>
   );

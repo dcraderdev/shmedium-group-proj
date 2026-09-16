@@ -2,6 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import './WritePage.css';
 import CreatorTile from '../CreatorTile';
+import { clickable } from '../../utils/a11y';
 
 const creators = [
   {
@@ -34,9 +35,10 @@ const WritePage = () => {
             <div className="writepage-container1-header small-text spaced">
               START A BLOG FOR FREE
             </div>
-            <div className="writepage-container1-header2 header-text align-left">
+            {/* WCAG 1.3.1: page had no h1. */}
+            <h1 className="writepage-container1-header2 header-text align-left">
               Publish, grow, and earn, all in one place.
-            </div>
+            </h1>
             <div className="writepage-container1-header3 memo-text">
               If you have a story to tell, knowledge to share, or a perspective
               to offer — welcome home. Sign up for free so your writing can
@@ -186,7 +188,7 @@ const WritePage = () => {
 
         {/* DIV 12 Stylings */}
         <div className="ourstorypage-footer-container flexcenter">
-          <div className="ourstorypage-footer-logo" onClick={handleLogoClick}>
+          <div className="ourstorypage-footer-logo" {...clickable(handleLogoClick)}>
             <b>Shmedium</b>
           </div>
           <div className="ourstorypage-footer">

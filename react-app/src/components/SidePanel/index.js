@@ -9,6 +9,7 @@ import * as sessionActions from '../../store/session';
 
 import StoryTileThree from '../StoryTileThree';
 import StoryTileTwoSkeleton from '../StoryTileTwoSkeleton';
+import { clickable } from '../../utils/a11y';
 
 
 const SidePanel = () => {
@@ -89,20 +90,20 @@ const SidePanel = () => {
                   ))}
     </div>
 
-    <div className="see-more-topics" onClick={() => setShowtags(!showTags)}>
+    <div className="see-more-topics" {...clickable(() => setShowtags(!showTags))}>
       {showTags ? 'See less topics' : 'See more topics'}
     </div>
 
 
     <div className="sidepanel-footer">
-      <div className="main-page-footer-item" onClick={navToOurStory}>Help</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Status</div>
-      <div className="main-page-footer-item" onClick={navToFeedStory}>Writers</div>
-      <div className="main-page-footer-item" onClick={navToFeedStory}>Blog</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Careers</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Privacy</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Terms</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>About</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Help</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Status</div>
+      <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Writers</div>
+      <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Blog</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Careers</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Privacy</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Terms</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>About</div>
     </div>
 
   </div>
@@ -120,7 +121,15 @@ const SidePanel = () => {
       </div>
 
 
-        <div className="sidepanel-staff-picks-content flex">
+        {/* WCAG 2.1.1: this list scrolls, so it needs to be reachable and
+            scrollable from the keyboard. tabIndex makes it focusable; the
+            group role + label stop it being an unlabelled stop in the order. */}
+        <div
+          className="sidepanel-staff-picks-content flex"
+          tabIndex={0}
+          role="group"
+          aria-label="Staff picks of the month"
+        >
           {staffPicks.map((story) => (
             <StoryTileThree key={story.id} story={story} />
           ))}
@@ -142,24 +151,24 @@ const SidePanel = () => {
 
     <div className={showTags ? 'sidepanel-tags-extended' : 'sidepanel-tags'}>
       {tags && tags.map((tag, i) => {
-        return <div key={i} className="main-page-tag memo-text" onClick={()=>searchTag(tag)}>{tag}</div>;
+        return <div key={i} className="main-page-tag memo-text" {...clickable(()=>searchTag(tag))}>{tag}</div>;
       })}
     </div>
 
-    <div className="see-more-topics" onClick={() => setShowtags(!showTags)}>
+    <div className="see-more-topics" {...clickable(() => setShowtags(!showTags))}>
       {showTags ? 'See less topics' : 'See more topics'}
     </div>
 
 
     <div className="sidepanel-footer">
-      <div className="main-page-footer-item" onClick={navToOurStory}>Help</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Status</div>
-      <div className="main-page-footer-item" onClick={navToFeedStory}>Writers</div>
-      <div className="main-page-footer-item" onClick={navToFeedStory}>Blog</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Careers</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Privacy</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>Terms</div>
-      <div className="main-page-footer-item" onClick={navToOurStory}>About</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Help</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Status</div>
+      <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Writers</div>
+      <div className="main-page-footer-item" {...clickable(navToFeedStory)}>Blog</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Careers</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Privacy</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>Terms</div>
+      <div className="main-page-footer-item" {...clickable(navToOurStory)}>About</div>
     </div>
 
   </div>

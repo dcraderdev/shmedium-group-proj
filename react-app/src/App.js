@@ -7,6 +7,7 @@ import { initialLoad } from './store/story';
 import Navigation from './components/Navigation';
 import PortfolioTopHeader from './components/PortfolioTopHeader';
 import { ModalContext } from './context/ModalContext';
+import DocumentTitle from './components/DocumentTitle';
 
 // Route-level chunks — each becomes its own JS file, loaded only when visited
 const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './components/NotFound'));
@@ -86,6 +87,13 @@ function App() {
 
   return (
     <>
+      {/* WCAG 2.4.2: keeps <title> in step with the route (every route reported
+          the same static "Shmedium"). */}
+      <DocumentTitle />
+      {/* WCAG 2.4.1: the nav, search field and portfolio bar sit ahead of the
+          content on every route, so a keyboard user had to tab through all of
+          them on each page load. Visually hidden until focused. */}
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <PortfolioTopHeader />
       {searchOpen && (
         <Suspense fallback={null}>
@@ -114,9 +122,23 @@ function App() {
       )}
 
       <Navigation />
-      <Suspense fallback={null}>
-        <AnimatedRoutes />
-      </Suspense>
+      {/* WCAG 1.3.1 / 2.4.1: every route's content was rendered as bare divs, so
+          axe reported all page content outside landmarks and no <main> anywhere.
+          Wrapping the router once gives every route exactly one main landmark
+          and a skip-link target, without touching each page component. */}
+      <main id="main-content" tabIndex={-1}>
+        <Suspense
+          fallback={
+            /* An h1, not a <p>: with an empty (or headingless) fallback the
+               page has no heading at all while a route chunk loads, which is
+               both a blank landing spot for a screen reader and a real
+               page-has-heading-one failure caught mid-navigation. */
+            <h1 className="visually-hidden">Loading page…</h1>
+          }
+        >
+          <AnimatedRoutes />
+        </Suspense>
+      </main>
     </>
   );
 }

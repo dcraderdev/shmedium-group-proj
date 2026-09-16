@@ -129,7 +129,9 @@ export default function PortfolioTopHeader() {
     >
       <div className="dt-inner">
         <a className="dt-home dt-pri" href="https://dcrader.dev">&larr; dcrader.dev</a>
-        <nav>
+        {/* Labelled so it is distinguishable from the app's own Main nav
+            (WCAG 1.3.1 — two unnamed nav landmarks are ambiguous). */}
+        <nav aria-label="Portfolio">
           <a href="https://dcrader.dev/pricing">Pricing</a>
           <a href="https://dcrader.dev/contact">Contact</a>
           <div className="dt-dd">

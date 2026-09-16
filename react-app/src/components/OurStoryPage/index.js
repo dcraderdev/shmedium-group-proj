@@ -10,6 +10,7 @@ import mediumLogoCircles from '../../public/medium-logo-circles.jpeg';
 import spinningCube from '../../public/spinning-cube.png';
 import spinningSphere from '../../public/spinning-sphere.png';
 import CreatorTile from '../CreatorTile';
+import { clickable } from '../../utils/a11y';
 
 const creators = [
   {
@@ -44,9 +45,10 @@ const navToWrite = () => {
       {/*  DIV 1 stylings */}
 
       <div className="ourstorypage-banner-container">
-        <div className="ourstorypage-banner-content header-text">
+        {/* WCAG 1.3.1: page had no h1. */}
+        <h1 className="ourstorypage-banner-content header-text">
           Every idea needs a <b className="medium-bold">Shmedium</b>.
-        </div>
+        </h1>
       </div>
 
 
@@ -168,7 +170,7 @@ const navToWrite = () => {
           earn money for your work.
         </div>
 
-        <div className="ourstorypage-create-content-button memo-text flexcenter" onClick={navToWrite}>
+        <div className="ourstorypage-create-content-button memo-text flexcenter" {...clickable(navToWrite)}>
           Write on Shmedium
         </div>
       </div>
@@ -343,7 +345,7 @@ const navToWrite = () => {
               Read, write, and expand your world.
             </div>
           </div>
-          <div className="ourstorypage-started-button flexcenter"  onClick={navToWrite}>
+          <div className="ourstorypage-started-button flexcenter"  {...clickable(navToWrite)}>
             Get started
           </div>
         </div>
@@ -351,7 +353,7 @@ const navToWrite = () => {
 
       {/* DIV 12 Stylings */}
       <div className="ourstorypage-footer-container flexcenter">
-        <div className="ourstorypage-footer-logo" onClick={handleLogoClick}>
+        <div className="ourstorypage-footer-logo" aria-label="Shmedium home" {...clickable(handleLogoClick)}>
           <b>Shmedium</b>
         </div>
         <div className="ourstorypage-footer-buttons">

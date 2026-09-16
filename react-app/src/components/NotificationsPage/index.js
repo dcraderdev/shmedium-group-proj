@@ -8,6 +8,7 @@ import {
   updateDigestFrequency,
 } from '../../store/notifications';
 import './NotificationsPage.css';
+import { clickable } from '../../utils/a11y';
 
 function timeAgo(dateStr) {
   const now = new Date();
@@ -89,7 +90,7 @@ function NotificationsPage() {
               <div
                 key={n.id}
                 className={`notif-item ${!n.read ? 'notif-unread' : ''}`}
-                onClick={() => handleNotifClick(n)}
+                {...clickable(() => handleNotifClick(n))}
               >
                 <div className="notif-dot-wrapper">
                   {!n.read && <span className="notif-dot" />}
@@ -107,7 +108,13 @@ function NotificationsPage() {
           <h2>Email Digest</h2>
           <p>Get a personalized summary of stories from authors you follow, delivered to {user?.email}.</p>
           <div className="notif-digest-controls">
+            {/* WCAG 4.1.2 / 3.3.2: the select had no accessible name at all —
+                a screen reader announced only the current value. */}
+            <label className="visually-hidden" htmlFor="digest-frequency">
+              Email digest frequency
+            </label>
             <select
+              id="digest-frequency"
               value={digestFreq}
               onChange={(e) => setDigestFreq(e.target.value)}
             >
