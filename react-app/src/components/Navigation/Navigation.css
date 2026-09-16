@@ -32,7 +32,7 @@
 }
 
 .nav-white { background-color: var(--color-card); }
-.nav-red   { background-color: #f24d2d; }
+.nav-red   { background-color: #cc3a1d; } /* matches the darkened write-page band (WCAG 1.4.3) */
 
 .nav-yellow {
   background-color: var(--color-yellow);
@@ -143,6 +143,10 @@
 }
 
 .nav-write:hover { color: var(--color-text-primary); }
+
+/* WCAG 1.4.3: --color-text-secondary on the landing page's yellow nav is
+   4.26:1 — just under the 4.5 bar. Dark ink on yellow is 10.58:1. */
+.nav-yellow .nav-write { color: var(--color-text-primary); }
 
 .profile-div {
   height: 40px;

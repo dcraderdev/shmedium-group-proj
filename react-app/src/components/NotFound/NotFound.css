@@ -20,7 +20,10 @@
   font-size: 140px;
   font-weight: 700;
   line-height: 1;
-  color: var(--color-border);
+  /* Was var(--color-border) (#e8e8e8) = 1.16:1 on the page background. It is
+     large text so 1.4.3 asks 3:1, and it carries the "404" meaning, so it is
+     not decorative. #8a8a8a = 3.28:1. */
+  color: #8a8a8a;
   letter-spacing: -6px;
   user-select: none;
   margin-bottom: 0;

@@ -242,8 +242,10 @@
   border-radius: 20px;
   height: 40px;
   width: 220px;
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
+  /* This button sits on the black band, where the light-surface accent is only
+     3.82:1 (WCAG 1.4.3). */
+  border: 1px solid var(--color-accent-on-dark);
+  color: var(--color-accent-on-dark);
   font-size: 22px;
   margin-top: 30px;
 
@@ -252,6 +254,7 @@
 .ourstorypage-create-content-button:hover {
   color: #ffffff;
   background-color: var(--color-accent);
+  border-color: var(--color-accent);
   font-size: 22px;
   transition: color 0.5s;
   cursor: pointer;
@@ -262,6 +265,10 @@
 .ourstorypage-membership-container {
   height: 500px;
   background-color: var(--color-accent);
+  /* WCAG 1.4.3: this block inherited the default near-black body colour, which
+     measured 3.84:1 against the green. The button inside it was already white,
+     so the whole block goes white — 5.49:1 — and the panel reads consistently. */
+  color: #ffffff;
   height: fit-content;
   flex-direction: column;
   font-size: 22px;
@@ -311,6 +318,9 @@
 .ourstorypage-read-reward-container {
   height: fit-content;
   background-color: var(--color-accent);
+  /* WCAG 1.4.3: the copy in this band inherited the near-black body colour
+     against the green. White is 5.49:1. */
+  color: #ffffff;
   display: flex;
   position: relative;
 }

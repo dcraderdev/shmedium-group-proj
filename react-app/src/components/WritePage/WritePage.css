@@ -42,7 +42,10 @@
 /*  DIV 1 stylings */
 
 .writepage-container1-wrapper {
-  background-color: #f24d2d;
+  /* WCAG 1.4.3: white 10px uppercase on #f24d2d measured 3.57:1. The text is
+     far too small to qualify as large text, so the band is darkened instead:
+     white on #cc3a1d = 5.01:1. */
+  background-color: #cc3a1d;
   padding-top: 50px;
 }
 
@@ -61,6 +64,9 @@
   font-size: 20px;
   margin-top: 40px;
   width: 90%;
+  /* WCAG 1.4.3: this paragraph inherited the near-black body colour and sat on
+     the red band at 3.47:1. The band's other text is already white. */
+  color: #ffffff;
 }
 
 .writepage-container1-button-container{

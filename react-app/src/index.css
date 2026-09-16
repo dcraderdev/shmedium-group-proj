@@ -7,14 +7,27 @@
   --color-bg:             #faf9f7;
   --color-card:           #ffffff;
   --color-text-primary:   #1a1a1a;
-  --color-text-secondary: #6b6b6b;
-  --color-text-tertiary:  #999999;
+  /* WCAG 1.4.3 (AA, 4.5:1 for body text). The old secondary/tertiary pair was
+     #6b6b6b / #999999. Tertiary carried nearly every contrast failure on the
+     site — 218 of 225 nodes — at 2.7:1 on --color-bg, because it is the colour
+     of all the byline meta ("3 min read", dates, clap counts). Tertiary is now
+     4.85:1 on --color-bg and 4.55:1 on --color-tag-bg, the lightest surfaces it
+     ever sits on. Secondary moved down with it so the two tiers stay visually
+     distinct rather than collapsing into one grey. */
+  --color-text-secondary: #595959;
+  --color-text-tertiary:  #6e6e6e;
   --color-border:         #e8e8e8;
   --color-border-light:   #f0f0f0;
 
-  /* Accent */
-  --color-accent:       #1a8917;
-  --color-accent-hover: #147113;
+  /* Accent
+     #1a8917 measured 4.31:1 on --color-bg, so it failed 1.4.3 wherever it was
+     used as text (the "Create One" link, sort pills). Darkened to 5.22:1; white
+     on it goes 4.53 → 5.49, so buttons improve too. */
+  --color-accent:       #157a13;
+  --color-accent-hover: #10600f;
+  /* The same accent on a dark surface needs to go the other way: #157a13 on
+     black is 3.83:1. This variant is 6.23:1 (WCAG 1.4.3). */
+  --color-accent-on-dark: #2ea043;
   --color-yellow:       #fec016;
 
   /* Tags */
@@ -32,6 +45,174 @@
 
   /* Transitions */
   --transition: 0.2s ease;
+
+  /* Focus ring (WCAG 2.4.7 / 1.4.11) */
+  --color-focus:         #1a1a1a;
+  --color-focus-inverse: #ffffff;
+}
+
+/* ── Accessibility baseline ───────────────────────────────────────────────
+ *
+ * WCAG 2.4.7 (Focus Visible) + 1.4.11 (Non-text Contrast).
+ *
+ * Twelve component stylesheets set `outline: none` on :focus with no visible
+ * replacement, so tabbing through the site showed nothing at all. Rather than
+ * unpick each one, this restores a ring for keyboard focus only (:focus-visible
+ * leaves mouse clicks unchanged). !important is deliberate: these rules must
+ * outrank the component-level resets, and a focus indicator is not something a
+ * component should be able to opt out of.
+ *
+ * The ring is near-black at 3px with a 2px offset — ≥3:1 against every light
+ * surface it lands on. The portfolio bar is dark, so it gets a light ring.
+ */
+:where(a, button, input, select, textarea, summary, [tabindex], [role="button"]):focus-visible {
+  outline: 3px solid var(--color-focus) !important;
+  outline-offset: 2px !important;
+}
+
+#dcrader-th :where(a, button):focus-visible {
+  outline-color: var(--color-focus-inverse) !important;
+}
+
+/* WCAG 2.4.1 (Bypass Blocks). Off-screen until focused. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100000;
+  padding: 12px 18px;
+  background: var(--color-text-primary);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-md) 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* Utility for text that should reach screen readers but not the screen. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Target size (WCAG 2.5.8, AA) ─────────────────────────────────────────
+ *
+ * The AA bar is 24×24 CSS px. Several controls sat under it, and a further set
+ * cleared 24 but not the 44×44 that touch guidance (and 2.5.5, AAA) asks for.
+ *
+ * Where a control's visual size is part of the design, the hit area is grown
+ * with a centred pseudo-element instead of resizing the control: the pointer
+ * target becomes 44×44 while the button still looks 38×38. The pseudo-element
+ * is a child of the control, so clicks on it activate the control.
+ *
+ * Exception taken: the portfolio bar is 34px tall by design, so its links
+ * cannot reach 44. They are taken to the full bar height (34 ≥ 24) which
+ * satisfies AA; going further would mean redesigning a shared bar.
+ */
+.share-btn,
+.filter-pill,
+.sort-btn,
+.notif-save-btn,
+.nav-mobile-search-btn,
+.cmt-sort-btn,
+.apc-sort-btn,
+.logo,
+.bell-trigger,
+.see-more-topics {
+  position: relative;
+}
+
+.share-btn::after,
+.filter-pill::after,
+.sort-btn::after,
+.notif-save-btn::after,
+.nav-mobile-search-btn::after,
+.cmt-sort-btn::after,
+.apc-sort-btn::after,
+.logo::after,
+.bell-trigger::after,
+.see-more-topics::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Chips are laid out in tight rows, so a 44px overlay would swallow the
+   neighbouring chip's target. These get the 24×24 minimum honestly instead. */
+.main-page-tag,
+.story-tag,
+.style2-tag {
+  min-height: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* axe (and the spec's "target" definition) measures the control's own box, not
+   the overlay above — so the flagged text controls get real height as well. */
+.see-more-topics,
+.main-page-footer-item,
+.logo {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo {
+  justify-content: center;
+  min-width: 24px;
+}
+
+/* The portfolio bar offsets the host nav by marking it from JS, which is
+   debounced — so on every load there is a window where the nav (and the logo
+   inside it) sits underneath the bar. This app knows its own nav, so it takes
+   the offset directly from CSS and never shows that intermediate state. The JS
+   marking still covers anything else that needs it. */
+html.dt-th-mounted .nav-bar {
+  top: var(--dt-th-h);
+}
+
+/* The bar is 34px tall; fill it so each link is a 34px-high target. */
+#dcrader-th .dt-inner > a,
+#dcrader-th nav a,
+#dcrader-th .dt-dd button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+/* WCAG 2.3.3 (Animation from Interactions). The site had no reduced-motion
+ * support: route transitions, fade-ins, the thumbnail zoom and the portfolio
+ * bar's slide all ran regardless of the OS setting. Honour it globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Global resets ────────────────────────────────────────────────────── */
