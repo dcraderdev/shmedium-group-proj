@@ -178,6 +178,29 @@
 .nav-write.black { color: black; }
 .search-field.black::placeholder { color: black; }
 
+/* WCAG 1.4.3. On the write page the nav sits on the red band, and the "black"
+   search variant puts #000 text and placeholder on it at 4.19:1. Darkening that
+   red (done so the white 10px band heading could reach 4.5:1) pushed black the
+   other way — the two text colours pull in opposite directions on the same
+   surface. The band's other copy is already white, so the field matches it:
+   white on #cc3a1d is 5.01:1. */
+.nav-red .search-field,
+.nav-red .search-field.black,
+.nav-red .nav-search.black,
+.nav-red .nav-write.black {
+  color: #ffffff;
+}
+
+.nav-red .search-field::placeholder,
+.nav-red .search-field.black::placeholder {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.nav-red .nav-search.black {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
 .bell-icon-container img,
 .write-icon-container { color: black; }
 
