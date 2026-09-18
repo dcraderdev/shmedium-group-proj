@@ -292,9 +292,19 @@ body {
 }
 
 /* ===== PAGE TRANSITIONS ===== */
+/* Slide only — no opacity ramp.
+ *
+ * These entry animations used to fade opacity 0 → 1. While that ran, every bit
+ * of text on the page was rendered part-transparent, so its effective contrast
+ * was below the computed value: an axe run that sampled during the ~360ms
+ * window reported 192 contrast failures across the feed tiles, on colours that
+ * pass comfortably at rest. It is a measurement artifact, but it is also real —
+ * the text genuinely is low-contrast for those frames, and it gates above-fold
+ * content behind an animation. Animating transform alone keeps the motion and
+ * leaves text legible from the first frame (WCAG 1.4.3). */
 @keyframes pageEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(8px); }
+  to   { transform: translateY(0); }
 }
 
 .page-enter {

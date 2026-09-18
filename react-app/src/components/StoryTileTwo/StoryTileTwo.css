@@ -345,13 +345,13 @@
 
 /* ── Fade-in entry animation ──────────────────────────────────────────── */
 
+/* Slide only: the opacity ramp rendered tile text part-transparent while it
+   ran, which fails 1.4.3 for those frames (see the note on pageEnter). */
 @keyframes fadeIn {
   from {
-    opacity: 0;
     transform: translateY(10px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
